@@ -1,0 +1,15 @@
+<launch>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find navi_map)/map/map.yaml"/>
+
+  <node pkg="navi_map" type="gvd.py" name="gvd" output="screen">
+    <!-- <param name="PM" value="10.0"/> -->
+    <!-- <param name="BM" value="3.74"/> -->
+  </node>
+  <node pkg="navi_map" type="gvg.py" name="gvg" output="screen">
+    <param name="minimum_path_distance" value="0.1"/>
+  </node>
+
+  <node pkg="navi_map" type="gvg_service_test.py" name="gvg_service_test" output="screen"/>
+
+</launch>
