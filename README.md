@@ -97,6 +97,9 @@
 - minimum_path_distance (float, default: 0.3)
     - GVG 말단이 성립하기 위한 최소거리
 
+### 3.3. Fake BCI
+BCI를 대신하여 trigger와 binary answer를 키보드로 출력한다.
+
 
 ## 4. 예제
 ### 4.1. Simple GVG

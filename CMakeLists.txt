@@ -57,6 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
+  MotorImagery.srv
   Nearest.srv
   Neighbors.srv
   Node.srv
