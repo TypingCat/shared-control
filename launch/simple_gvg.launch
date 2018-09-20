@@ -1,6 +1,6 @@
 <launch>
 
-  <node pkg="map_server" type="map_server" name="map_server" args="$(find navi_map)/map/map.yaml"/>
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/map.yaml"/>
 
   <node pkg="shared_control" type="gvd.py" name="gvd" output="screen">
     <!-- <param name="PM" value="10.0"/> -->

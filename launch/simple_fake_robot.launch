@@ -1,0 +1,7 @@
+<launch>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/map.yaml"/>
+
+  <node pkg="shared_control" type="fake_robot.py" name="fake_robot" output="screen"/>
+
+</launch>
