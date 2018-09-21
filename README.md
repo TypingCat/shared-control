@@ -24,11 +24,40 @@
     - 말단에 진입하면 정지한다.
 
 ### 1.3. 협업 구조
-| 팀 | 실무자 | 역할 |
+#### 김래현박사님팀
+- 실무자: 김다혜, dahyekim@kist.re.kr
+- 역할: BCI로 사용자의 의도를 획득한다.
+
+| 노드 | 수신 | 발신 |
 |-|-|-|
-| 김래현박사님팀(laehyunk@kist.re.kr) | 김다혜(dahyekim@kist.re.kr) | BCI로 사용자의 의도를 획득한다. |
-| 최종석박사님팀(cjs@kist.re.kr) | 노진홍(fini@kist.re.kr) | BCI-이동로봇의 움직임을 설계한다. |
-| 윤상석교수님팀(ssyun@silla.ac.kr) | 엄홍규(ehg2y@naver.com) | 주행환경을 시뮬레이션한다. |
+| Motor imagery | Binary question | Binary answer |
+| Eye blink | | trigger |
+
+#### 최종석박사님팀
+- 실무자: 노진홍, fini@kist.re.kr
+- 역할: BCI-이동로봇을 위한 공유제어를 설계한다.
+
+| 노드 | 수신 | 발신 |
+|-|-|-|
+| Task planner | binary answer, gvg answer, robot state, robot pose  | binary question, gvg question, choice info., target pose |
+| Spatial info. manager | gvg question, map | gvg answer, gvg |
+| Map server | map | map |
+| Plan visualizer | choice info. | marker |
+| Rviz | map, gvg, robot pose, marker | |
+
+#### 윤상석교수님팀
+- 실무자: 엄홍규, ehg2y@naver.com
+- 역할: 이동로봇을 제어한다.
+
+| 노드 | 수신 | 발신 |
+|-|-|-|
+| Turtlebot3 core | velocity | coordinate |
+| Turtlebot3 lds | | obstacle |
+| Camera | | video |
+| SLAM | coordinate, obstacle | map |
+| Localization | coordinate, obstacle, map | robot pose |
+| Navigation | robot pose, map | velocity |
+| Motion manager | target pose | robot state, command |
 
 
 ## 2. 개발환경
@@ -43,89 +72,64 @@
 
 
 ## 3. 기능
-### 3.1. GVD
-- [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
-    - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
-    - 미세한 부분은 GVG에서 다듬는다.
-- [ ] Unknown을 occupied로 간주한다.
-    - 미탐사 지역은 상정하지 않으므로, unknown 격자 주변에서는 GVD가 어지러워진다.
-    - 차후 지도의 실시간 갱신기능이 구현되면 unknown도 주행가능한 지역으로 변경한다.
+### 3.1. Task planner
+- Subscribed Topics
+    - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+    - robot/pose ([geomegry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+- Published Topics
+    - robot/target ([geomegry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 
-#### 3.1.1. Subscribed Topics
-- map ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+### 3.2. Spatial info. manager
+- Subscribed Topics
+    - map ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+- Published Topics
+    - gvd ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+    - gvg/marker ([visualization_msgs/MarkerArray](docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+- Services
+    - gvg/nearest (shared_control/Nearest), 입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다.
+    - gvg/neighbors (shared_control/Neighbors), 입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다.
+    - gvg/node (shared_control/Node), 입력한 id를 갖는 노드의 속성을 반환한다.
+- Paramters
+    - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
+    - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
+    - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
+    - marker_cycle (float, default: 2.0), gvd와 gvg/marker의 발행 주기
+- 개발
+    - [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
+        - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
+        - 미세한 부분은 GVG에서 다듬는다.
+    - [ ] Unknown을 occupied로 간주한다.
+        - 미탐사 지역은 상정하지 않으므로, unknown 격자 주변에서는 GVD가 어지러워진다.
+        - 차후 지도의 실시간 갱신기능이 구현되면 unknown도 주행가능한 지역으로 변경한다.
+    - [x] 임의의 서브그래프를 GVG로 변환한다.
+        - GVD에 포함된 가장 큰 서브그래프를 검색하여 GVG로 변환한다.
+    - [x] 규모가 큰 교차로에 2개 이상의 독립된 노드가 발생한다. Cycle이 발생하는 교차로에 결손이 발생한다.
+        - ~~Depth first search를 활용하여 교차로를 완성한다.~~
+        - ~~탐색위치 전환을 트리거로 인접한 교차로 노드들을 연결한다.~~
+        - 동일한 상태를 갖는 노드들을 단일 노드로 압축한다.
+    - [x] 이웃노드가 2개인 노드가 발생한다.
+        - 불필요한 노드들을 하나씩 제거하고 엣지로 연결한다.
+        - ~~스스로 cycle을 만드는 엣지를 제거한다.~~
+    - [x] GVG에 불필요한 짧은 말단이 발생한다.
+        - 말단을 유지하기 위한 최소거리를 설정한다.
+    - [ ] 특정 위치를 GVG에 맵핑할 수 없다.
+        - 가장 가까운 노드를 검색하는 기능으로 대신한다.
+        - GVG 엣지 데이터를 그래프로 구축해야 한다.
 
-#### 3.1.2. Published Topics
-- gvd ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+### 3.3. Map server
+- Published Topics
+    - map ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 
-#### 3.1.3. Paramters
-- PM (float, default: 10.0)
-    - Origin 사이의 최소거리
-- BM (float, default: 3.74)
-    - GVD에 등록되기 위한 occupied와의 최소거리
+### 3.4. Plan visualizer
 
-### 3.2. GVG
-- [x] 임의의 서브그래프를 GVG로 변환한다.
-    - GVD에 포함된 가장 큰 서브그래프를 검색하여 GVG로 변환한다.
-- [x] 규모가 큰 교차로에 2개 이상의 독립된 노드가 발생한다. Cycle이 발생하는 교차로에 결손이 발생한다.
-    - ~~Depth first search를 활용하여 교차로를 완성한다.~~
-    - ~~탐색위치 전환을 트리거로 인접한 교차로 노드들을 연결한다.~~
-    - 동일한 상태를 갖는 노드들을 단일 노드로 압축한다.
-- [x] 이웃노드가 2개인 노드가 발생한다.
-    - 불필요한 노드들을 하나씩 제거하고 엣지로 연결한다.
-    - ~~스스로 cycle을 만드는 엣지를 제거한다.~~
-- [x] GVG에 불필요한 짧은 말단이 발생한다.
-    - 말단을 유지하기 위한 최소거리를 설정한다.
-- [ ] 특정 위치를 GVG에 맵핑할 수 없다.
-    - 가장 가까운 노드를 검색하는 기능으로 대신한다.
-    - GVG 엣지 데이터를 그래프로 구축해야 한다.
-
-#### 3.2.1. Subscribed Topics
-- gvd ([nav_msgs/OccupancyGrid](docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
-
-#### 3.2.2. Published Topics
-- gvg/marker ([visualization_msgs/MarkerArray](docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
-
-#### 3.2.3. Services
-- gvg/nearest (shared_control/Nearest)
-    - 입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다.
-- gvg/neighbors (shared_control/Neighbors)
-    - 입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다.
-- gvg/node (shared_control/Node)
-    - 입력한 id를 갖는 노드의 속성을 반환한다.
-
-#### 3.2.4. Paramters
-- minimum_path_distance (float, default: 0.3)
-    - GVG 말단이 성립하기 위한 최소거리
-
-### 3.3. Fake BCI
-BCI를 대신하여 trigger와 binary answer를 키보드로 생성한다.
-
-### 3.4. Fake robot
-로봇을 대신하여 로봇의 자세와 상태를 임의로 생성한다.
+### 3.5. Rviz
 
 
-## 4. 예제
-### 4.1. Simple GVG
+## 4. 사용법
 본 패키지의 커스텀 서비스를 등록하기 위해 컴파일이 필요하다. 작업공간에 `shared_control` 패키지를 위치시키고 다음을 실행한다.
 ```
 $ cd ~/catkin_ws
 $ catkin_make
-```
-
-그리고 예제 simple_gvg를 실행하면 지도 `map/map.yaml`의 GVG가 생성된다. 화면에서 2초 간격으로 3개 출력이 발생하는 것을 확인할 수 있다: 이 출력들은 GVG가 제공하는 서비스의 결과이다. 여기서는 `test_gvg_service.py`가 GVG에게 서비스를 요청하였다.
-```
-$ roslaunch shared_control simple_gvg.launch
-...
-[INFO] [1536294775.381412]: 29485
-[INFO] [1536294775.387210]: (25394, 40250, 29119)
-[INFO] [1536294775.393004]: x: 1.18153605923
-y: -3.1466108685
-z: 0.0
-```
-
-GVD와 GVG의 형태는 rviz로 확인할 수 있다(설정파일 `launch/simple_gvg.rviz`가 준비되어 있다). 실행하면 짙은 회색 격자로 표현된 GVD와, 붉은 노드를 갖는 그래프로 표현된 GVG를 확인할 수 있다.
-```
-$ rviz
 ```
 
 
