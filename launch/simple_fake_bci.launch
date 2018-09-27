@@ -1,5 +1,0 @@
-<launch>
-
-  <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
-
-</launch>

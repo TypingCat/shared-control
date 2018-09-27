@@ -24,10 +24,6 @@
     - 말단에 진입하면 정지한다.
 
 ### 1.3. 협업 구조
-#### 아키텍처
-![아키텍처](image/architecture.png)
-
-#### 상세
 - 김래현박사님팀
     - 실무자: 김다혜, dahyekim@kist.re.kr
     - 역할: BCI로 사용자의 의도를 획득한다.
@@ -37,6 +33,8 @@
 - 윤상석교수님팀
     - 실무자: 엄홍규, ehg2y@naver.com
     - 역할: 이동로봇을 제어한다.
+
+![아키텍처](image/architecture.png)
 
 
 ## 2. 개발환경
@@ -59,9 +57,12 @@
     - robot/target ([geomegry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Issues
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
-        - 아직은 현재 위치가 속한 GVG 엣지를 판단할 수 없다. 차선책으로 가장 가까운 노드로 이동한다.
-    - [ ] 연속해서 trigger를 작동시키면 질문의 순서가 무너진다.
-        - 독립적인 함수 운용의 반동이다. 질문 시퀀스를 위한 lock이 구현되어야 한다.
+        - 아직은 현재 위치가 속한 GVG 엣지를 판단할 수 없다. 차선책으로, 가장 가까운 노드로 이동한다.
+    - [ ] 연속해서 trigger(eyeblink)를 작동시키면 질문의 순서가 무너진다.
+        - 독립적인 함수 운용의 부작용이다. 질문 시퀀스를 위한 lock이 구현되어야 한다.
+    - [ ] 테스트를 위해 fake_bci, fake_robot을 운용한다.
+        - 이동로봇의 좌표계는 발행되지 않는다.
+        - BCI의 정확도는 반영하지 않는다. 명령을 연속으로 입력할 경우 가끔 의도하지 않은 방향으로 이동한다.
 
 ### 3.2. Spatial info. manager
 - Subscribed Topics
@@ -115,6 +116,8 @@
 $ cd ~/catkin_ws
 $ catkin_make
 ```
+
+하하하하핳ㅎ하하!
 
 
 ## 5. 색인

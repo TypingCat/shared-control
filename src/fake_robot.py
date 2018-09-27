@@ -5,11 +5,9 @@ import rospy
 import math
 import tf
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Int32
-
 from visualization_msgs.msg import MarkerArray, Marker
-from geometry_msgs.msg import Point
 
 
 class FAKE_ROBOT:
@@ -18,6 +16,7 @@ class FAKE_ROBOT:
         self.state = 0          # 로봇의 상태: 0=정지, 1=이동중
         self.pose = Pose()      # 로봇의 자세
         self.target = Pose()    # 로봇의 목표 자세
+        self.step = rospy.get_param('~sim_cycle', 0.1)*rospy.get_param('~robot_velocity', 0.2)
 
         self.pose.position.x = rospy.get_param('~robot_x', 0.0)
         self.pose.position.y = rospy.get_param('~robot_y', 0.0)
@@ -40,7 +39,7 @@ class FAKE_ROBOT:
         self.pose_publisher = rospy.Publisher('robot/pose', Pose, queue_size=1)
         self.marker_publisher = rospy.Publisher('robot/marker', MarkerArray, queue_size=1)
 
-        rospy.Timer(rospy.Duration(0.1), self.fake_navigation)
+        rospy.Timer(rospy.Duration(rospy.get_param('~sim_cycle', 0.1)), self.fake_navigation)
 
     def update_target(self, data):
         """목표 자세를 갱신한다"""
@@ -59,8 +58,8 @@ class FAKE_ROBOT:
                 th = math.pi/2
             else:
                 th = math.pi*3/2
-            self.pose.position.x = 0.01*math.cos(th) + self.pose.position.x
-            self.pose.position.y = 0.01*math.sin(th) + self.pose.position.y
+            self.pose.position.x = self.step*math.cos(th) + self.pose.position.x
+            self.pose.position.y = self.step*math.sin(th) + self.pose.position.y
             q = tf.transformations.quaternion_from_euler(0, 0, th)
             self.pose.orientation.x = q[0]
             self.pose.orientation.y = q[1]
