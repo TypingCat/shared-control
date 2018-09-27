@@ -10,7 +10,7 @@ from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 
-from navi_map.srv import Nearest, Neighbors, Node
+from shared_control.srv import Nearest, Neighbors, Node
 
 
 class SPATIAL_INFO_MANAGER:

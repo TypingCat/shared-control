@@ -37,6 +37,8 @@ class FAKE_BCI:
                 self.key_watcher.shutdown()
             elif self.key == 's':       # Eye blink를 대신하여 trigger를 발행한다.
                 self.publisher.publish(2)
+        else:
+            self.key = ''
 
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
 
@@ -45,10 +47,12 @@ class FAKE_BCI:
         rospy.loginfo('[a:%d, d:%d] 어디로 이동할까요?'%request.ids)
 
         answer = -1
-        while answer == -1:             # 답변이 들어올 때까지 키를 확인한다.
-            if self.key == 'a':         # a가 들어오면 첫번째 값을 돌려준다.
+        key = 'fini'
+        while (key != 'a')&(key != 'd'):    # 답변이 들어올 때까지 키를 확인한다.
+            key = self.key
+            if self.key == 'a':                  # a가 들어오면 첫번째 값을 돌려준다.
                 answer = request.ids[0]
-            elif self.key == 'd':       # d가 들어오면 두번째 값을 돌려준다.
+            elif self.key == 'd':                # d가 들어오면 두번째 값을 돌려준다.
                 answer = request.ids[1]
 
             rospy.sleep(0.1)

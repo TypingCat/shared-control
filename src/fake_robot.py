@@ -71,8 +71,6 @@ class FAKE_ROBOT:
             self.state = 0
             self.pose.orientation = self.target.orientation
 
-        rospy.loginfo(self.pose)
-
         try:
             self.state_publisher.publish(self.state)
             self.pose_publisher.publish(self.pose)
