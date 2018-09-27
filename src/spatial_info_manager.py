@@ -3,46 +3,102 @@
 
 import rospy
 import numpy
-import time
 import networkx
 
 from nav_msgs.msg import OccupancyGrid
-from visualization_msgs.msg import Marker
-from visualization_msgs.msg import MarkerArray
+from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
 
 from navi_map.srv import Nearest, Neighbors, Node
 
 
-class GVG:
-    """Generalized Voronoi Graph"""
+class SPATIAL_INFO_MANAGER:
+    """지도로부터 GVG를 생성하고 관련 서비스를 제공한다."""
     def __init__(self):
+        self.map = OccupancyGrid()
         self.gvd = OccupancyGrid()
         self.gvg = networkx.Graph()
 
-        rospy.Subscriber('gvd', OccupancyGrid, self.load_gvd)
-        self.publisher = rospy.Publisher('gvg/marker', MarkerArray, queue_size=1)
+        rospy.Subscriber('map', OccupancyGrid, self.load_map)
+
+        self.gvd_publisher = rospy.Publisher('gvd', OccupancyGrid, queue_size=1)
+        self.gvg_publisher = rospy.Publisher('gvg/marker', MarkerArray, queue_size=1)
+        rospy.Timer(rospy.Duration(rospy.get_param('~marker_cycle', 2.0)), self.publish)
 
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
 
-    def load_gvd(self, data):
-        """GVD를 불러온다."""
-        self.gvd.header = data.header       # GVD를 획득한다.
+    def load_map(self, data):
+        """지도로 GVD, GVG를 계산한다"""
+        self.map.header = data.header                               # 지도를 획득한다.
+        self.map.info = data.info
+        self.map.data = numpy.array(data.data)
+
+        gvd = self.calc_gvd(self.map.data.reshape(data.info.height,data.info.width),
+                            rospy.get_param('~gvd_PM', 10.0),       # GVD를 계산한다.
+                            rospy.get_param('~gvd_BM', 0.187/self.map.info.resolution))
+        self.gvd.header = data.header
         self.gvd.info = data.info
-        self.gvd.data = numpy.array(data.data)
+        self.gvd.data = gvd.flatten()
 
-        t = time.time()                     # GVG를 계산한다.
-        footprint = self.draw_footprint(self.gvd.data.reshape(data.info.height,
-                                                              data.info.width))
-        raw = self.extract_gvg(footprint)
-        self.gvg = self.pruning(raw,
-                                rospy.get_param('~minimum_path_distance', 0.3)**2)
-        # rospy.loginfo('GVG 연산시간 %.2f초'%(time.time() - t))
+        footprint = self.draw_footprint(gvd)
+        gvg = self.extract_gvg(footprint)
+        self.gvg = self.pruning(gvg,                                # GVG를 계산한다.
+                                rospy.get_param('~gvg_minimum_path_distance', 0.3)**2)
 
-        self.publish()                      # GVG를 출력한다.
+    def calc_gvd(self, data, PM, BM):
+        """Brushfire-based AGVD calculation"""
+        frontier = []                                   # 연산을 초기화한다.
+        origin = numpy.ones([len(data), len(data[0]), 2])*(-1)
+        brushfire = numpy.ones([len(data), len(data[0])])*(-1)
+        gvd = numpy.zeros([len(data), len(data[0])])
+        for i in range(0, len(data)):
+            for j in range(0, len(data[0])):
+                if (data[i][j] > 50)|(data[i][j] < 0):
+                    frontier.append([i, j])
+                    origin[i][j][0] = i
+                    origin[i][j][1] = j
+                    brushfire[i][j] = 0
+        neighbor = [          [0,  1],
+                    [-1,  0],          [1,  0],
+                              [0, -1]         ]
+        step = 0
+
+        while len(frontier) != 0:                       # 연산경계가 사라질 때까지
+            step = step + 1
+            next_frontier = []
+            for x in frontier:
+                for n in neighbor:
+                    i = n[0] + x[0]                     # 장애물이 아닌 이웃의 위치를 확인한다.
+                    j = n[1] + x[1]
+                    try:
+                        if (data[i][j] > 50)|(data[i][j] < 0):
+                            continue
+                    except: continue
+
+                    if brushfire[i][j] == -1:           # 연산한 적이 없는 이웃일 경우,
+                        brushfire[i][j] = step          # 현재 스텝을 그대로 등록한다.
+                        origin[i][j][0] = origin[x[0]][x[1]][0]
+                        origin[i][j][1] = origin[x[0]][x[1]][1]
+                        next_frontier.append([i, j])
+
+                    elif brushfire[i][j] == step:       # 이번회차에서 연산된 이웃일 경우,
+                        dist = abs(origin[i][j][0]-origin[x[0]][x[1]][0]) +\
+                               abs(origin[i][j][1]-origin[x[0]][x[1]][1])
+                        if (dist > PM)&(brushfire[x[0]][x[1]] > BM):
+                            gvd[i][j] = 100             # 이웃을 GVD에 등록한다.
+
+                    elif brushfire[i][j] == step - 1:   # 저번회차에서 연산된 이웃일 경우,
+                        dist = abs(origin[i][j][0]-origin[x[0]][x[1]][0]) +\
+                               abs(origin[i][j][1]-origin[x[0]][x[1]][1])
+                        if (dist > PM)&(brushfire[x[0]][x[1]] > BM)&(gvd[i][j] != 100):
+                            gvd[x[0]][x[1]] = 100       # 현재위치를 GVD에 등록한다.
+
+            frontier = next_frontier                    # 경계를 갱신한다.
+
+        return gvd
 
     def draw_footprint(self, gvd):
         """점유격자를 그래프로 변환한다"""
@@ -198,16 +254,20 @@ class GVG:
 
         return gvg
 
-    def publish(self):
-        """GVG를 마커로 출력한다"""
+    def publish(self, event):
+        """GVD, GVG를 출력한다"""
+        try:                    # GVD를 출력한다.
+            self.gvd_publisher.publish(self.gvd)
+        except: pass
+
         gvg_node = Marker()     # GVG 노드 마커를 생성한다.
         gvg_node.header.stamp = rospy.Time.now()
         gvg_node.header.frame_id = 'map'
         gvg_node.id = 0
         gvg_node.type = Marker.POINTS
         gvg_node.action = Marker.ADD
-        gvg_node.scale.x = 0.5*self.gvd.info.resolution
-        gvg_node.scale.y = 0.5*self.gvd.info.resolution
+        gvg_node.scale.x = 0.5*self.map.info.resolution
+        gvg_node.scale.y = 0.5*self.map.info.resolution
         gvg_node.points = []
         gvg_node.colors = []
         for n in self.gvg.nodes:
@@ -218,7 +278,7 @@ class GVG:
             p = Point()
             p.x = self.gvg.nodes[n]['pos'][0]
             p.y = self.gvg.nodes[n]['pos'][1]
-            p.z = 0
+            p.z = 0.1
             gvg_node.points.append(p)
 
         gvg_edge = Marker()     # GVG 엣지 마커를 생성한다.
@@ -227,23 +287,23 @@ class GVG:
         gvg_edge.id = 1
         gvg_edge.type = Marker.LINE_LIST
         gvg_edge.action = Marker.ADD
-        gvg_edge.scale.x = 0.2*self.gvd.info.resolution
+        gvg_edge.scale.x = 0.2*self.map.info.resolution
         gvg_edge.points = []
         gvg_edge.color.a = 0.7
         for e in self.gvg.edges:
             p1 = Point()
             p1.x = self.gvg.nodes[e[0]]['pos'][0]
             p1.y = self.gvg.nodes[e[0]]['pos'][1]
-            p1.z = 0
+            p1.z = 0.1
             gvg_edge.points.append(p1)
             p2 = Point()
             p2.x = self.gvg.nodes[e[1]]['pos'][0]
             p2.y = self.gvg.nodes[e[1]]['pos'][1]
-            p2.z = 0
+            p2.z = 0.1
             gvg_edge.points.append(p2)
 
         try:                    # GVG 마커를 출력한다.
-            self.publisher.publish([gvg_node, gvg_edge])
+            self.gvg_publisher.publish([gvg_node, gvg_edge])
         except: pass
 
     def get_nearest(self, request):
@@ -259,7 +319,7 @@ class GVG:
 
     def get_neighbors(self, request):
         """입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다"""
-        return {'id': list(self.gvg.neighbors(request.id))}
+        return {'ids': list(self.gvg.neighbors(request.id))}
 
     def get_node(self, request):
         """입력한 id를 갖는 노드의 속성을 반환한다"""
@@ -272,6 +332,6 @@ class GVG:
 
 
 if __name__ == '__main__':
-    rospy.init_node('gvg')
-    gvg = GVG()
+    rospy.init_node('spatial_info_manager')
+    spatial_info_manager = SPATIAL_INFO_MANAGER()
     rospy.spin()

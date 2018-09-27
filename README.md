@@ -94,7 +94,7 @@
     - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
     - marker_cycle (float, default: 2.0), gvd와 gvg/marker의 발행 주기
-- 개발
+- Issues
     - [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
         - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
         - 미세한 부분은 GVG에서 다듬는다.

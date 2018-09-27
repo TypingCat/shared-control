@@ -1,0 +1,19 @@
+<launch>
+
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/map.yaml"/>
+  <node pkg="shared_control" type="spatial_info_manager.py" name="spatial_info_manager" output="screen">
+    <param name="gvd_PM" value="10.0"/>
+    <param name="gvd_BM" value="3.74"/>
+    <param name="gvg_minimum_path_distance" value="0.1"/>
+    <param name="marker_cycle" value="2.0"/>
+  </node>
+
+  <node pkg="shared_control" type="fake_robot.py" name="fake_robot" output="screen">
+    <param name="robot_x" value="0.8"/>
+    <param name="robot_y" value="-1.2"/>
+    <param name="robot_th" value="87"/>
+  </node>
+
+  <node pkg="shared_control" type="task_planner.py" name="task_planner" output="screen"/>
+
+</launch>
