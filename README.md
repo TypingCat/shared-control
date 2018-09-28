@@ -63,7 +63,7 @@
         - 아직은 현재 위치가 속한 GVG 엣지를 판단할 수 없다. 차선책으로, 가장 가까운 노드로 이동한다.
     - [ ] 연속해서 trigger(eyeblink)를 작동시키면 질문의 순서가 무너진다.
         - 독립적인 함수 운용의 부작용이다. 질문 시퀀스를 위한 lock이 구현되어야 한다.
-    - [ ] 테스트를 위해 fake_bci, fake_robot을 운용한다.
+    - [ ] 테스트를 위해 `fake_bci`, `fake_robot`을 운용한다.
         - 이동로봇의 좌표계는 발행하지 않는다.
         - BCI의 정확도는 반영하지 않는다. 명령을 연속으로 입력할 경우 가끔 의도하지 않은 방향으로 이동한다.
 
@@ -71,7 +71,7 @@
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 - Published Topics
-    - gvd ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+    - gvd ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html)), GVD를 점유된 격자로 표현한다.
     - gvg/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Services
     - gvg/nearest (shared_control/Nearest), 입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다.
@@ -87,7 +87,7 @@
     - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    - marker_cycle (float, default: 2.0), gvd와 gvg/marker의 발행 주기
+    - marker_cycle (float, default: 2.0), `gvd`와 `gvg/marker`의 발행 주기
 - Issues
     - [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
         - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
@@ -152,7 +152,7 @@
     - sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
     - robot_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
     - robot_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
-    - robot_th (float, default: 0.0), 이동로봇의 z축 좌표 초기값
+    - robot_th (float, default: 0.0), 이동로봇의 방향각 초기값
     - robot_velocity (float, default: 0.2), 이동로봇의 속도
 
 
