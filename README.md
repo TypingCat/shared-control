@@ -51,6 +51,7 @@
 ## 3. 기능
 ### 3.1. Task planner
 - Subscribed Topics
+    - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
@@ -133,12 +134,12 @@
 - Subscribed Topics
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
-    - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+    - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     - bci/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Services
     - bci/motorimagery (shared_control/MotorImagery), 입력받은 리스트(binary question)의 요소 중 하나를 반환한다. 키보드를 인터페이스로 사용한다.
-    - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
-    - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+        - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+        - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 
 
 ### 3.7. (테스트 전용) Fake robot
@@ -162,13 +163,14 @@
 $ cd ~/catkin_ws
 $ catkin_make
 ```
+아키텍처가 계획대로 구현될 경우 `shared_control/launch/KES.launch`를 사용하여 다른 패키지들과 함께 실행하면 된다.
 
-아키텍처가 계획대로 구현될 경우 `shared_control/launch/KES.launch`를 사용하여 다른 패키지들과 함께 실행하면 된다. 그리고 테스트를 하려면 `shared_control/launch/KES_test.launch`를 실행한다: 여기에는 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 포함되어 있으며, 지도는 `shared_control/map`에서 불러온다. Eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다.
+테스트를 하려면 이하와 같이 `shared_control/launch/KES_test.launch`를 실행한다: 여기에는 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 포함되어 있으며, 지도는 `shared_control/map`에서 불러온다. Eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다.
 ```
 $ roslaunch shared_control KES_test.launch
 ```
 
-`Rviz`로 진행상황을 시각화할 수 있다. `Rviz/File/Open Config`에서 `shared_control/launch/KES.rviz` 파일로 환경설정을 불러올 수 있다. 로봇의 자세와 목표는 각각 적색 화살표와 녹색 화살표로 표현되며, 적색 점으로 구성된 그래프 `GVG` 위에서 이동하는 것을 확인할 수 있다. 사용자의 선택이 필요할 경우 해당 선택으로 이동할 수 있는 위치가 적색 원 `a`와 청색 원 `d`로 표현된다.
+위의 명령으로는 터미널에서만 작동하지만 Rviz로 진행상황을 시각화할 수도 있다. 다른 터미널에서 Rviz를 실행하고, `Rviz/File/Open Config`에서 환경설정파일 `shared_control/launch/KES.rviz`를 선택하자. 로봇의 자세와 목표는 각각 적색 화살표와 녹색 화살표로 표현되며, 적색 점으로 구성된 그래프 `GVG` 위에서 이동하는 것을 확인할 수 있다. 사용자의 선택이 필요할 경우 해당 선택으로 이동할 수 있는 위치가 적색 원 `a`와 청색 원 `d`로 표현된다.
 ```
 $ rviz
 ```
