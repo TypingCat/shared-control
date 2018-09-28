@@ -8,6 +8,15 @@
     <param name="marker_cycle" value="2.0"/>
   </node>
 
+  <node pkg="shared_control" type="fake_robot.py" name="fake_robot" output="screen">
+    <param name="sim_cycle" value="0.1"/>
+    <param name="robot_x" value="0.8"/>
+    <param name="robot_y" value="-1.2"/>
+    <param name="robot_th" value="87"/>
+    <param name="robot_velocity" value="0.5"/>
+  </node>
+  <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
+
   <node pkg="shared_control" type="task_planner.py" name="task_planner" output="screen">
     <param name="spin_cycle" value="0.1"/>
     <param name="planning_cycle" value="0.5"/>

@@ -24,11 +24,12 @@ class SPATIAL_INFO_MANAGER:
 
         self.gvd_publisher = rospy.Publisher('gvd', OccupancyGrid, queue_size=1)
         self.gvg_publisher = rospy.Publisher('gvg/marker', MarkerArray, queue_size=1)
-        rospy.Timer(rospy.Duration(rospy.get_param('~marker_cycle', 2.0)), self.publish)
 
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
+
+        rospy.Timer(rospy.Duration(rospy.get_param('~marker_cycle', 2.0)), self.publish)
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""

@@ -24,13 +24,13 @@ class FAKE_BCI:
 
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
-        rospy.wait_for_service('gvg/node')
-        self.get_node = rospy.ServiceProxy('gvg/node', Node)
-
         self.eyeblink_publisher = rospy.Publisher('bci/eyeblink', Int32, queue_size=1)
         self.marker_publisher = rospy.Publisher('bci/marker', MarkerArray, queue_size=1)
 
         rospy.Service('bci/motorimagery', MotorImagery, self.motorimagery)
+        
+        rospy.wait_for_service('gvg/node')
+        self.get_node = rospy.ServiceProxy('gvg/node', Node)
 
     def __del__(self):
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
