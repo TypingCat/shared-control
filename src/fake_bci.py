@@ -28,7 +28,7 @@ class FAKE_BCI:
         self.marker_publisher = rospy.Publisher('bci/marker', MarkerArray, queue_size=1)
 
         rospy.Service('bci/motorimagery', MotorImagery, self.motorimagery)
-        
+
         rospy.wait_for_service('gvg/node')
         self.get_node = rospy.ServiceProxy('gvg/node', Node)
 
@@ -109,6 +109,7 @@ class FAKE_BCI:
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
         self.pose = data
+
 
 if __name__ == '__main__':
     rospy.init_node('fake_bci')

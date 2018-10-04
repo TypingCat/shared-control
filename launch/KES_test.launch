@@ -14,12 +14,14 @@
     <param name="robot_y" value="-1.2"/>
     <param name="robot_th" value="87"/>
     <param name="robot_velocity" value="0.5"/>
+    <param name="goal_margin" value="0.01"/>
   </node>
   <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
 
   <node pkg="shared_control" type="task_planner.py" name="task_planner" output="screen">
     <param name="spin_cycle" value="0.1"/>
-    <param name="planning_cycle" value="0.5"/>
+    <param name="planning_cycle" value="0.3"/>
+    <param name="goal_margin" value="0.01"/>
   </node>
 
 </launch>

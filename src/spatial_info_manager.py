@@ -309,28 +309,39 @@ class SPATIAL_INFO_MANAGER:
 
     def get_nearest(self, request):
         """입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다"""
-        nearest = [-1, 2147483647]
-        for n in self.gvg.nodes:
-            dist2 = (request.point.x - self.gvg.nodes[n]['pos'][0])**2 +\
-                    (request.point.y - self.gvg.nodes[n]['pos'][1])**2
-            if dist2 < nearest[1]:
-                nearest = [n, dist2]
+        try:
+            nearest = [-1, 2147483647]
+            for n in self.gvg.nodes:
+                dist2 = (request.point.x - self.gvg.nodes[n]['pos'][0])**2 +\
+                        (request.point.y - self.gvg.nodes[n]['pos'][1])**2
+                if dist2 < nearest[1]:
+                    nearest = [n, dist2]
+            return {'id': nearest[0]}
 
-        return {'id': nearest[0]}
+        except:
+            rospy.loginfo('서비스 get_nearest 실패')
+            return {'id': -1}
 
     def get_neighbors(self, request):
         """입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다"""
-        return {'ids': list(self.gvg.neighbors(request.id))}
+        try:
+            return {'ids': list(self.gvg.neighbors(request.id))}
+
+        except:
+            rospy.loginfo('서비스 get_neighbors 실패')
+            return {'ids': [-1]}
 
     def get_node(self, request):
         """입력한 id를 갖는 노드의 속성을 반환한다"""
         p = Point()
-        p.x = self.gvg.nodes[request.id]['pos'][0]
-        p.y = self.gvg.nodes[request.id]['pos'][1]
-        p.z = 0
+        try:
+            p.x = self.gvg.nodes[request.id]['pos'][0]
+            p.y = self.gvg.nodes[request.id]['pos'][1]
+            p.z = 0
+        except:
+            rospy.loginfo('서비스 get_node 실패')
 
         return {'point': p}
-
 
 if __name__ == '__main__':
     rospy.init_node('spatial_info_manager')

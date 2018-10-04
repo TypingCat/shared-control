@@ -35,7 +35,7 @@ class FAKE_ROBOT:
         self.target.orientation.w = q[3]
 
         rospy.Subscriber('robot/target', Pose, self.update_target)
-        
+
         self.state_publisher = rospy.Publisher('robot/state', Int32, queue_size=1)
         self.pose_publisher = rospy.Publisher('robot/pose', Pose, queue_size=1)
         self.marker_publisher = rospy.Publisher('robot/marker', MarkerArray, queue_size=1)
@@ -50,8 +50,8 @@ class FAKE_ROBOT:
         """목표를 향해 이동한다"""
         dx = self.target.position.x - self.pose.position.x
         dy = self.target.position.y - self.pose.position.y
-        if dx**2 + dy**2 > 0.01:    # 목표에 도달하지 못했다면 이동한다.
-            self.state = 1
+        if dx**2 + dy**2 > rospy.get_param('~goal_margin', 0.01):
+            self.state = 1          # 목표에 도달하지 못했다면 이동한다.
 
             if dx != 0:             # 다음 위치를 계산한다.
                 th = math.atan2(dy, dx)

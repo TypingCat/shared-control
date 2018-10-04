@@ -59,14 +59,18 @@
 - Paramters
     - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
     - planning_cycle (float, default: 0.5), 계획의 단위연산주기
+    - goal_margin (float, default: 0.01), 목표영역의 반경
 - Issues
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
         - 아직은 현재 위치가 속한 GVG 엣지를 판단할 수 없다. 차선책으로, 가장 가까운 노드로 이동한다.
-    - [ ] 연속해서 trigger(eyeblink)를 작동시키면 질문의 순서가 무너진다.
-        - 독립적인 함수 운용의 부작용이다. 질문 시퀀스를 위한 lock이 구현되어야 한다.
     - [ ] 테스트를 위해 `fake_bci`, `fake_robot`을 운용한다.
         - 이동로봇의 좌표계는 발행하지 않는다.
         - BCI의 정확도는 반영하지 않는다. 명령을 연속으로 입력할 경우 가끔 의도하지 않은 방향으로 이동한다.
+    - [ ] 노드 초기화가 실패한다.
+        - 초기화를 실행 후 1초(임의) 뒤로 미룬다. 미봉책이다.
+    - [ ] 트리거와 타이머가 질문을 섞는다.
+        - 질문 시퀀스를 분리하여 lock을 설정한다. 질문 도중 들어오는 트리거는 무시된다.
+        - 두 작업을 모두 하나의 함수에서 처리한다. 해당 함수에서 로봇의 상태와 위치를 관리한다.
 
 ### 3.2. Spatial info. manager
 - Subscribed Topics
@@ -110,6 +114,9 @@
     - [ ] 특정 위치를 GVG에 맵핑할 수 없다.
         - 가장 가까운 노드를 검색하는 기능으로 대신한다.
         - GVG 엣지 데이터를 그래프로 구축해야 한다.
+    - [ ] GVG가 불안정하여 가끔 서비스가 실패한다.
+        - 초기화 도중 혹은 잦은 서비스 요청에서 발생한다.
+        - 일단 예외처리를 추가하여 서비스에 실패했음을 알린다.
 
 ### 3.3. Plan visualizer
 - Issues
@@ -141,7 +148,6 @@
         - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 
-
 ### 3.7. (테스트 전용) Fake robot
 - Subscribed Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
@@ -155,6 +161,7 @@
     - robot_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
     - robot_th (float, default: 0.0), 이동로봇의 방향각 초기값
     - robot_velocity (float, default: 0.2), 이동로봇의 속도
+    - goal_margin (float, default: 0.01), 목표영역의 반경
 
 
 ## 4. 사용법
