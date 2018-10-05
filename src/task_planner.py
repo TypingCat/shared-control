@@ -19,6 +19,7 @@ class TASK_PLANNER:
         self.nearest = [-1, 0]                  # 로봇과 가장 가까운 노드
         self.history = [-1, -1]                 # 목표노드 기록
         self.questions = []                     # 질문 목록
+        self.alarm = -1
         self.busy = 0
 
         rospy.wait_for_service('gvg/nearest')   # 초기화를 기다린다.
@@ -70,7 +71,9 @@ class TASK_PLANNER:
 
     def spin(self, event):
         """이동로봇의 좌표를 감시한다"""
-        self.planning()
+        self.alarm = 0
+        if (self.nearest[1] < rospy.get_param('~goal_margin', 0.01)):
+            rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
 
         # if (self.nearest[1] < rospy.get_param('~goal_margin', 0.01)) &\
         #    (self.history[0] == self.nearest[0]):                    # 노드에 도달했다면,
@@ -93,7 +96,11 @@ class TASK_PLANNER:
 
     def percussion(self, data):
         """트리거가 발생하면 이동목표를 갱신한다"""
-        self.planning()
+        self.alarm = 1
+        if self.state == 1:     # 일단 정지한다.
+            self.target_publisher.publish(self.pose)
+
+        rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
 
         # self.questions = []
         # if self.state == 0:                                          # 로봇이 정지해 있을 경우,
@@ -123,22 +130,63 @@ class TASK_PLANNER:
         #
         # rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.questioning, oneshot=True)
 
-    def planning(self):
-        if self.busy == 1:  # 중복실행을 방지한다.
+    def planning(self, event):
+        if self.busy == 1:                              # 중복실행을 방지한다.
             return
         else:
             self.busy = 1
 
+        self.questions = []                             # 질문을 생성한다.
+        if self.nearest[1] < rospy.get_param('~goal_margin', 0.01):     # 목표노드에 놓여있을 경우,
+            if self.nearest[0] == self.history[0]:
+                options = list(self.get_neighbors(self.nearest[0]).ids) # 선택지를 확인한다.
+                try:
+                    options.remove(self.history[0])
+                    options.remove(self.history[1])
+                except: pass
+
+                if len(options) > 0:                    # 교차로일 경우 이웃노드가 선택지이다.
+                    for id in options:
+                        self.questions.append((id, -1))
+                elif self.alarm == 1:                   # 말단일 경우 이전목표가 선택지이다.
+                    self.questions.append((self.history[1], -1))
+
+            else:
+                rospy.loginfo('여긴... 어디지?')
+
+        else:                                           # 경로에 놓여있을 경우
+            self.questions.append(tuple(self.history))  # 목표와 이전목표가 선택지이다.
 
 
+        answer = -1
+        for question in self.questions:                         # Motorimagery로 질문한다.
+            answer = self.get_motorimagery(question).id
+            if answer != -1:
+                break
 
+        if answer != -1:                                        # 답변을 얻었다면,
+            pose = Pose()
+            pose.position = self.get_node(answer).point         # 위치를 설정한다.
 
-        self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.
-        p = self.get_node(self.nearest[0]).point
-        self.nearest[1] = (p.x-self.pose.position.x)**2 + (p.y-self.pose.position.y)**2
+            dx = pose.position.x - self.pose.position.x         # 방향을 설정한다.
+            dy = pose.position.y - self.pose.position.y
+            th = math.atan2(dy, dx)
+            q = tf.transformations.quaternion_from_euler(0, 0, th)
+            pose.orientation.x = q[0]
+            pose.orientation.y = q[1]
+            pose.orientation.z = q[2]
+            pose.orientation.w = q[3]
 
+            self.target_publisher.publish(pose)                 # 목표를 발행한다.
+            self.history[1] = self.history[0]                   # 기록한다.
+            self.history[0] = answer
 
+            rospy.loginfo('%d로 이동합니다.'%answer)
 
+        else:
+            rospy.loginfo('?!')
+
+        rospy.sleep(rospy.get_param('~planning_cycle', 0.5))    # 대기한다.
         self.busy = 0
 
     # def questioning(self, event):
@@ -184,9 +232,9 @@ class TASK_PLANNER:
         """로봇의 자세를 갱신한다"""
         self.pose = data                                            # 현재 자세를 갱신한다.
 
-        # self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.
-        # p = self.get_node(self.nearest[0]).point
-        # self.nearest[1] = (p.x-self.pose.position.x)**2 + (p.y-self.pose.position.y)**2
+        self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.
+        p = self.get_node(self.nearest[0]).point
+        self.nearest[1] = (p.x-self.pose.position.x)**2 + (p.y-self.pose.position.y)**2
 
 
 if __name__ == '__main__':
