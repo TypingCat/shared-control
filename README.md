@@ -36,6 +36,10 @@
 
 ![아키텍처](image/architecture.png)
 
+### 1.4. 버전
+- `1.0.0` 노드 사이의 프로토콜 확립; 테스트 모듈 구현
+- `1.0.1` Task planner 구축
+
 
 ## 2. 개발환경
 ### 2.1. 소프트웨어
@@ -60,19 +64,34 @@
     - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
     - planning_cycle (float, default: 0.5), 계획의 단위연산주기
     - goal_margin (float, default: 0.01), 목표영역의 반경
+- Expected behavior
+    - Task planner는 4개의 상태: `수면` `대기` `목표노드 도착` `eyeblink`를 갖는 finite-state machine이다.
+    - 이동로봇이 목표노드에 도달하거나 eyeblink를 수신하는 이벤트가 발생하면 상태천이를 검토한다.
+    - Task planner와 이동로봇의 상태에 따라 선택지를 결정한다.
+    - 선택지를 binary question으로 파싱하여 motor imagery에게 전달된다.
+    - 획득한 답변을 로봇의 목표자세로 변환하여 출력한다. 이동과 정지 모두 자세로 간주한다.
 - Issues
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
-        - 아직은 현재 위치가 속한 GVG 엣지를 판단할 수 없다. 차선책으로, 가장 가까운 노드로 이동한다.
-    - [ ] 테스트를 위해 `fake_bci`, `fake_robot`을 운용한다.
+        - 아직은 현재위치가 속한 GVG 엣지를 판단할 수 없다.
+        - 차선책으로써 가장 가까운 노드로 이동한다.
+    - [ ] 테스트를 위해 `fake_bci` `fake_robot`을 운용한다.
         - 이동로봇의 좌표계는 발행하지 않는다.
-        - BCI의 정확도는 반영하지 않는다. 명령을 연속으로 입력할 경우 가끔 의도하지 않은 방향으로 이동한다.
-    - [ ] 노드 초기화가 실패한다.
-        - 초기화를 실행 후 1초(임의) 뒤로 미룬다. 미봉책이다.
-    - [ ] 트리거와 타이머가 질문을 섞는다.
-        - 질문 시퀀스를 분리하여 lock을 설정한다. 질문 도중 들어오는 트리거는 무시된다.
-        - 두 작업을 모두 하나의 함수에서 처리한다. 해당 함수에서 로봇의 상태와 위치를 관리한다.
+        - BCI의 정확도는 반영하지 않는다.
+    - [x] Motor imagery 문답 시 다른 기능들이 정지한다.
+        - 일회성 타이머로 연산을 분리한다.
+        - 이벤트 전후로 다른 연산요청을 처리한다.
+        - 상태 갱신과정을 간소화한다.
+    - [ ] 가끔 노드의 초기화가 실패한다.
+        - 서비스 연결을 실행 후 1초 뒤로 미룬다.
+        - 성공할 때까지 초기화를 반복한다.
+    - [ ] 가끔 의도하지 않은 노드가 이동목표로 선택된다.
+        - GVG 위에서의 현재위치가 명확하지 않다.
+        - 중복입력을 방지하기 위해 이벤트 처리 후 일정시간 휴지한다.
+    - [x] 트리거와 타이머가 질문을 섞는다.
+        - 질문 시퀀스를 분리하여 진행한다. 이 과정이 진행되는 동안 발생하는 이벤트들은 무시한다.
+        - 계획 관련 작업을 모두 하나의 함수에서 처리한다.
 
-### 3.2. Spatial info. manager
+### 3.2. Spatial information manager
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 - Published Topics
@@ -92,7 +111,7 @@
     - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    - marker_cycle (float, default: 2.0), `gvd`와 `gvg/marker`의 발행 주기
+    - marker_cycle (float, default: 2.0), `gvd` `gvg/marker`의 발행 주기
 - Issues
     - [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
         - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
@@ -134,7 +153,7 @@
     - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
     - bci/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Issues
-    - [ ] 토픽 `robot/marker`, `bci/marker`는 노드 `fake_robot`, `fake_bci`로부터 발행된다.
+    - [ ] 토픽 `robot/marker` `bci/marker`는 노드 `fake_robot` `fake_bci`로부터 발행된다.
         - 즉 해당 토픽들은 테스트를 위한 마커이다. 실제 시스템과 연결할 때에는 해당 패키지에서 마커를 발행하거나, 그에 준하는 정보를 발행해 주어야 한다.
 
 ### 3.6. (테스트 전용) Fake BCI
@@ -170,9 +189,9 @@
 $ cd ~/catkin_ws
 $ catkin_make
 ```
-아키텍처가 계획대로 구현될 경우 `shared_control/launch/KES.launch`를 사용하여 다른 패키지들과 함께 실행하면 된다.
+아키텍처가 계획대로 구현될 경우 `shared_control/launch/KES.launch`를 사용하여 `fake_bci`나 `fake_robot`을 대체하는 패키지들과 함께 실행하면 된다.
 
-테스트를 하려면 이하와 같이 `shared_control/launch/KES_test.launch`를 실행한다: 여기에는 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 포함되어 있으며, 지도는 `shared_control/map`에서 불러온다. Eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다.
+단순히 테스트를 할 경우에는 이하와 같이 `shared_control/launch/KES_test.launch`를 실행한다: 여기에는 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 포함되어 있으며, 지도는 `shared_control/map`에서 불러온다. Eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다.
 ```
 $ roslaunch shared_control KES_test.launch
 ```
@@ -184,8 +203,8 @@ $ rviz
 
 
 ## 5. 색인
-### 5.1. BCI
-Brain-Computer Interface. 본 과제에서는 다음과 같은 방식이 제공된다.
+### 5.1. Brain-Computer Interface (BCI)
+본 과제에서는 다음과 같은 방식이 제공된다.
 - Motor imagery
     - 이동로봇이 사용자에게 질문하면 약 6초(편차가 크다) 후에 80%의 정확도로 답변을 돌려준다.
     - 현재는 binary question만 가능하다. 3개 이상의 선택지를 질문하려면 각 선택지를 순차적으로 질문해야 한다.
@@ -193,5 +212,5 @@ Brain-Computer Interface. 본 과제에서는 다음과 같은 방식이 제공�
     - 사용자가 눈을 2번 깜빡이면 85%의 정확도로 로봇에게 신호를 전달한다.
 - ~~Error-Related Negativity (ERN)~~
 
-### 5.2. GVG
-Generalized Voronoi Graph. 지도의 뼈대를 표현한 그래프이다. 이동로봇의 선택지를 최적화하고, BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
+### 5.2. Generalized Voronoi Graph (GVG)
+지도의 뼈대를 표현한 그래프이다. 이동로봇의 선택지를 최적화하고, BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
