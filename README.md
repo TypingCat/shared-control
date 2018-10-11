@@ -25,13 +25,13 @@
 
 ### 1.3. 협업 구조
 - 김래현박사님팀
-    - 실무자: 김다혜, dahyekim@kist.re.kr
+    - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr)
     - 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
-    - 실무자: 노진홍, fini@kist.re.kr
+    - 실무자: 노진홍(fini@kist.re.kr)
     - 역할: BCI-이동로봇을 위한 공유제어를 설계한다.
 - 윤상석교수님팀
-    - 실무자: 엄홍규, ehg2y@naver.com
+    - 실무자: 엄홍규(ehg2y@naver.com)
     - 역할: 이동로봇을 제어한다.
 
 ![아키텍처](image/architecture.png)
@@ -166,6 +166,8 @@
     - bci/motorimagery (shared_control/MotorImagery), 입력받은 리스트(binary question)의 요소 중 하나를 반환한다. 키보드를 인터페이스로 사용한다.
         - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+- Issues
+    - [ ] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
 
 ### 3.7. (테스트 전용) Fake robot
 - Subscribed Topics
@@ -181,6 +183,9 @@
     - robot_th (float, default: 0.0), 이동로봇의 방향각 초기값
     - robot_velocity (float, default: 0.2), 이동로봇의 속도
     - goal_margin (float, default: 0.01), 목표영역의 반경
+- Issues
+    - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
+        - Gazebo 시뮬레이터 https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
 
 
 ## 4. 사용법
