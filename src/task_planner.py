@@ -158,7 +158,7 @@ class TASK_PLANNER:
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
         self.pose = data                                                # 현재 자세를 갱신한다.
-        
+
         try:
             self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.
             p = self.get_node(self.nearest[0]).point
