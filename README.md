@@ -187,11 +187,6 @@
     - goal_margin (float, default: 0.01), 목표영역의 반경
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
-        - Gazebo 시뮬레이터 https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
-    - [ ] `navigation/move_base`가 불안정하다.
-        - 전진해야 할 상황에서 후진하면서 자세를 잡는다.
-        - 장애물과의 거리에 민감하여 말단에 도달하지 못한다.
-        - 목표에 도달하지 못하고 주위를 맴돈다.
 
 
 ## 4. 사용법
@@ -211,9 +206,10 @@ $ roslaunch shared_control simple_test.launch
 화살표가 GVG를 따라 이동하는 것을 확인할 수 있다.
 
 ### 4.2. 이동로봇 시뮬레이터 적용
-본 예제에서는 ROS Gazebo를 사용하여 이동로봇을 시뮬레이션한다(연산량이 많으므로 저사양 컴퓨터에서는 실행을 권하지 않는다). 그리고 BCI 대신 키보드를 활용한다. 예제 실행에는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 시뮬레이션 환경을 다운로드한다.
+본 예제에서는 ROS Gazebo를 사용하여 이동로봇을 시뮬레이션한다(연산량이 많으므로 저사양 컴퓨터에서는 실행을 권하지 않는다). BCI 대신 키보드를 활용하는 것은 `4.1. 테스트`와 동일하다. 예제의 실행에는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 시뮬레이션에 필요한 패키지들을 다운로드한다.
 ```
 $ cd ~/catkin_ws/src
+$ git clone https://github.com/Taemin0707/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
 $ cd ~/catkin_ws
 $ catkin_make
@@ -228,7 +224,7 @@ $ roslaunch shared_control gazebo_test.launch
 
 ## 5. 색인
 ### 5.1. Brain-Computer Interface (BCI)
-본 과제에서는 다음과 같은 방식이 제공된다.
+사용자의 뇌파(electroencephalography, EEG)를 사용하는 인터페이스이다.
 - Motor imagery
     - 이동로봇이 사용자에게 질문하면 약 6초(편차가 크다) 후에 80%의 정확도로 답변을 돌려준다.
     - 현재는 binary question만 가능하다. 3개 이상의 선택지를 질문하려면 각 선택지를 순차적으로 질문해야 한다.
@@ -237,4 +233,12 @@ $ roslaunch shared_control gazebo_test.launch
 - ~~Error-Related Negativity (ERN)~~
 
 ### 5.2. Generalized Voronoi Graph (GVG)
-지도의 뼈대를 표현한 그래프이다. 이동로봇의 선택지를 최적화하고, BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
+지도의 뼈대를 표현한 그래프이다. Brushfire-based AGVD calculation을 사용하여 계산한다.
+- 이동로봇의 선택지를 최적화하고, BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
+- 현재는 정적인 환경에서만 작동한다.
+
+### 5.3. Navigation
+ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다.
+- 전진해야 할 상황에서 후진하면서 자세를 잡는다.
+- 장애물과의 거리에 민감하여 말단에 도달하지 못한다.
+- 목표에 도달하지 못하고 주위를 맴돈다.
