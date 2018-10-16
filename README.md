@@ -9,9 +9,7 @@
 
 ## 1. 개요
 ### 1.1. 목표
-한국전자전 참가
-- 일시: 2018.10.24(수)-27(토)
-- 장소: COEX
+조이스틱 사용자 대비 이동시간 300% 이내에 무작위 목적지에 도달
 
 ### 1.2. 시나리오
 1. 로봇에게는 지도가 주어진다. 로봇은 이 지도를 바탕으로 GVG를 구축한다.
@@ -39,17 +37,21 @@
 ### 1.4. 버전
 - `1.0.0` 노드 사이의 프로토콜 확립; 테스트 모듈 구현
 - `1.0.1` Task planner 구축
+- `1.0.2` Gazebo 연결
 
 
 ## 2. 개발환경
 ### 2.1. 소프트웨어
 - Ubuntu 16.04
 - ROS kinetic
+    - Turtlebot3
+    - Turtlebot3_msgs
 - Python 2.7
     - NetworkX 2.1
 
 ### 2.2. 하드웨어
-- ~~Turtlebot3 Waffle~~
+- Turtlebot3 Waffle
+    - Gazebo 시뮬레이션
 
 
 ## 3. 기능
@@ -186,25 +188,42 @@
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
         - Gazebo 시뮬레이터 https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
+    - [ ] `navigation/move_base`가 불안정하다.
+        - 전진해야 할 상황에서 후진하면서 자세를 잡는다.
+        - 장애물과의 거리에 민감하여 말단에 도달하지 못한다.
+        - 목표에 도달하지 못하고 주위를 맴돈다.
 
 
 ## 4. 사용법
-본 패키지의 커스텀 서비스를 등록하기 위해 컴파일이 필요하다. 작업공간 `~/catkin_ws`의 `src` 폴더에 `shared_control` 패키지를 위치시키고 다음을 실행한다. 이 과정은 최초 설치시에만 실행하면 된다.
+### 4.1. 테스트
+본 예제에서는 `shared_control` 패키지의 기능을 확인할 수 있다. 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 함께 실행된다. `shared_control` 패키지를 다운로드하자.
 ```
+$ cd ~/catkin_ws/src
+$ git clone https://github.com/Taemin0707/shared_control.git
 $ cd ~/catkin_ws
 $ catkin_make
 ```
-아키텍처가 계획대로 구현될 경우 `shared_control/launch/KES.launch`를 사용하여 `fake_bci`나 `fake_robot`을 대체하는 패키지들과 함께 실행하면 된다.
 
-단순히 테스트를 할 경우에는 이하와 같이 `shared_control/launch/KES_test.launch`를 실행한다: 여기에는 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 포함되어 있으며, 지도는 `shared_control/map`에서 불러온다. Eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다.
+준비가 끝나면 다음을 실행한다. Rviz 화면에서 진행상황을 확인하고 터미널로 입력하는 방식의 인터페이스를 제공한다. 터미널에서도 안내되겠지만 eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다. Rviz 화면에서 로봇의 자세와 목표는 각각 적색 화살표와 녹색 화살표로 표현되며 `a`가 가리키는 노드는 적색 원기둥, `d`가 가리키는 노드는 청색 원기둥으로 강조된다.
 ```
-$ roslaunch shared_control KES_test.launch
+$ roslaunch shared_control simple_test.launch
+```
+화살표가 GVG를 따라 이동하는 것을 확인할 수 있다.
+
+### 4.2. 이동로봇 시뮬레이터 적용
+본 예제에서는 ROS Gazebo를 사용하여 이동로봇을 시뮬레이션한다(연산량이 많으므로 저사양 컴퓨터에서는 실행을 권하지 않는다). 그리고 BCI 대신 키보드를 활용한다. 예제 실행에는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 시뮬레이션 환경을 다운로드한다.
+```
+$ cd ~/catkin_ws/src
+$ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
+$ cd ~/catkin_ws
+$ catkin_make
 ```
 
-위의 명령으로는 터미널에서만 작동하지만 Rviz로 진행상황을 시각화할 수도 있다. 다른 터미널에서 Rviz를 실행하고, `Rviz/File/Open Config`에서 환경설정파일 `shared_control/launch/KES.rviz`를 선택하자. 로봇의 자세와 목표는 각각 적색 화살표와 녹색 화살표로 표현되며, 적색 점으로 구성된 그래프 `GVG` 위에서 이동하는 것을 확인할 수 있다. 사용자의 선택이 필요할 경우 해당 선택으로 이동할 수 있는 위치가 적색 원 `a`와 청색 원 `d`로 표현된다.
+설치를 모두 마쳤다면 다음 명령어로 예제를 실행할 수 있다.
 ```
-$ rviz
+$ roslaunch shared_control gazebo_test.launch
 ```
+조작법은 `4.1. 테스트`와 같다. 로봇이 경로를 계획하여 이동하는 것을 확인할 수 있다.
 
 
 ## 5. 색인

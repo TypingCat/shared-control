@@ -1,0 +1,33 @@
+<launch>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/models/silla_univ.house.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model turtlebot3_waffle
+              -x 0.0
+              -y 0.0
+              -z 0.0
+              -param robot_description"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
+
+  <include file="$(find turtlebot3_navigation)/launch/amcl.launch"/>
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
+  </node>
+
+</launch>
