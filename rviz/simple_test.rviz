@@ -40,19 +40,9 @@ Visualization Manager:
       Value: true
     - Class: rviz/Group
       Displays:
-        - Alpha: 0.200000003
-          Class: rviz/Map
-          Color Scheme: map
-          Draw Behind: false
-          Enabled: true
-          Name: GVD
-          Topic: /gvd
-          Unreliable: false
-          Use Timestamp: false
-          Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /gvg/marker
+          Marker Topic: /interface
           Name: GVG
           Namespaces:
             "": true
@@ -71,7 +61,7 @@ Visualization Manager:
           Marker Topic: /bci/marker
           Name: Question
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
       Enabled: true

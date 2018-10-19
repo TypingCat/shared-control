@@ -3,7 +3,7 @@
   <include file="$(find shared_control)/launch/gazebo.launch"/>
   <node pkg="shared_control" type="motion_manager.py" name="motion_manager"/>
 
-  <include file="$(find shared_control)/launch/core.launch"/>
+  <include file="$(find shared_control)/launch/shared_control.launch"/>
 
   <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
 

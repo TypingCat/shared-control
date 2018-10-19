@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*-coding:utf-8-*-
+#-*-coding: utf-8-*-
 
 import rospy
 import numpy
@@ -22,14 +22,11 @@ class SPATIAL_INFO_MANAGER:
 
         rospy.Subscriber('map', OccupancyGrid, self.load_map)
 
-        self.gvd_publisher = rospy.Publisher('gvd', OccupancyGrid, queue_size=1)
-        self.gvg_publisher = rospy.Publisher('gvg/marker', MarkerArray, queue_size=1)
+        self.publisher = rospy.Publisher('gvg', MarkerArray, queue_size=1)
 
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
-
-        rospy.Timer(rospy.Duration(rospy.get_param('~marker_cycle', 2.0)), self.publish)
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""
@@ -38,7 +35,7 @@ class SPATIAL_INFO_MANAGER:
         self.map.data = numpy.array(data.data)
 
         gvd = self.calc_gvd(self.map.data.reshape(data.info.height,data.info.width),
-                            rospy.get_param('~gvd_PM', 10.0),       # GVD를 계산한다.
+                            rospy.get_param('~gvd_PM', 10.0),       # 지도의 GVD를 계산한다.
                             rospy.get_param('~gvd_BM', 0.187/self.map.info.resolution))
         self.gvd.header = data.header
         self.gvd.info = data.info
@@ -46,8 +43,10 @@ class SPATIAL_INFO_MANAGER:
 
         footprint = self.draw_footprint(gvd)
         gvg = self.extract_gvg(footprint)
-        self.gvg = self.pruning(gvg,                                # GVG를 계산한다.
+        self.gvg = self.pruning(gvg,                                # GVD로부터 GVG를 추출한다.
                                 rospy.get_param('~gvg_minimum_path_distance', 0.3)**2)
+
+        self.publish(gvg)                                           # GVG를 발행한다.
 
     def calc_gvd(self, data, PM, BM):
         """Brushfire-based AGVD calculation"""
@@ -255,13 +254,9 @@ class SPATIAL_INFO_MANAGER:
 
         return gvg
 
-    def publish(self, event):
-        """GVD, GVG를 출력한다"""
-        try:                    # GVD를 출력한다.
-            self.gvd_publisher.publish(self.gvd)
-        except: pass
-
-        gvg_node = Marker()     # GVG 노드 마커를 생성한다.
+    def publish(self, gvg):
+        """GVG를 출력한다"""
+        gvg_node = Marker()                             # GVG 노드 마커를 생성한다.
         gvg_node.header.stamp = rospy.Time.now()
         gvg_node.header.frame_id = 'map'
         gvg_node.id = 0
@@ -271,18 +266,18 @@ class SPATIAL_INFO_MANAGER:
         gvg_node.scale.y = 0.5*self.map.info.resolution
         gvg_node.points = []
         gvg_node.colors = []
-        for n in self.gvg.nodes:
+        for n in gvg.nodes:
             c = ColorRGBA()
             c.a = 0.5
             c.r = 1
             gvg_node.colors.append(c)
             p = Point()
-            p.x = self.gvg.nodes[n]['pos'][0]
-            p.y = self.gvg.nodes[n]['pos'][1]
+            p.x = gvg.nodes[n]['pos'][0]
+            p.y = gvg.nodes[n]['pos'][1]
             p.z = 0.1
             gvg_node.points.append(p)
 
-        gvg_edge = Marker()     # GVG 엣지 마커를 생성한다.
+        gvg_edge = Marker()                             # GVG 엣지 마커를 생성한다.
         gvg_edge.header.stamp = rospy.Time.now()
         gvg_edge.header.frame_id = 'map'
         gvg_edge.id = 1
@@ -291,21 +286,19 @@ class SPATIAL_INFO_MANAGER:
         gvg_edge.scale.x = 0.2*self.map.info.resolution
         gvg_edge.points = []
         gvg_edge.color.a = 0.7
-        for e in self.gvg.edges:
+        for e in gvg.edges:
             p1 = Point()
-            p1.x = self.gvg.nodes[e[0]]['pos'][0]
-            p1.y = self.gvg.nodes[e[0]]['pos'][1]
+            p1.x = gvg.nodes[e[0]]['pos'][0]
+            p1.y = gvg.nodes[e[0]]['pos'][1]
             p1.z = 0.1
             gvg_edge.points.append(p1)
             p2 = Point()
-            p2.x = self.gvg.nodes[e[1]]['pos'][0]
-            p2.y = self.gvg.nodes[e[1]]['pos'][1]
+            p2.x = gvg.nodes[e[1]]['pos'][0]
+            p2.y = gvg.nodes[e[1]]['pos'][1]
             p2.z = 0.1
             gvg_edge.points.append(p2)
 
-        try:                    # GVG 마커를 출력한다.
-            self.gvg_publisher.publish([gvg_node, gvg_edge])
-        except: pass
+        self.publisher.publish([gvg_node, gvg_edge])     # GVG 마커를 출력한다.
 
     def get_nearest(self, request):
         """입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다"""

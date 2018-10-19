@@ -5,13 +5,16 @@
     <param name="gvd_PM" value="10.0"/>
     <param name="gvd_BM" value="3.74"/>
     <param name="gvg_minimum_path_distance" value="0.1"/>
-    <param name="marker_cycle" value="2.0"/>
   </node>
 
   <node pkg="shared_control" type="task_planner.py" name="task_planner" output="screen">
     <param name="spin_cycle" value="0.1"/>
     <param name="planning_cycle" value="0.3"/>
     <param name="goal_margin" value="0.2"/>
+  </node>
+
+  <node pkg="shared_control" type="interface_visualizer.py" name="interface_visualizer" output="screen">
+    <param name="publish_cycle" value="1.0"/>
   </node>
 
 </launch>

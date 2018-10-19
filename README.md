@@ -97,8 +97,7 @@
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 - Published Topics
-    - gvd ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html)), GVD를 점유된 격자로 표현한다.
-    - gvg/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - gvg ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Services
     - gvg/nearest (shared_control/Nearest), 입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다.
         - 입력: point ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
@@ -113,7 +112,6 @@
     - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    - marker_cycle (float, default: 2.0), `gvd` `gvg/marker`의 발행 주기
 - Issues
     - [ ] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
         - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
@@ -139,10 +137,17 @@
         - 초기화 도중 혹은 잦은 서비스 요청에서 발생한다.
         - 일단 예외처리를 추가하여 서비스에 실패했음을 알린다.
 
-### 3.3. Plan visualizer
+### 3.3. Interface visualizer
+- Subscribed Topics
+    - gvg ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+- Published Topics
+    - interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+- Parameters
+    - publish_cycle (float, default: 1.0), `interface`의 발행 주기
 - Issues
-    - [ ] 아직 인터페이스 규모가 크지 않아 구현하지 않는다.
-        - 시각화가 필요한 노드에서 직접 마커를 출력한다.
+    - [x] 아직 인터페이스 규모가 크지 않아 구현하지 않는다.
+        - 시각화가 필요한 노드에서 직접 마커를 출력했었으나, 이제 마커를 단일 타이머에서 정리하여 출력한다.
+        - 마커의 주기적인 재발행 혹은 정보의 구체적인 이미지화를 돕는다.
 
 ### 3.4. Map server
 - Published Topics
@@ -151,9 +156,10 @@
 ### 3.5. Rviz
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
-    - gvg/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
-    - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
-    - bci/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - camera/rgb/image_raw ([sensor_msgs/Image](http://docs.ros.org/kinetic/api/sensor_msgs/html/msg/Image.html))
+    - (테스트 전용) robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - (테스트 전용) bci/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Issues
     - [ ] 토픽 `robot/marker` `bci/marker`는 노드 `fake_robot` `fake_bci`로부터 발행된다.
         - 즉 해당 토픽들은 테스트를 위한 마커이다. 실제 시스템과 연결할 때에는 해당 패키지에서 마커를 발행하거나, 그에 준하는 정보를 발행해 주어야 한다.
