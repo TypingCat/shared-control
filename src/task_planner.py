@@ -62,7 +62,7 @@ class TASK_PLANNER:
         if self.state == -1:                                # 수면중이었다면,
             options = self.get_options(self.history[0])     # 질문을 생성한다.
             for id in options:
-                self.questions.append((id, -1))
+                self.questions.append(id)
 
         elif self.state == 1:                               # 노드 위에 정지해 있다면,
             options = self.get_options(self.history[0])
@@ -77,7 +77,7 @@ class TASK_PLANNER:
 
             else:                                           # 교차로라면 질문을 생성한다.
                 for id in options:
-                    self.questions.append((id, -1))
+                    self.questions.append(id)
 
         elif self.state == 2:                               # 트리거를 받았을 때,
             if self.move == 0:                              # 정지해 있다면,
@@ -85,11 +85,14 @@ class TASK_PLANNER:
 
             else:                                           # 이동중이라면,
                 self.target_publisher.publish(self.pose)    # 정지한다.
-                self.questions.append(tuple(self.history))  # 그리고 앞으로 갈지 뒤로갈지를 결정한다.
+                self.questions.append(self.history[0])      # 그리고 앞으로 갈지 뒤로갈지를 결정한다.
+                self.questions.append(self.history[1])
 
         answer = -1
         for question in self.questions:                     # Motorimagery로 질문한다.
-            answer = self.get_motorimagery(question).id
+            self.send_target(question, 1)                   # 목적지를 보여준다.
+
+            answer = self.get_motorimagery((question, -1)).id
             if answer != -1:
                 break
             else:
@@ -103,10 +106,10 @@ class TASK_PLANNER:
         if answer == -2:                # 답변이 없었다면,
             self.state = -1             # 수면에 든다.
             rospy.loginfo('대기합니다.')
-            return
 
-        else:
-            self.state = 0
+        else:                           # 질문이 없었다면,
+            self.state = 0              # 대기한다.
+            rospy.loginfo('대기합니다.')
 
     def get_options(self, id):
         """그래프로부터 선택지를 확인한다"""
@@ -117,7 +120,8 @@ class TASK_PLANNER:
 
         return options
 
-    def send_target(self, id):
+    def send_target(self, id, head_only=0):
+        """이동로봇에게 목표자세를 전송한다"""
         pose = Pose()
         pose.position = self.get_node(id).point         # 위치를 설정한다.
 
@@ -129,6 +133,11 @@ class TASK_PLANNER:
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
+
+        if head_only == 1:                              # 쳐다보기만 할지 결정한다.
+            pose.position.x = self.pose.position.x
+            pose.position.y = self.pose.position.y
+            pose.position.z = self.pose.position.z
 
         self.target_publisher.publish(pose)             # 목표를 발행한다.
         self.history[1] = self.history[0]               # 기록한다.
@@ -150,6 +159,8 @@ class TASK_PLANNER:
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
         elif self.state == -1:
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
+        else:
+            rospy.loginfo("잠깐만요.")
 
     def update_state(self, data):
         """로봇의 상태를 갱신한다"""

@@ -53,7 +53,7 @@ class FAKE_BCI:
 
     def motorimagery(self, request):
         """Motor imagery를 대신하여 binary question에 답변한다"""
-        rospy.loginfo('[a:%d, d:%d] 어디로 이동할까요?'%request.ids)
+        rospy.loginfo('이동할까요? 긍정은 a, 부정은 d: ')
 
         answer = -1
         key = 'fini'
