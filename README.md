@@ -198,7 +198,6 @@
     - goal_margin (float, default: 0.01), 목표영역의 반경
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
-    - [ ] `motion_manager`를 https://github.com/ZeroAnu/motion_manager 에서 관리하고 있지만, 예제에서는 소스를 내장한다.
 
 
 ## 4. 사용법
@@ -211,7 +210,7 @@ $ cd ~/catkin_ws
 $ catkin_make
 ```
 
-준비가 끝나면 다음을 실행한다. Rviz 화면에서 진행상황을 확인하고 터미널로 입력하는 방식의 인터페이스를 제공한다. 터미널에서도 안내되겠지만 eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다. Rviz 화면에서 로봇의 자세와 목표는 각각 적색 화살표와 녹색 화살표로 표현되며 `a`가 가리키는 노드는 적색 원기둥, `d`가 가리키는 노드는 청색 원기둥으로 강조된다.
+준비가 끝나면 다음을 실행한다. Rviz 화면에서 진행상황을 확인하고 터미널로 입력하는 방식의 인터페이스를 제공한다. 터미널에서도 안내되겠지만 eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다: 이동에 긍정하면 `a`, 부정이면 `d`를 사용한다.
 ```
 $ roslaunch shared_control simple_test.launch
 ```
@@ -250,7 +249,4 @@ $ roslaunch shared_control gazebo_test.launch
 - 현재는 정적인 환경에서만 작동한다.
 
 ### 5.3. Navigation
-ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다.
-- 전진해야 할 상황에서 후진하면서 자세를 잡는다.
-- 장애물과의 거리에 민감하여 말단에 도달하지 못한다.
-- 목표에 도달하지 못하고 주위를 맴돈다.
+ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다. 신라대의 `motion_manager`: https://github.com/ZeroAnu/motion_manager 에서 행동방침을 관리하고 있다.
