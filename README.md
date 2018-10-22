@@ -38,6 +38,7 @@
 - `1.0.0` 노드 사이의 프로토콜 확립; 테스트 모듈 구현
 - `1.0.1` Task planner 구축
 - `1.0.2` Gazebo 연결
+- `1.0.3` Interface visualizer 구축
 
 
 ## 2. 개발환경
@@ -66,11 +67,11 @@
     - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
     - planning_cycle (float, default: 0.5), 계획의 단위연산주기
     - goal_margin (float, default: 0.01), 목표영역의 반경
-- Expected behavior
+- Expected behaviors
     - Task planner는 4개의 상태: `수면` `대기` `목표노드 도착` `eyeblink`를 갖는 finite-state machine이다.
     - 이동로봇이 목표노드에 도달하거나 eyeblink를 수신하는 이벤트가 발생하면 상태천이를 검토한다.
     - Task planner와 이동로봇의 상태에 따라 선택지를 결정한다.
-    - 선택지를 binary question으로 파싱하여 motor imagery에게 전달된다.
+    - 선택지를 binary question으로 파싱하여 motor imagery에게 전달한다.
     - 획득한 답변을 로봇의 목표자세로 변환하여 출력한다. 이동과 정지 모두 자세로 간주한다.
 - Issues
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
@@ -92,6 +93,8 @@
     - [x] 트리거와 타이머가 질문을 섞는다.
         - 질문 시퀀스를 분리하여 진행한다. 이 과정이 진행되는 동안 발생하는 이벤트들은 무시한다.
         - 계획 관련 작업을 모두 하나의 함수에서 처리한다.
+    - [x] 이동로봇 기준의 시야에서는 선택지가 확인되지 않는다.
+        - 선택지를 정면에 놓고 이동 여부를 질문하도록 방침을 변경한다.
 
 ### 3.2. Spatial information manager
 - Subscribed Topics
@@ -135,11 +138,14 @@
         - GVG 엣지 데이터를 그래프로 구축해야 한다.
     - [ ] GVG가 불안정하여 가끔 서비스가 실패한다.
         - 초기화 도중 혹은 잦은 서비스 요청에서 발생한다.
-        - 일단 예외처리를 추가하여 서비스에 실패했음을 알린다.
+        - 예외처리를 추가하여 서비스에 실패했음을 알린다.
 
 ### 3.3. Interface visualizer
 - Subscribed Topics
     - gvg ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - interface/lighter ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+    - interface/flicker ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+    - interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 - Published Topics
     - interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Parameters
@@ -169,7 +175,6 @@
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
     - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
-    - bci/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Services
     - bci/motorimagery (shared_control/MotorImagery), 입력받은 리스트(binary question)의 요소 중 하나를 반환한다. 키보드를 인터페이스로 사용한다.
         - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
@@ -193,6 +198,7 @@
     - goal_margin (float, default: 0.01), 목표영역의 반경
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
+    - [ ] `motion_manager`를 https://github.com/ZeroAnu/motion_manager 에서 관리하고 있지만, 예제에서는 소스를 내장한다.
 
 
 ## 4. 사용법

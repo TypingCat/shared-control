@@ -79,6 +79,7 @@ class FAKE_ROBOT:
         self.visualize_robot()
 
     def visualize_robot(self):
+        """로봇의 자세를 화살표로 시각화한다"""
         robot = Marker()        # 로봇 마커를 생성한다.
         robot.header.stamp = rospy.Time.now()
         robot.header.frame_id = 'map'

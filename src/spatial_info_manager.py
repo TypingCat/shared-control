@@ -137,6 +137,7 @@ class SPATIAL_INFO_MANAGER:
         return footprint
 
     def extract_gvg(self, footprint):
+        """GVD로부터 GVG를 추출한다"""
         seed = [-1, 0]                              # 가장 규모가 큰 서브그래프를 확인한다.
         foot = footprint.copy()
         while len(foot.nodes) > 0:

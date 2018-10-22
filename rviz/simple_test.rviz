@@ -58,8 +58,8 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /bci/marker
-          Name: Question
+          Marker Topic: /interface
+          Name: Interface
           Namespaces:
             "": true
           Queue Size: 100

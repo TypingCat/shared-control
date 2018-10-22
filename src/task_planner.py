@@ -5,7 +5,7 @@ import rospy
 import math
 import tf
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Int32
 
 from shared_control.srv import Nearest, Neighbors, Node, MotorImagery
@@ -27,11 +27,14 @@ class TASK_PLANNER:
         rospy.wait_for_service('bci/motorimagery')
         rospy.sleep(1.0)
 
-        rospy.Subscriber('bci/eyeblink', Int32, self.percussion, queue_size=1)
+        rospy.Subscriber('bci/eyeblink', Int32, self.percussion)
         rospy.Subscriber('robot/state', Int32, self.update_state)
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
         self.target_publisher = rospy.Publisher('robot/target', Pose, queue_size=1)
+        self.lighter_publisher = rospy.Publisher('interface/lighter', Point, queue_size=1)
+        self.flicker_publisher = rospy.Publisher('interface/flicker', Point, queue_size=1)
+        self.douser_publisher = rospy.Publisher('interface/douser', Int32, queue_size=1)
 
         self.get_nearest = rospy.ServiceProxy('gvg/nearest', Nearest)   # 서비스들을 등록한다.
         self.get_neighbors = rospy.ServiceProxy('gvg/neighbors', Neighbors)
@@ -72,6 +75,7 @@ class TASK_PLANNER:
 
             if len(options) == 0:                           # 말단이라면 수면을 취한다.
                 self.state = -1
+                self.douser_publisher.publish(self.state)
                 rospy.loginfo('대기합니다.')
                 return
 
@@ -81,7 +85,8 @@ class TASK_PLANNER:
 
         elif self.state == 2:                               # 트리거를 받았을 때,
             if self.move == 0:                              # 정지해 있다면,
-                rospy.loginfo('이럴리가 없는데?')
+                self.douser_publisher.publish(self.state)
+                rospy.loginfo('이럴리가 없는데?(state=%d)'%self.state)
 
             else:                                           # 이동중이라면,
                 self.target_publisher.publish(self.pose)    # 정지한다.
@@ -90,7 +95,7 @@ class TASK_PLANNER:
 
         answer = -1
         for question in self.questions:                     # Motorimagery로 질문한다.
-            self.send_target(question, 1)                   # 목적지를 보여준다.
+            self.send_target(question, 1)                   # 로봇의 방향각을 목적지로 향한다.
 
             answer = self.get_motorimagery((question, -1)).id
             if answer != -1:
@@ -100,16 +105,22 @@ class TASK_PLANNER:
                 rospy.sleep(rospy.get_param('~planning_cycle', 0.5))
 
         if answer > -1:                 # 답변을 얻었다면,
+            self.state = 0
             self.send_target(answer)    # 이동한다.
             rospy.loginfo('%d로 이동합니다.'%answer)
 
-        if answer == -2:                # 답변이 없었다면,
-            self.state = -1             # 수면에 든다.
+        elif answer == -1:              # 답변이 없었다면,
+            self.state = 0              # 대기한다.
+            self.douser_publisher.publish(self.state)
             rospy.loginfo('대기합니다.')
 
-        else:                           # 질문이 없었다면,
-            self.state = 0              # 대기한다.
+        elif answer == -2:              # 질문 자체가 없었다면,
+            self.state = -1             # 수면에 든다.
+            self.douser_publisher.publish(self.state)
             rospy.loginfo('대기합니다.')
+
+        else:
+            rospy.loginfo('네?(state=%d)'%self.state)
 
     def get_options(self, id):
         """그래프로부터 선택지를 확인한다"""
@@ -123,9 +134,9 @@ class TASK_PLANNER:
     def send_target(self, id, head_only=0):
         """이동로봇에게 목표자세를 전송한다"""
         pose = Pose()
-        pose.position = self.get_node(id).point         # 위치를 설정한다.
+        pose.position = self.get_node(id).point             # 위치를 설정한다.
 
-        dx = pose.position.x - self.pose.position.x     # 방향을 설정한다.
+        dx = pose.position.x - self.pose.position.x         # 방향을 설정한다.
         dy = pose.position.y - self.pose.position.y
         th = math.atan2(dy, dx)
         q = tf.transformations.quaternion_from_euler(0, 0, th)
@@ -134,14 +145,20 @@ class TASK_PLANNER:
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
-        if head_only == 1:                              # 쳐다보기만 할지 결정한다.
-            pose.position.x = self.pose.position.x
+        if head_only == 0:
+            self.lighter_publisher.publish(pose.position)   # 화면에 출력한다.
+
+            self.target_publisher.publish(pose)             # 목표를 발행한다.
+            self.history[1] = self.history[0]               # 이동했음을 기록한다.
+            self.history[0] = id
+
+        elif head_only == 1:                                # 방향을 선택중일 경우에는
+            self.flicker_publisher.publish(pose.position)   # 화면에 출력한다.
+
+            pose.position.x = self.pose.position.x          # 방향각만 조정하여 선택을 돕는다.
             pose.position.y = self.pose.position.y
             pose.position.z = self.pose.position.z
-
-        self.target_publisher.publish(pose)             # 목표를 발행한다.
-        self.history[1] = self.history[0]               # 기록한다.
-        self.history[0] = id
+            self.target_publisher.publish(pose)             # 목표를 발행한다.
 
     def explosion(self, event):
         """이동로봇이 노드에 도달했는지를 감시한다"""
@@ -149,7 +166,7 @@ class TASK_PLANNER:
            (self.move == 0)&\
            (self.history[0] == self.nearest[0])&\
            (self.nearest[1] < 2*rospy.get_param('~goal_margin', 0.01)):
-            self.state = 1
+            self.state = 1      # 노드에 도달했다면 이동목표를 갱신한다.
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
 
     def percussion(self, data):
@@ -157,10 +174,12 @@ class TASK_PLANNER:
         if self.state == 0:
             self.state = 2
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
+
         elif self.state == -1:
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
+
         else:
-            rospy.loginfo("잠깐만요.")
+            rospy.loginfo("잠깐만요(state=%d)"%self.state)
 
     def update_state(self, data):
         """로봇의 상태를 갱신한다"""
