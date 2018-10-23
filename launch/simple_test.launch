@@ -1,12 +1,14 @@
 <launch>
 
   <node pkg="shared_control" type="fake_robot.py" name="fake_robot" output="screen">
+    <param name="pos_x" value="0.8"/>
+    <param name="pos_y" value="-1.2"/>
+    <param name="pos_th" value="87"/>
+    <param name="velocity_lin" value="0.26"/>
+    <param name="velocity_ang" value="1.82"/>
+    <param name="margin_lin" value="0.1"/>
+    <param name="margin_ang" value="0.1"/>
     <param name="sim_cycle" value="0.1"/>
-    <param name="robot_x" value="0.8"/>
-    <param name="robot_y" value="-1.2"/>
-    <param name="robot_th" value="87"/>
-    <param name="robot_velocity" value="0.5"/>
-    <param name="goal_margin" value="0.01"/>
   </node>
 
   <include file="$(find shared_control)/launch/shared_control.launch"/>

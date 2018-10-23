@@ -66,7 +66,6 @@
 - Paramters
     - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
     - planning_cycle (float, default: 0.5), 계획의 단위연산주기
-    - goal_margin (float, default: 0.01), 목표영역의 반경
 - Expected behaviors
     - Task planner는 4개의 상태: `수면` `대기` `목표노드 도착` `eyeblink`를 갖는 finite-state machine이다.
     - 이동로봇이 목표노드에 도달하거나 eyeblink를 수신하는 이벤트가 발생하면 상태천이를 검토한다.
@@ -188,14 +187,15 @@
 - Published Topics
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
-    - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Paramters
+    - pos_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
+    - pos_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
+    - pos_th (float, default: 0.0), 이동로봇의 방향각 초기값
+    - velocity_lin (float, default: 0.26), 이동로봇의 선속도
+    - velocity_ang (float, default: 1.82), 이동로봇의 각속도
+    - margin_lin (float, default: 0.1)
+    - margin_ang (float, default: 0.1)
     - sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
-    - robot_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
-    - robot_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
-    - robot_th (float, default: 0.0), 이동로봇의 방향각 초기값
-    - robot_velocity (float, default: 0.2), 이동로봇의 속도
-    - goal_margin (float, default: 0.01), 목표영역의 반경
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
 
@@ -249,4 +249,4 @@ $ roslaunch shared_control gazebo_test.launch
 - 현재는 정적인 환경에서만 작동한다.
 
 ### 5.3. Navigation
-ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다. 신라대의 `motion_manager`: https://github.com/ZeroAnu/motion_manager 에서 행동방침을 관리하고 있다.
+ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다. 신라대의 `motion_manager`: https://github.com/ZeroAnu/motion_manager 에서 움직임을 관리하고 있다.

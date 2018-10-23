@@ -14,7 +14,7 @@ from shared_control.srv import Nearest, Neighbors, Node, MotorImagery
 class TASK_PLANNER:
     """로봇의 행동방침을 결정한다"""
     def __init__(self):
-        self.move = 0               # 로봇의 움직임: 0=정지, 1=이동중
+        self.move = 1               # 로봇의 움직임: 0=정지, 1=이동중
         self.pose = Pose()          # 로봇의 자세
         self.nearest = [-1, 0]      # 로봇과 가장 가까운 노드
         self.history = [-1, -1]     # 목표노드 기록
@@ -31,10 +31,10 @@ class TASK_PLANNER:
         rospy.Subscriber('robot/state', Int32, self.update_state)
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
-        self.target_publisher = rospy.Publisher('robot/target', Pose, queue_size=1)
-        self.lighter_publisher = rospy.Publisher('interface/lighter', Point, queue_size=1)
-        self.flicker_publisher = rospy.Publisher('interface/flicker', Point, queue_size=1)
-        self.douser_publisher = rospy.Publisher('interface/douser', Int32, queue_size=1)
+        self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
+        self.publisher_lighter = rospy.Publisher('interface/lighter', Point, queue_size=1)
+        self.publisher_flicker = rospy.Publisher('interface/flicker', Point, queue_size=1)
+        self.publisher_douser = rospy.Publisher('interface/douser', Int32, queue_size=1)
 
         self.get_nearest = rospy.ServiceProxy('gvg/nearest', Nearest)   # 서비스들을 등록한다.
         self.get_neighbors = rospy.ServiceProxy('gvg/neighbors', Neighbors)
@@ -75,7 +75,7 @@ class TASK_PLANNER:
 
             if len(options) == 0:                           # 말단이라면 수면을 취한다.
                 self.state = -1
-                self.douser_publisher.publish(self.state)
+                self.publisher_douser.publish(self.state)
                 rospy.loginfo('대기합니다.')
                 return
 
@@ -85,11 +85,11 @@ class TASK_PLANNER:
 
         elif self.state == 2:                               # 트리거를 받았을 때,
             if self.move == 0:                              # 정지해 있다면,
-                self.douser_publisher.publish(self.state)
+                self.publisher_douser.publish(self.state)
                 rospy.loginfo('이럴리가 없는데?(state=%d)'%self.state)
 
             else:                                           # 이동중이라면,
-                self.target_publisher.publish(self.pose)    # 정지한다.
+                self.publisher_target.publish(self.pose)    # 정지한다.
                 self.questions.append(self.history[0])      # 그리고 앞으로 갈지 뒤로갈지를 결정한다.
                 self.questions.append(self.history[1])
 
@@ -111,12 +111,12 @@ class TASK_PLANNER:
 
         elif answer == -1:              # 답변이 없었다면,
             self.state = 0              # 대기한다.
-            self.douser_publisher.publish(self.state)
+            self.publisher_douser.publish(self.state)
             rospy.loginfo('대기합니다.')
 
         elif answer == -2:              # 질문 자체가 없었다면,
             self.state = -1             # 수면에 든다.
-            self.douser_publisher.publish(self.state)
+            self.publisher_douser.publish(self.state)
             rospy.loginfo('대기합니다.')
 
         else:
@@ -146,26 +146,25 @@ class TASK_PLANNER:
         pose.orientation.w = q[3]
 
         if head_only == 0:
-            self.lighter_publisher.publish(pose.position)   # 화면에 출력한다.
+            self.publisher_lighter.publish(pose.position)   # 화면에 출력한다.
 
-            self.target_publisher.publish(pose)             # 목표를 발행한다.
+            self.publisher_target.publish(pose)             # 목표를 발행한다.
             self.history[1] = self.history[0]               # 이동했음을 기록한다.
             self.history[0] = id
 
         elif head_only == 1:                                # 방향을 선택중일 경우에는
-            self.flicker_publisher.publish(pose.position)   # 화면에 출력한다.
+            self.publisher_flicker.publish(pose.position)   # 화면에 출력한다.
 
             pose.position.x = self.pose.position.x          # 방향각만 조정하여 선택을 돕는다.
             pose.position.y = self.pose.position.y
             pose.position.z = self.pose.position.z
-            self.target_publisher.publish(pose)             # 목표를 발행한다.
+            self.publisher_target.publish(pose)             # 목표를 발행한다.
 
     def explosion(self, event):
         """이동로봇이 노드에 도달했는지를 감시한다"""
         if (self.state == 0)&\
            (self.move == 0)&\
-           (self.history[0] == self.nearest[0])&\
-           (self.nearest[1] < 2*rospy.get_param('~goal_margin', 0.01)):
+           (self.history[0] == self.nearest[0]):
             self.state = 1      # 노드에 도달했다면 이동목표를 갱신한다.
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
 

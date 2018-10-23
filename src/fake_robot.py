@@ -13,68 +13,97 @@ from visualization_msgs.msg import MarkerArray, Marker
 class FAKE_ROBOT:
     """로봇의 자세와 상태를 임의로 생성한다"""
     def __init__(self):
+        self.init_param()
         self.state = 0          # 로봇의 상태: 0=정지, 1=이동중
-        self.pose = Pose()      # 로봇의 자세
-        self.target = Pose()    # 로봇의 목표 자세
-        self.step = rospy.get_param('~sim_cycle', 0.1)*rospy.get_param('~robot_velocity', 0.2)
+        self.lowspeed = 0.1
 
-        self.pose.position.x = rospy.get_param('~robot_x', 0.0)
-        self.pose.position.y = rospy.get_param('~robot_y', 0.0)
-        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~robot_th', 0.0)*math.pi/180)
+        rospy.Subscriber('robot/target', Pose, self.update_target)
+
+        self.publisher_state = rospy.Publisher('robot/state', Int32, queue_size=1)
+        self.publisher_pose = rospy.Publisher('robot/pose', Pose, queue_size=1)
+        self.publisher_marker = rospy.Publisher('robot/marker', MarkerArray, queue_size=1)
+
+        rospy.Timer(rospy.Duration(self.sim_cycle), self.navigation)
+
+    def init_param(self):
+        """파라미터를 초기화한다"""
+        self.pose = Pose()      # 로봇의 자세
+        self.pose.position.x = rospy.get_param('~pos_x', 0.0)
+        self.pose.position.y = rospy.get_param('~pos_y', 0.0)
+        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pos_th', 0.0)*math.pi/180)
         self.pose.orientation.x = q[0]
         self.pose.orientation.y = q[1]
         self.pose.orientation.z = q[2]
         self.pose.orientation.w = q[3]
 
-        self.target.position.x = rospy.get_param('~robot_x', 0.0)
-        self.target.position.y = rospy.get_param('~robot_y', 0.0)
-        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~robot_th', 0.0)*math.pi/180)
+        self.target = Pose()    # 로봇의 목표 자세
+        self.target.position.x = rospy.get_param('~pos_x', 0.0)
+        self.target.position.y = rospy.get_param('~pos_y', 0.0)
+        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pos_th', 0.0)*math.pi/180)
         self.target.orientation.x = q[0]
         self.target.orientation.y = q[1]
         self.target.orientation.z = q[2]
         self.target.orientation.w = q[3]
 
-        rospy.Subscriber('robot/target', Pose, self.update_target)
+        self.velocity_lin = rospy.get_param('~velocity_lin', 0.26)
+        self.velocity_ang = rospy.get_param('~velocity_ang', 1.82)
+        self.margin_lin = rospy.get_param('~margin_lin', 0.1)
+        self.margin_ang = rospy.get_param('~margin_ang', 0.1)
 
-        self.state_publisher = rospy.Publisher('robot/state', Int32, queue_size=1)
-        self.pose_publisher = rospy.Publisher('robot/pose', Pose, queue_size=1)
-        self.marker_publisher = rospy.Publisher('robot/marker', MarkerArray, queue_size=1)
-
-        rospy.Timer(rospy.Duration(rospy.get_param('~sim_cycle', 0.1)), self.fake_navigation)
+        self.sim_cycle = rospy.get_param('~sim_cycle', 0.1)
 
     def update_target(self, data):
         """목표 자세를 갱신한다"""
         self.target = data
 
-    def fake_navigation(self, event):
+    def navigation(self, event):
         """목표를 향해 이동한다"""
-        dx = self.target.position.x - self.pose.position.x
+        dx = self.target.position.x - self.pose.position.x  # 상대자세를 확인한다.
         dy = self.target.position.y - self.pose.position.y
-        if dx**2 + dy**2 > rospy.get_param('~goal_margin', 0.01):
-            self.state = 1          # 목표에 도달하지 못했다면 이동한다.
+        target_th = tf.transformations.euler_from_quaternion([self.target.orientation.x,
+                                                              self.target.orientation.y,
+                                                              self.target.orientation.z,
+                                                              self.target.orientation.w])[2]
+        robot_th = tf.transformations.euler_from_quaternion([self.pose.orientation.x,
+                                                             self.pose.orientation.y,
+                                                             self.pose.orientation.z,
+                                                             self.pose.orientation.w])[2]
+        dth = (target_th - robot_th + math.pi)%(2*math.pi) - math.pi
 
-            if dx != 0:             # 다음 위치를 계산한다.
-                th = math.atan2(dy, dx)
-            elif dy > 0:
-                th = math.pi/2
+        dd = math.sqrt(dx**2 + dy**2)
+        if abs(dth) > self.margin_ang:
+            self.state = 1
+            if dth > 0:
+                robot_th = robot_th + self.velocity_ang*self.sim_cycle
             else:
-                th = math.pi*3/2
-            self.pose.position.x = self.step*math.cos(th) + self.pose.position.x
-            self.pose.position.y = self.step*math.sin(th) + self.pose.position.y
-            q = tf.transformations.quaternion_from_euler(0, 0, th)
+                robot_th = robot_th - self.velocity_ang*self.sim_cycle
+            q = tf.transformations.quaternion_from_euler(0, 0, robot_th)
             self.pose.orientation.x = q[0]
             self.pose.orientation.y = q[1]
             self.pose.orientation.z = q[2]
             self.pose.orientation.w = q[3]
 
-        else:                       # 목표에 도달하면 대기한다.
-            self.state = 0
-            self.pose.orientation = self.target.orientation
+        elif dd > self.margin_lin:
+            self.state = 1
+            step_lin = self.velocity_lin*self.sim_cycle
+            self.pose.position.x = self.pose.position.x + step_lin*math.cos(robot_th)
+            self.pose.position.y = self.pose.position.y + step_lin*math.sin(robot_th)
 
-        try:
-            self.state_publisher.publish(self.state)
-            self.pose_publisher.publish(self.pose)
-        except: pass
+            if dth > 0:
+                robot_th = robot_th + self.lowspeed*self.velocity_ang*self.sim_cycle
+            else:
+                robot_th = robot_th - self.lowspeed*self.velocity_ang*self.sim_cycle
+            q = tf.transformations.quaternion_from_euler(0, 0, robot_th)
+            self.pose.orientation.x = q[0]
+            self.pose.orientation.y = q[1]
+            self.pose.orientation.z = q[2]
+            self.pose.orientation.w = q[3]
+
+        else:
+            self.state = 0
+
+        self.publisher_state.publish(self.state)
+        self.publisher_pose.publish(self.pose)
 
         self.visualize_robot()
 
@@ -129,7 +158,7 @@ class FAKE_ROBOT:
         target.color.a = 0.7
 
         try:
-            self.marker_publisher.publish([robot, target])
+            self.publisher_marker.publish([robot, target])
         except: pass
 
 
