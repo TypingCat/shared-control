@@ -94,6 +94,8 @@
         - 계획 관련 작업을 모두 하나의 함수에서 처리한다.
     - [x] 이동로봇 기준의 시야에서는 선택지가 확인되지 않는다.
         - 선택지를 정면에 놓고 이동 여부를 질문하도록 방침을 변경한다.
+    - [ ] 오래 기동하면 state machine이 무너진다.
+        - 주로 타이머에 문제가 발생한다.
 
 ### 3.2. Spatial information manager
 - Subscribed Topics
@@ -187,6 +189,10 @@
 - Published Topics
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+- Broadcasted Transformations
+    - `map`--`odom`, 이동로봇의 초기위치
+    - `odom`--`base_footprint`
 - Paramters
     - pos_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
     - pos_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
@@ -196,41 +202,37 @@
     - margin_lin (float, default: 0.1)
     - margin_ang (float, default: 0.1)
     - sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
+    - oscillation (float, default: 0.01)
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
 
 
 ## 4. 사용법
-### 4.1. 테스트
-본 예제에서는 `shared_control` 패키지의 기능을 확인할 수 있다. 테스트를 위해 이동로봇과 BCI에서 제공해야 할 메시지들을 임의로 생성하는 노드들이 함께 실행된다. `shared_control` 패키지를 다운로드하자.
-```
-$ cd ~/catkin_ws/src
-$ git clone https://github.com/Taemin0707/shared_control.git
-$ cd ~/catkin_ws
-$ catkin_make
-```
-
-준비가 끝나면 다음을 실행한다. Rviz 화면에서 진행상황을 확인하고 터미널로 입력하는 방식의 인터페이스를 제공한다. 터미널에서도 안내되겠지만 eyeblink 신호를 보내려면 `w`를, motorimagery 신호를 보내려면 `a`와 `d`를 사용한다: 이동에 긍정하면 `a`, 부정이면 `d`를 사용한다.
-```
-$ roslaunch shared_control simple_test.launch
-```
-화살표가 GVG를 따라 이동하는 것을 확인할 수 있다.
-
-### 4.2. 이동로봇 시뮬레이터 적용
-본 예제에서는 ROS Gazebo를 사용하여 이동로봇을 시뮬레이션한다(연산량이 많으므로 저사양 컴퓨터에서는 실행을 권하지 않는다). BCI 대신 키보드를 활용하는 것은 `4.1. 테스트`와 동일하다. 예제의 실행에는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 시뮬레이션에 필요한 패키지들을 다운로드한다.
+### 4.1. 설치
+본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 다운로드한다.
 ```
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/Taemin0707/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
+$ apt-get install python-pip
+$ pip install networkx
 $ cd ~/catkin_ws
 $ catkin_make
 ```
 
-설치를 모두 마쳤다면 다음 명령어로 예제를 실행할 수 있다.
+### 4.2. 테스트
+본 예제는 `shared_control` 패키지의 기능을 확인할 수 있다. 테스트를 위해 이동로봇과 BCI로부터의 메시지를 시뮬레이션한다. 키보드로 BCI 입력을 대체하고 rviz로 진행상황을 출력한다.
+```
+$ roslaunch shared_control simple_test.launch
+```
+이동로봇이 그래프를 따라 이동하는 것을 확인할 수 있다.
+
+### 4.3. 이동로봇 시뮬레이터
+본 예제는 `4.2`에서 gazebo 시뮬레이터가 추가된 형태이다. 실제 이동로봇을 위한 navigation 기능이 추가된다. 조작법은 동일하다.
 ```
 $ roslaunch shared_control gazebo_test.launch
 ```
-조작법은 `4.1. 테스트`와 같다. 로봇이 경로를 계획하여 이동하는 것을 확인할 수 있다.
+Navigation 성능을 체감할 수 있다.
 
 
 ## 5. 색인

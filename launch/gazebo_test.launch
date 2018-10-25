@@ -1,8 +1,10 @@
 <launch>
 
-  <include file="$(find shared_control)/launch/gazebo.launch"/>
-  <node pkg="shared_control" type="motion_manager.py" name="motion_manager"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
+  <include file="$(find shared_control)/launch/gazebo.launch"/>
+  <include file="$(find shared_control)/launch/navigation.launch"/>
   <include file="$(find shared_control)/launch/shared_control.launch"/>
 
   <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
