@@ -191,8 +191,8 @@
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
     - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Broadcasted Transformations
-    - `map`--`odom`, 이동로봇의 초기위치
-    - `odom`--`base_footprint`
+    - `map`~`odom`, 이동로봇의 초기위치
+    - `odom`~`base_footprint`
 - Paramters
     - pos_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
     - pos_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
@@ -205,11 +205,13 @@
     - oscillation (float, default: 0.01)
 - Issues
     - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
+    - [x] 좌표계가 발행되지 않아 rviz에서 이동로봇을 정상적으로 출력하지 못한다.
+        - 직접 좌표계를 계산하여 발행한다.
 
 
 ## 4. 사용법
 ### 4.1. 설치
-본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 다운로드한다.
+본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
 ```
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/Taemin0707/shared_control.git
