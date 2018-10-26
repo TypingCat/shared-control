@@ -36,11 +36,12 @@
 
 ### 1.4. 버전
 - `1.0.0` 노드 사이의 프로토콜 확립; 테스트 모듈 구현
-- `1.0.1` Task planner 구축
-- `1.0.2` Gazebo 연결
-- `1.0.3` Interface visualizer 구축
-- `1.0.4` 이동로봇 좌표계 구축
+    - `1.0.1` Task planner 구축
+    - `1.0.2` Gazebo 연결
+    - `1.0.3` Interface visualizer 구축
+    - `1.0.4` 이동로봇 좌표계 구축
 - `1.1.0` 실제 BCI 연결 시도
+    - `1.1.1` 평가 모듈 추가
 
 
 ## 2. 개발환경
@@ -223,6 +224,7 @@
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/Taemin0707/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
+$ git clone https://github.com/ZeroAnu/motion_manager.git
 $ apt-get install python-pip
 $ pip install networkx
 $ cd ~/catkin_ws
@@ -230,12 +232,16 @@ $ catkin_make
 ```
 
 ### 4.2. 실행
-본 패키지는 입력과 출력에 따른 실행방법들을 제공한다.
-| 명령어 | 입력 | 출력 |
-|-|-|-|
-| $ roslaunch shared_control key_sim.launch | keyboard | simple simulator |
-| $ roslaunch shared_control key_gzb.launch | keyboard | gazebo simulator |
-| $ roslaunch shared_control bci_sim.launch | BCI | simple simulator |
+본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
+- $ roslaunch shared_control key_sim.launch
+    - 입력: keyboard
+    - 출력: simple simulator
+- $ roslaunch shared_control key_gzb.launch
+    - 입력: keyboard
+    - 출력: gazebo simulator
+- $ roslaunch shared_control bci_sim.launch
+    - 입력: BCI
+    - 출력: simple simulator
 
 
 ## 5. 색인

@@ -78,10 +78,8 @@ class TASK_PLANNER:
                 #                  (self.dst.y - self.pose.y)**2)
                 # rospy.loginfo(dist)
                 # if dist > self.dst.z:
-                #     rospy.loginfo("제거")
+                #     rospy.loginfo("지나온 노드 제거")
                 #     options.remove(self.history[1])
-                # else:
-                #     rospy.loginfo("제거안함")
             except: pass
 
             if len(options) == 0:                           # 말단이라면 수면을 취한다.
