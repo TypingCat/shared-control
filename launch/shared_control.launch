@@ -18,6 +18,11 @@
 
   <node pkg="shared_control" type="evaluator.py" name="evaluator" output="screen">
     <param name="spin_cycle" value="0.1"/>
+    <param name="destination_margin" value="0.5"/>
+    <param name="destination_spawn_x_min" value="-5.0"/>
+    <param name="destination_spawn_x_max" value="5.0"/>
+    <param name="destination_spawn_y_min" value="-5.0"/>
+    <param name="destination_spawn_y_max" value="5.0"/>
   </node>
 
 </launch>

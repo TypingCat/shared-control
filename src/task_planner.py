@@ -20,6 +20,8 @@ class TASK_PLANNER:
         self.history = [-1, -1]     # 목표노드 기록
         self.questions = []         # 질문 목록
         self.state = 0              # 상태: -1=수면, 0=대기, 1=이벤트, 2=트리거
+        self.count = 0
+        self.dst = Point()
 
         rospy.wait_for_service('gvg/nearest')   # 서비스 초기화를 기다린다.
         rospy.wait_for_service('gvg/neighbors')
@@ -30,6 +32,7 @@ class TASK_PLANNER:
         rospy.Subscriber('bci/eyeblink', Int32, self.percussion)
         rospy.Subscriber('robot/state', Int32, self.update_state)
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
+        rospy.Subscriber('interface/destination', Point, self.update_dst)
 
         self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
         self.publisher_lighter = rospy.Publisher('interface/lighter', Point, queue_size=1)
@@ -71,6 +74,14 @@ class TASK_PLANNER:
             options = self.get_options(self.history[0])
             try:
                 options.remove(self.history[1])
+                # dist = math.sqrt((self.dst.x - self.pose.x)**2 +
+                #                  (self.dst.y - self.pose.y)**2)
+                # rospy.loginfo(dist)
+                # if dist > self.dst.z:
+                #     rospy.loginfo("제거")
+                #     options.remove(self.history[1])
+                # else:
+                #     rospy.loginfo("제거안함")
             except: pass
 
             if len(options) == 0:                           # 말단이라면 수면을 취한다.
@@ -165,8 +176,12 @@ class TASK_PLANNER:
         if (self.state == 0)&\
            (self.move == 0)&\
            (self.history[0] == self.nearest[0]):
-            self.state = 1      # 노드에 도달했다면 이동목표를 갱신한다.
-            rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
+
+            self.count = self.count + 1     # 노드에 도달했는지 신중히 확인한다.
+            if self.count > 4:
+                self.state = 1      # 노드에 도달했다면 이동목표를 갱신한다.
+                rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
+                self.count = 0
 
     def percussion(self, data):
         """트리거가 발생하면 이동목표를 갱신한다"""
@@ -194,6 +209,11 @@ class TASK_PLANNER:
             self.nearest[1] = (p.x-self.pose.position.x)**2 + (p.y-self.pose.position.y)**2
         except: pass
 
+    def update_dst(self, data):
+        """목적지를 갱신한다"""
+        self.dst.x = data.x
+        self.dst.y = data.y
+        self.dst.z = data.z
 
 if __name__ == '__main__':
     rospy.init_node('task_planner')
