@@ -24,9 +24,13 @@ class RosJoystick():
         # 5번째, 6번째: LB&RB키 관련 필요 없음,
         # 7번째: BACK, 8번째: START
         # 9번째: XBOX키, 10번째: 왼쪽 조이스틱 누름, 11번째: 오른쪽 조이스틱 누름
+
+        # 버튼 리스트에 정의한대로 토픽 발행
         button = Int32MultiArray()
         button.data = msg.buttons
         self.button_pub.publish(button)
+
+        # 왼쪽 조이스틱만 속도값으로 발행
         twist = Twist()
         twist.linear.x = 4 * msg.axes[1]
         twist.angular.z = 4 * msg.axes[0]
