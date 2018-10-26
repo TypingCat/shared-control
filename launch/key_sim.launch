@@ -18,9 +18,7 @@
 
   <include file="$(find shared_control)/launch/shared_control.launch"/>
 
-  <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen">
-    <param name="ip_addr" value="192.168.43.168"/>
-  </node>
+  <node pkg="shared_control" type="fake_bci.py" name="fake_bci" output="screen"/>
 
   <node pkg="rviz" type="rviz" name="rviz"
         args="-d $(find shared_control)/rviz/simple_test.rviz"/>
