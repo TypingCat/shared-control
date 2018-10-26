@@ -30,18 +30,18 @@ class FAKE_ROBOT:
     def init_param(self):
         """파라미터를 초기화한다"""
         self.pose = Pose()      # 로봇의 자세
-        self.pose.position.x = rospy.get_param('~pos_x', 0.0)
-        self.pose.position.y = rospy.get_param('~pos_y', 0.0)
-        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pos_th', 0.0)*math.pi/180)
+        self.pose.position.x = rospy.get_param('~pose_x', 0.0)
+        self.pose.position.y = rospy.get_param('~pose_y', 0.0)
+        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pose_th', 0.0)*math.pi/180)
         self.pose.orientation.x = q[0]
         self.pose.orientation.y = q[1]
         self.pose.orientation.z = q[2]
         self.pose.orientation.w = q[3]
 
         self.target = Pose()    # 로봇의 목표 자세
-        self.target.position.x = rospy.get_param('~pos_x', 0.0)
-        self.target.position.y = rospy.get_param('~pos_y', 0.0)
-        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pos_th', 0.0)*math.pi/180)
+        self.target.position.x = rospy.get_param('~pose_x', 0.0)
+        self.target.position.y = rospy.get_param('~pose_y', 0.0)
+        q = tf.transformations.quaternion_from_euler(0, 0, rospy.get_param('~pose_th', 0.0)*math.pi/180)
         self.target.orientation.x = q[0]
         self.target.orientation.y = q[1]
         self.target.orientation.z = q[2]

@@ -16,4 +16,8 @@
     <param name="publish_cycle" value="0.3"/>
   </node>
 
+  <node pkg="shared_control" type="evaluator.py" name="evaluator" output="screen">
+    <param name="spin_cycle" value="0.1"/>
+  </node>
+
 </launch>

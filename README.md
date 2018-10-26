@@ -23,7 +23,7 @@
 
 ### 1.3. 협업 구조
 - 김래현박사님팀
-    - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr)
+    - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr)
     - 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
     - 실무자: 노진홍(fini@kist.re.kr)
@@ -39,6 +39,8 @@
 - `1.0.1` Task planner 구축
 - `1.0.2` Gazebo 연결
 - `1.0.3` Interface visualizer 구축
+- `1.0.4` 이동로봇 좌표계 구축
+- `1.1.0` 실제 BCI 연결 시도
 
 
 ## 2. 개발환경
@@ -171,7 +173,11 @@
     - [ ] 토픽 `robot/marker` `bci/marker`는 노드 `fake_robot` `fake_bci`로부터 발행된다.
         - 즉 해당 토픽들은 테스트를 위한 마커이다. 실제 시스템과 연결할 때에는 해당 패키지에서 마커를 발행하거나, 그에 준하는 정보를 발행해 주어야 한다.
 
-### 3.6. (테스트 전용) Fake BCI
+### 3.6 Evaluator
+
+
+
+### 3.7. (테스트 전용) Fake BCI
 - Subscribed Topics
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
@@ -183,7 +189,7 @@
 - Issues
     - [ ] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
 
-### 3.7. (테스트 전용) Fake robot
+### 3.8. (테스트 전용) Fake robot
 - Subscribed Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
@@ -194,9 +200,9 @@
     - `map`~`odom`, 이동로봇의 초기위치
     - `odom`~`base_footprint`
 - Paramters
-    - pos_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
-    - pos_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
-    - pos_th (float, default: 0.0), 이동로봇의 방향각 초기값
+    - pose_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
+    - pose_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
+    - pose_th (float, default: 0.0), 이동로봇의 방향각 초기값
     - velocity_lin (float, default: 0.26), 이동로봇의 선속도
     - velocity_ang (float, default: 1.82), 이동로봇의 각속도
     - margin_lin (float, default: 0.1)
@@ -222,19 +228,13 @@ $ cd ~/catkin_ws
 $ catkin_make
 ```
 
-### 4.2. 테스트
-본 예제는 `shared_control` 패키지의 기능을 확인할 수 있다. 테스트를 위해 이동로봇과 BCI로부터의 메시지를 시뮬레이션한다. 키보드로 BCI 입력을 대체하고 rviz로 진행상황을 출력한다.
-```
-$ roslaunch shared_control simple_test.launch
-```
-이동로봇이 그래프를 따라 이동하는 것을 확인할 수 있다.
-
-### 4.3. 이동로봇 시뮬레이터
-본 예제는 `4.2`에서 gazebo 시뮬레이터가 추가된 형태이다. 실제 이동로봇을 위한 navigation 기능이 추가된다. 조작법은 동일하다.
-```
-$ roslaunch shared_control gazebo_test.launch
-```
-Navigation 성능을 체감할 수 있다.
+### 4.2. 실행
+본 패키지는 입력과 출력에 따른 실행방법들을 제공한다.
+| 명령어 | 입력 | 출력 |
+|-|-|-|
+| $ roslaunch shared_control key_sim.launch | keyboard | simple simulator |
+| $ roslaunch shared_control key_gzb.launch | keyboard | gazebo simulator |
+| $ roslaunch shared_control bci_sim.launch | BCI | simple simulator |
 
 
 ## 5. 색인

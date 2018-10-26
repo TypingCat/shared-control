@@ -21,7 +21,7 @@ class TASK_PLANNER:
         self.questions = []         # 질문 목록
         self.state = 0              # 상태: -1=수면, 0=대기, 1=이벤트, 2=트리거
 
-        rospy.wait_for_service('gvg/nearest')   # 초기화를 기다린다.
+        rospy.wait_for_service('gvg/nearest')   # 서비스 초기화를 기다린다.
         rospy.wait_for_service('gvg/neighbors')
         rospy.wait_for_service('gvg/node')
         rospy.wait_for_service('bci/motorimagery')

@@ -38,34 +38,6 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
-    - Class: rviz/Group
-      Displays:
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /interface
-          Name: GVG
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /robot/marker
-          Name: Robot
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: false
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /interface
-          Name: Interface
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-      Enabled: true
-      Name: Shared control
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
@@ -141,6 +113,34 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /interface
+          Name: GVG
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: false
+          Marker Topic: /robot/marker
+          Name: Robot
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /interface
+          Name: Interface
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Shared control
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -166,7 +166,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 12.2124758
+      Distance: 15.7275829
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1

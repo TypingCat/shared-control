@@ -1,0 +1,29 @@
+<launch>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
+  <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
+
+  <node pkg="shared_control" type="fake_robot.py" name="fake_robot" output="screen">
+    <param name="pose_x" value="0.8"/>
+    <param name="pose_y" value="-1.2"/>
+    <param name="pose_th" value="87"/>
+    <param name="velocity_lin" value="0.26"/>
+    <param name="velocity_ang" value="1.82"/>
+    <param name="margin_lin" value="0.1"/>
+    <param name="margin_ang" value="0.1"/>
+    <param name="sim_cycle" value="0.1"/>
+    <param name="oscillation" value="0.01"/>
+  </node>
+
+  <include file="$(find shared_control)/launch/shared_control.launch"/>
+
+  <node pkg="shared_control" type="bci.py" name="bci" output="screen">
+    <param name="address_ip" value="192.168.43.168"/>
+    <param name="address_port" value="8524"/>
+  </node>
+
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find shared_control)/rviz/simple_test.rviz"/>
+
+</launch>
