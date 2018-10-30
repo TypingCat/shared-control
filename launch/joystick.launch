@@ -1,0 +1,9 @@
+<launch>
+
+  <node pkg="joy" type="joy_node" name="joy_node"/>
+  <node pkg="shared_control" type="joystick.py" name="joystick" output="screen">
+    <param name="velocity_lin" value="0.26"/>
+    <param name="velocity_ang" value="1.82"/>
+  </node>
+
+</launch>

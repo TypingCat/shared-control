@@ -15,7 +15,7 @@ class INTERFACE_VISUALIZER:
         self.gvg_node = Marker()
         self.gvg_edge = Marker()
         self.marker_point = Point()
-        self.marker_state = 0           # -1=비활성, 0=활성, else=점멸
+        self.marker_state = -1          # -1=비활성, 0=활성, else=점멸
         self.dst = Point()
         self.pose = Pose()
 
@@ -85,7 +85,7 @@ class INTERFACE_VISUALIZER:
             marker.pose.position.y = self.marker_point.y
             marker.pose.position.z = 0.5
             marker.color.r = 1.0
-            marker.color.a = 1.0
+            marker.color.a = 0.5
             interf.append(marker)
 
         elif self.marker_state > 0:         # 비활성화 상태일 경우 원기둥마커가 점멸하도록 설정한다.
@@ -103,9 +103,9 @@ class INTERFACE_VISUALIZER:
             marker.pose.position.z = 0.5
             marker.color.r = 1.0
             if self.marker_state%2 == 1:
-                marker.color.a = 1.0
-            else:
                 marker.color.a = 0.5
+            else:
+                marker.color.a = 0.2
             interf.append(marker)
             self.marker_state = self.marker_state + 1
 

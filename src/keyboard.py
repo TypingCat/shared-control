@@ -14,7 +14,7 @@ from visualization_msgs.msg import MarkerArray, Marker
 from shared_control.srv import MotorImagery, Node
 
 
-class FAKE_BCI:
+class KEYBOARD:
     """BCI를 키보드로 대체한다"""
     def __init__(self):
         self.key = ''
@@ -73,6 +73,6 @@ class FAKE_BCI:
 
 
 if __name__ == '__main__':
-    rospy.init_node('fake_bci')
-    fake_bci = FAKE_BCI()
+    rospy.init_node('keyboard')
+    keyboard = KEYBOARD()
     rospy.spin()

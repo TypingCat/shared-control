@@ -11,7 +11,7 @@ from std_msgs.msg import Int32
 from visualization_msgs.msg import MarkerArray, Marker
 
 
-class FAKE_ROBOT:
+class FAKE_ROBOT_POS:
     """로봇의 자세와 상태를 임의로 생성한다"""
     def __init__(self):
         self.init_param()
@@ -21,7 +21,6 @@ class FAKE_ROBOT:
 
         self.publisher_state = rospy.Publisher('robot/state', Int32, queue_size=1)
         self.publisher_pose = rospy.Publisher('robot/pose', Pose, queue_size=1)
-        self.publisher_marker = rospy.Publisher('robot/marker', MarkerArray, queue_size=1)
 
         self.broadcaster = tf.TransformBroadcaster()
 
@@ -66,7 +65,7 @@ class FAKE_ROBOT:
         self.init_tf_inv = tf.transformations.inverse_matrix(init_tf)
 
     def update_target(self, data):
-        """목표 자세를 갱신한다"""
+        """목표를 갱신한다"""
         self.target = data
 
     def navigation(self, event):
@@ -119,7 +118,6 @@ class FAKE_ROBOT:
         self.publisher_state.publish(self.state)            # 계산된 자세를 발행한다.
         self.publisher_pose.publish(self.pose)
         self.broadcast_tf(self.pose)
-        self.visualize_robot()
 
     def broadcast_tf(self, pose):
         """좌표계를 발행한다"""
@@ -139,62 +137,8 @@ class FAKE_ROBOT:
         self.broadcaster.sendTransform(self.init_pos, self.init_ang, rospy.Time.now(), "odom", "map")
         self.broadcaster.sendTransform(t, tf.transformations.quaternion_from_euler(a[0], a[1], a[2]), rospy.Time.now(), "base_footprint", "odom")
 
-    def visualize_robot(self):
-        """로봇의 자세를 화살표로 시각화한다"""
-        robot = Marker()        # 로봇 마커를 생성한다.
-        robot.header.stamp = rospy.Time.now()
-        robot.header.frame_id = 'map'
-        robot.id = 0
-        robot.type = Marker.ARROW
-        robot.action = Marker.ADD
-        robot.scale.x = 0.05
-        robot.scale.y = 0.1
-        p1 = Point()
-        p1.x = self.pose.position.x
-        p1.y = self.pose.position.y
-        p1.z = 0.1
-        p2 = Point()
-        th = tf.transformations.euler_from_quaternion([self.pose.orientation.x,
-                                                       self.pose.orientation.y,
-                                                       self.pose.orientation.z,
-                                                       self.pose.orientation.w])[2]
-        p2.x = self.pose.position.x + 0.2*math.cos(th)
-        p2.y = self.pose.position.y + 0.2*math.sin(th)
-        p2.z = 0.1
-        robot.points = [p1, p2]
-        robot.color.r = 1.0
-        robot.color.a = 0.7
-
-        target = Marker()       # 타겟 마커를 생성한다.
-        target.header.stamp = rospy.Time.now()
-        target.header.frame_id = 'map'
-        target.id = 1
-        target.type = Marker.ARROW
-        target.action = Marker.ADD
-        target.scale.x = 0.05
-        target.scale.y = 0.1
-        p1 = Point()
-        p1.x = self.target.position.x
-        p1.y = self.target.position.y
-        p1.z = 0.1
-        p2 = Point()
-        th = tf.transformations.euler_from_quaternion([self.target.orientation.x,
-                                                       self.target.orientation.y,
-                                                       self.target.orientation.z,
-                                                       self.target.orientation.w])[2]
-        p2.x = self.target.position.x + 0.2*math.cos(th)
-        p2.y = self.target.position.y + 0.2*math.sin(th)
-        p2.z = 0.1
-        target.points = [p1, p2]
-        target.color.g = 1.0
-        target.color.a = 0.7
-
-        try:
-            self.publisher_marker.publish([robot, target])
-        except: pass
-
 
 if __name__ == '__main__':
-    rospy.init_node('fake_robot')
-    fake_robot = FAKE_ROBOT()
+    rospy.init_node('fake_robot_pos')
+    fake_robot_pos = FAKE_ROBOT_POS()
     rospy.spin()

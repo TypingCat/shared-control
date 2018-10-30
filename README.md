@@ -42,6 +42,7 @@
     - `1.0.4` 이동로봇 좌표계 구축
 - `1.1.0` 실제 BCI 연결 시도
     - `1.1.1` 평가 모듈 추가
+    - `1.1.2` Joystick 추가
 
 
 ## 2. 개발환경
@@ -56,6 +57,7 @@
 ### 2.2. 하드웨어
 - Turtlebot3 Waffle
     - Gazebo 시뮬레이션
+- XBOX360 무선 컨트롤러 + 패드 리시버
 
 
 ## 3. 기능
@@ -64,8 +66,12 @@
     - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    - interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
 - Published Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    - interface/lighter ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+    - interface/flicker ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+    - interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 - Paramters
     - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
     - planning_cycle (float, default: 0.5), 계획의 단위연산주기
@@ -79,8 +85,9 @@
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
         - 아직은 현재위치가 속한 GVG 엣지를 판단할 수 없다.
         - 차선책으로써 가장 가까운 노드로 이동한다.
-    - [ ] 테스트를 위해 `fake_bci` `fake_robot`을 운용한다.
-        - 이동로봇의 좌표계는 발행하지 않는다.
+    - [x] 테스트를 위해 `fake_bci` `fake_robot`을 운용한다.
+        - ~~이동로봇의 좌표계는 발행하지 않는다.~~
+        - 이동로봇의 좌표계를 방송한다.
         - BCI의 정확도는 반영하지 않는다.
     - [x] Motor imagery 문답 시 다른 기능들이 정지한다.
         - 일회성 타이머로 연산을 분리한다.
@@ -98,8 +105,8 @@
     - [x] 이동로봇 기준의 시야에서는 선택지가 확인되지 않는다.
         - 선택지를 정면에 놓고 이동 여부를 질문하도록 방침을 변경한다.
     - [ ] 오래 기동하면 state machine이 무너진다.
-        - 주로 타이머에 문제가 발생한다.
-        - 뒤늦게 갱신되는 상태로 인해 노드도달여부 인지가 불안정했었다. 노드도달여부 몇차례 확인함으로써 `shared_control: explosion` 함수는 안정화하였다.
+        - 주로 타이머에서 문제가 발생한다.
+        - 뒤늦게 갱신되는 상태로 인해 노드도달여부 인지가 불안정했었다. 노드도달여부를 몇차례 연속으로 확인함으로써 `shared_control: explosion` 함수를 안정화시켰다.
 
 ### 3.2. Spatial information manager
 - Subscribed Topics
@@ -176,8 +183,12 @@
         - 즉 해당 토픽들은 테스트를 위한 마커이다. 실제 시스템과 연결할 때에는 해당 패키지에서 마커를 발행하거나, 그에 준하는 정보를 발행해 주어야 한다.
 
 ### 3.6 Evaluator
-
-
+- Subscribed Topics
+    - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
+    - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+    - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+- Published Topics
+    - interface/destination
 
 ### 3.7. (테스트 전용) Fake BCI
 - Subscribed Topics
@@ -194,6 +205,7 @@
 ### 3.8. (테스트 전용) Fake robot
 - Subscribed Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    - cmd_vel ([geometry_msgs/Twist](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Twist.html))
 - Published Topics
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
@@ -225,11 +237,17 @@ $ cd ~/catkin_ws/src
 $ git clone https://github.com/Taemin0707/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
 $ git clone https://github.com/ZeroAnu/motion_manager.git
-$ apt-get install python-pip
+$ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
 $ pip install networkx
 $ cd ~/catkin_ws
 $ catkin_make
 ```
+
+XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`를 같이 누르면 된다. 그리고 다음을 실행한다.
+```
+$ sudo xboxdrv
+```
+
 
 ### 4.2. 실행
 본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
@@ -239,6 +257,9 @@ $ catkin_make
 - $ roslaunch shared_control key_gzb.launch
     - 입력: keyboard
     - 출력: gazebo simulator
+- $ roslaunch shared_control joy_sim.launch
+    - 입력: joystick
+    - 출력: simple simulator
 - $ roslaunch shared_control bci_sim.launch
     - 입력: BCI
     - 출력: simple simulator
