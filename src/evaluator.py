@@ -19,13 +19,21 @@ class EVALUATOR:
         self.state = -1                         # 상태: -1=초기화, 0=대기, 1=시작, 2=평가
         self.move = 0
         self.pose = Pose()
+        self.dst_num = 0                                                # 목적지 도달횟수
         self.dst_point = Point()                                        # 목적지 위치
         self.dst_margin = rospy.get_param('~destination_margin', 0.5)   # 목적지 반경
+
+        self.dst_list = []                      # 목적지 리스트
+        list_x = rospy.get_param('~destination_list_x', [])
+        list_y = rospy.get_param('~destination_list_y', [])
+        for i in range(0, len(list_x)):
+            self.dst_list.append((list_x[i], list_y[i]))
+
         self.dst_x_min = rospy.get_param('~destination_spawn_x_min', -5.0)
         self.dst_x_max = rospy.get_param('~destination_spawn_x_max', 5.0)
         self.dst_y_min = rospy.get_param('~destination_spawn_y_min', -5.0)
         self.dst_y_max = rospy.get_param('~destination_spawn_y_max', 5.0)
-        self.time_start = 0.0
+        self.time_start = rospy.get_time()
 
         rospy.wait_for_service('gvg/nearest')   # 서비스 초기화를 기다린다.
         rospy.wait_for_service('gvg/node')
@@ -50,10 +58,9 @@ class EVALUATOR:
         """주행을 평가한다"""
         if self.state == 0:                                 # 초기화중일 경우,
             try:                                            # 대기를 확인하고 다음으로 넘어간다.
-                self.dst_point = self.select_destination().point
-                if self.move == 0:
-                    rospy.loginfo("목적지: [%f, %f]"%(self.dst_point.x, self.dst_point.y))
-                    self.state = 1
+                self.dst_point = self.select_destination()
+                rospy.loginfo("목적지: [%f, %f]"%(self.dst_point.x, self.dst_point.y))
+                self.state = 1
             except: pass
 
         elif self.state == 1:                               # 대기상태일 경우,
@@ -62,11 +69,14 @@ class EVALUATOR:
                 self.state = 2
 
         elif self.state == 2:                               # 이동중일 경우,
-            dist = math.sqrt((self.dst_point.x - self.pose.position.x)**2 +
-                             (self.dst_point.y - self.pose.position.y)**2)
-            if dist < self.dst_margin:                      # 목적지에 도달했는지 검사한다.
-                rospy.loginfo('소요시간: %f초'%(rospy.get_time()-self.time_start))
+            dst = math.sqrt((self.dst_point.x - self.pose.position.x)**2 +
+                            (self.dst_point.y - self.pose.position.y)**2)
+
+            if dst < self.dst_margin:                       # 목적지에 도달했는지 검사한다.
+                self.dst_num = self.dst_num + 1
                 self.state = 0
+
+                rospy.loginfo('[%d] 소요시간: %f초'%(self.dst_num, rospy.get_time()-self.time_start))
 
         p = Point()                                         # 목적지를 발행한다.
         p.x = self.dst_point.x
@@ -75,16 +85,23 @@ class EVALUATOR:
         self.publisher_dst.publish(p)
 
     def select_destination(self):
-        """목적지를 무작위로 선택한다"""
-        rand = Point()          # 지도로부터 무작위 위치를 선정한다.
-        rand.x = (self.dst_x_max - self.dst_x_min)*random.random() + self.dst_x_min
-        rand.y = (self.dst_y_max - self.dst_y_min)*random.random() + self.dst_y_min
-        nearest = -1            # 가장 가까운 노드를 검색한다.
-        while nearest == -1:
-            nearest = self.get_nearest(rand).id
-            rospy.sleep(0.1)
+        """목적지를 선택한다"""
+        p = Point()                 # 지도로부터 위치를 선정한다.
+        if len(self.dst_list)==0:   # 리스트가 주어지지 않았다면 무작위로 선정한다.
+            p.x = (self.dst_x_max - self.dst_x_min)*random.random() + self.dst_x_min
+            p.y = (self.dst_y_max - self.dst_y_min)*random.random() + self.dst_y_min
+            nearest = -1
+            while nearest == -1:
+                nearest = self.get_nearest(p).id
+                rospy.sleep(0.1)
+            p = self.get_node(nearest).point
 
-        return self.get_node(nearest)
+        else:
+            idx = self.dst_num%len(self.dst_list)
+            p.x = self.dst_list[idx][0]
+            p.y = self.dst_list[idx][1]
+
+        return p
 
     def update_state(self, data):
         """로봇의 상태를 갱신한다"""

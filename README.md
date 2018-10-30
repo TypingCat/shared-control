@@ -57,7 +57,7 @@
 ### 2.2. 하드웨어
 - Turtlebot3 Waffle
     - Gazebo 시뮬레이션
-- XBOX360 무선 컨트롤러 + 패드 리시버
+- XBOX360 무선 컨트롤러
 
 
 ## 3. 기능
@@ -245,6 +245,7 @@ $ catkin_make
 
 XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`를 같이 누르면 된다. 그리고 다음을 실행한다.
 ```
+$ sudo rmmod xpad
 $ sudo xboxdrv
 ```
 
@@ -260,6 +261,9 @@ $ sudo xboxdrv
 - $ roslaunch shared_control joy_sim.launch
     - 입력: joystick
     - 출력: simple simulator
+- $ roslaunch shared_control joy_gzb.launch
+    - 입력: joystick
+    - 출력: gazebo simulator
 - $ roslaunch shared_control bci_sim.launch
     - 입력: BCI
     - 출력: simple simulator

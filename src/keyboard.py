@@ -22,14 +22,14 @@ class KEYBOARD:
         self.key_watcher = rospy.Timer(rospy.Duration(0.1), self.spin)
         self.pose = Pose()
 
+        rospy.wait_for_service('gvg/node')
+        self.get_node = rospy.ServiceProxy('gvg/node', Node)
+
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
         self.publisher_eyeblink = rospy.Publisher('bci/eyeblink', Int32, queue_size=1)
 
         rospy.Service('bci/motorimagery', MotorImagery, self.motorimagery)
-
-        rospy.wait_for_service('gvg/node')
-        self.get_node = rospy.ServiceProxy('gvg/node', Node)
 
     def __del__(self):
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
@@ -52,8 +52,6 @@ class KEYBOARD:
 
     def motorimagery(self, request):
         """Motor imagery를 대신하여 binary question에 답변한다"""
-        rospy.loginfo('이동할까요? 긍정은 a, 부정은 d: ')
-
         answer = -1
         key = 'fini'
         while (key != 'a')&(key != 'd'):    # 답변이 들어올 때까지 키를 확인한다.

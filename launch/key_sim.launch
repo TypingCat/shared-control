@@ -5,12 +5,15 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
   <node pkg="shared_control" type="fake_robot_pos.py" name="fake_robot_pos" output="screen">
-    <param name="pose_x" value="0.8"/>
-    <param name="pose_y" value="-1.2"/>
-    <param name="pose_th" value="87"/>
+    <param name="pose_x" value="-0.54"/>
+    <param name="pose_y" value="-3.64"/>
+    <param name="pose_th" value="90"/>
     <param name="velocity_lin" value="0.26"/>
     <param name="velocity_ang" value="1.82"/>
+    <param name="margin_lin" value="0.1"/>
+    <param name="margin_ang" value="0.1"/>
     <param name="sim_cycle" value="0.1"/>
+    <param name="oscillation" value="0.01"/>
   </node>
 
   <include file="$(find shared_control)/launch/shared_control.launch"/>

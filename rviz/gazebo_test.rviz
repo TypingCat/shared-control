@@ -28,7 +28,7 @@ Panels:
 Visualization Manager:
   Class: ""
   Displays:
-    - Alpha: 0.699999988
+    - Alpha: 1
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false

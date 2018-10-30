@@ -48,7 +48,7 @@ class TASK_PLANNER:
         rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.explosion)
 
         rospy.loginfo('')
-        rospy.loginfo('준비되었습니다. Eyeblink는 \'w\', motorimagery는 \'a(긍정), d(부정)\'입니다.')
+        rospy.loginfo('준비되었습니다. Eyeblink는 \'w(기동)\', motorimagery는 \'a(긍정), d(부정)\'입니다.')
 
     def mount_gvg(self):
         """이동로봇을 GVG 위로 이동시킨다"""
@@ -116,7 +116,6 @@ class TASK_PLANNER:
         if answer > -1:                 # 답변을 얻었다면,
             self.state = 0
             self.send_target(answer)    # 이동한다.
-            rospy.loginfo('%d로 이동합니다.'%answer)
 
         elif answer == -1:              # 답변이 없었다면,
             self.state = 0              # 대기한다.
