@@ -18,15 +18,17 @@ class SPATIAL_INFO_MANAGER:
     def __init__(self):
         self.map = OccupancyGrid()
         self.gvd = OccupancyGrid()
-        self.gvg = networkx.Graph()
+        self.graph = networkx.Graph()
 
         rospy.Subscriber('map', OccupancyGrid, self.load_map)
 
-        self.publisher = rospy.Publisher('gvg', MarkerArray, queue_size=1)
+        self.publisher = rospy.Publisher('interface/graph', MarkerArray, queue_size=1)
 
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
+
+        rospy.Timer(rospy.Duration(0.3), self.publish)
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""
@@ -34,19 +36,38 @@ class SPATIAL_INFO_MANAGER:
         self.map.info = data.info
         self.map.data = numpy.array(data.data)
 
-        gvd = self.calc_gvd(self.map.data.reshape(data.info.height,data.info.width),
-                            rospy.get_param('~gvd_PM', 10.0),       # 지도의 GVD를 계산한다.
-                            rospy.get_param('~gvd_BM', 0.187/self.map.info.resolution))
-        self.gvd.header = data.header
-        self.gvd.info = data.info
-        self.gvd.data = gvd.flatten()
+        if len(rospy.get_param('~custom_edge_list_x1', [])) != 0:   # 엣지리스트로 그래프를 구축한다.
+            self.graph = self.create_graph(rospy.get_param('~custom_edge_list_x1', []),
+                                           rospy.get_param('~custom_edge_list_y1', []),
+                                           rospy.get_param('~custom_edge_list_x2', []),
+                                           rospy.get_param('~custom_edge_list_y2', []),
+                                           data.info.width)
 
-        footprint = self.draw_footprint(gvd)
-        gvg = self.extract_gvg(footprint)
-        self.gvg = self.pruning(gvg,                                # GVD로부터 GVG를 추출한다.
-                                rospy.get_param('~gvg_minimum_path_distance', 0.3)**2)
+        else:                                                       # 지도의 GVD를 계산한다.
+            gvd = self.calc_gvd(self.map.data.reshape(data.info.height, data.info.width),
+                                rospy.get_param('~gvd_PM', 10.0),
+                                rospy.get_param('~gvd_BM', 0.187/self.map.info.resolution))
+            self.gvd.header = data.header
+            self.gvd.info = data.info
+            self.gvd.data = gvd.flatten()
 
-        self.publish(gvg)                                           # GVG를 발행한다.
+            footprint = self.draw_footprint(gvd)
+            gvg = self.extract_gvg(footprint)
+            self.graph = self.pruning(gvg, rospy.get_param('~gvg_minimum_path_distance', 0.3)**2)
+
+    def create_graph(self, X1, Y1, X2, Y2, w):
+        """주어진 좌표로 그래프를 구성한다"""
+        g = networkx.Graph()
+        res = 100
+        for i in range(0, len(X1)):
+            idx1 = int((res*Y1[i])*w + (res*X1[i]))
+            idx2 = int((res*Y2[i])*w + (res*X2[i]))
+
+            g.add_edge(idx1, idx2)      # (x1, y1)--(x2, y2) 엣지를 구축한다.
+            g.nodes[idx1]['pos'] = [X1[i], Y1[i]]
+            g.nodes[idx2]['pos'] = [X2[i], Y2[i]]
+
+        return g
 
     def calc_gvd(self, data, PM, BM):
         """Brushfire-based AGVD calculation"""
@@ -255,7 +276,7 @@ class SPATIAL_INFO_MANAGER:
 
         return gvg
 
-    def publish(self, gvg):
+    def publish(self, event):
         """GVG를 출력한다"""
         gvg_node = Marker()                             # GVG 노드 마커를 생성한다.
         gvg_node.header.stamp = rospy.Time.now()
@@ -267,14 +288,14 @@ class SPATIAL_INFO_MANAGER:
         gvg_node.scale.y = 0.5*self.map.info.resolution
         gvg_node.points = []
         gvg_node.colors = []
-        for n in gvg.nodes:
+        for n in self.graph.nodes:
             c = ColorRGBA()
             c.a = 0.5
             c.r = 1
             gvg_node.colors.append(c)
             p = Point()
-            p.x = gvg.nodes[n]['pos'][0]
-            p.y = gvg.nodes[n]['pos'][1]
+            p.x = self.graph.nodes[n]['pos'][0]
+            p.y = self.graph.nodes[n]['pos'][1]
             p.z = 0.1
             gvg_node.points.append(p)
 
@@ -287,15 +308,15 @@ class SPATIAL_INFO_MANAGER:
         gvg_edge.scale.x = 0.2*self.map.info.resolution
         gvg_edge.points = []
         gvg_edge.color.a = 0.7
-        for e in gvg.edges:
+        for e in self.graph.edges:
             p1 = Point()
-            p1.x = gvg.nodes[e[0]]['pos'][0]
-            p1.y = gvg.nodes[e[0]]['pos'][1]
+            p1.x = self.graph.nodes[e[0]]['pos'][0]
+            p1.y = self.graph.nodes[e[0]]['pos'][1]
             p1.z = 0.1
             gvg_edge.points.append(p1)
             p2 = Point()
-            p2.x = gvg.nodes[e[1]]['pos'][0]
-            p2.y = gvg.nodes[e[1]]['pos'][1]
+            p2.x = self.graph.nodes[e[1]]['pos'][0]
+            p2.y = self.graph.nodes[e[1]]['pos'][1]
             p2.z = 0.1
             gvg_edge.points.append(p2)
 
@@ -305,9 +326,9 @@ class SPATIAL_INFO_MANAGER:
         """입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다"""
         try:
             nearest = [-1, 2147483647]
-            for n in self.gvg.nodes:
-                dist2 = (request.point.x - self.gvg.nodes[n]['pos'][0])**2 +\
-                        (request.point.y - self.gvg.nodes[n]['pos'][1])**2
+            for n in self.graph.nodes:
+                dist2 = (request.point.x - self.graph.nodes[n]['pos'][0])**2 +\
+                        (request.point.y - self.graph.nodes[n]['pos'][1])**2
                 if dist2 < nearest[1]:
                     nearest = [n, dist2]
             return {'id': nearest[0]}
@@ -319,7 +340,7 @@ class SPATIAL_INFO_MANAGER:
     def get_neighbors(self, request):
         """입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다"""
         try:
-            return {'ids': list(self.gvg.neighbors(request.id))}
+            return {'ids': list(self.graph.neighbors(request.id))}
 
         except:
             rospy.loginfo('서비스 get_neighbors 실패')
@@ -329,8 +350,8 @@ class SPATIAL_INFO_MANAGER:
         """입력한 id를 갖는 노드의 속성을 반환한다"""
         p = Point()
         try:
-            p.x = self.gvg.nodes[request.id]['pos'][0]
-            p.y = self.gvg.nodes[request.id]['pos'][1]
+            p.x = self.graph.nodes[request.id]['pos'][0]
+            p.y = self.graph.nodes[request.id]['pos'][1]
             p.z = 0
         except:
             rospy.loginfo('서비스 get_node 실패')

@@ -5,6 +5,10 @@
     <param name="gvd_PM" value="10.0"/>
     <param name="gvd_BM" value="3.74"/>
     <param name="gvg_minimum_path_distance" value="0.1"/>
+    <rosparam param="custom_edge_list_x1"> [-4.8, 4.2, 1.4, 1.4, 1.4, 3.4, 6.2, 0.6, 0.6,-5.4,-3.4,-3.4,-3.4] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [-4.4,-4.4,-0.6,-0.6,-0.6, 1.8, 1.6, 0.0, 0.0,-0.2, 1.8, 1.8, 1.8] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [ 1.2, 1.2, 1.2, 0.6, 5.0, 5.0, 5.0, 1.4,-2.6,-2.6,-2.6,-1.8,-4.6] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [-2.2,-2.2,-2.2, 0.0, 0.0, 0.0, 0.0, 3.2, 0.4, 0.4, 0.4, 2.8, 3.0] </rosparam>
   </node>
 
   <node pkg="shared_control" type="task_planner.py" name="task_planner" output="screen">
@@ -19,8 +23,8 @@
   <node pkg="shared_control" type="evaluator.py" name="evaluator" output="screen">
     <param name="spin_cycle" value="0.1"/>
     <param name="destination_margin" value="0.15"/>
-    <rosparam param="destination_list_x"> [0.37, 1.29, -2.76, -7.58, -3.97] </rosparam>
-    <rosparam param="destination_list_y"> [-2.76, 0.06, 0.44, 0.51, 2.68] </rosparam>
+    <!-- <rosparam param="destination_list_x"> [0.37, 1.29, -2.76, -7.58, -3.97] </rosparam>
+    <rosparam param="destination_list_y"> [-2.76, 0.06, 0.44, 0.51, 2.68] </rosparam> -->
     <param name="destination_spawn_x_min" value="-5.0"/>
     <param name="destination_spawn_x_max" value="5.0"/>
     <param name="destination_spawn_y_min" value="-5.0"/>

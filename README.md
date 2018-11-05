@@ -26,7 +26,7 @@
     - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr)
     - 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
-    - 실무자: 노진홍(fini@kist.re.kr)
+    - 실무자: 노진홍(fini@kist.re.kr), 최태민(choitm0707@kist.re.kr)
     - 역할: BCI-이동로봇을 위한 공유제어를 설계한다.
 - 윤상석교수님팀
     - 실무자: 엄홍규(ehg2y@naver.com)
@@ -43,6 +43,7 @@
 - `1.1.0` 실제 BCI 연결 시도
     - `1.1.1` 평가 모듈 추가
     - `1.1.2` Joystick 추가
+    - `1.1.3` 그래프 수동작성기능 추가
 
 
 ## 2. 개발환경
@@ -112,7 +113,7 @@
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 - Published Topics
-    - gvg ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
+    - interface/graph ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Services
     - gvg/nearest (shared_control/Nearest), 입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다.
         - 입력: point ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
@@ -127,6 +128,10 @@
     - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
+    - custom_edge_list_x1 (float, default: []), GVG 대신 임의로 (x1, y1)--(x2, y2) 형태의 엣지를 생성한다. 센티미터 단위로 입력받는다.
+    - custom_edge_list_y1 (float, default: [])
+    - custom_edge_list_x2 (float, default: [])
+    - custom_edge_list_y2 (float, default: [])
 - Issues
     - [x] GVD에 불필요하게 두텁거나 끊어진 부분이 발생한다.
         - 지도에 따라 다르지만 파라미터를 조정하여 해결할 수 있다.
@@ -151,10 +156,11 @@
     - [x] GVG가 불안정하여 가끔 서비스가 실패한다.
         - 초기화 도중 혹은 잦은 서비스 요청에서 발생한다.
         - 예외처리를 추가하여 서비스에 실패했음을 알린다.
+    - [ ] 시연을 위해 GVG가 아닌 임의의 그래프가 필요하다.
+    - [ ] 마커 `interface/graph`를 본 패키지에서 임시로 출력한다. `interface_visualizer` 패키지로 옮겨야 한다.
 
 ### 3.3. Interface visualizer
 - Subscribed Topics
-    - gvg ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
     - interface/lighter ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
     - interface/flicker ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
     - interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))

@@ -7,12 +7,18 @@
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base">
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
-    <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
+    <!-- <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
     <rosparam file="$(find turtlebot3_navigation)/param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap"/>
     <rosparam file="$(find turtlebot3_navigation)/param/local_costmap_params.yaml" command="load"/>
     <rosparam file="$(find turtlebot3_navigation)/param/global_costmap_params.yaml" command="load"/>
     <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load"/>
-    <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
+    <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_waffle.yaml" command="load"/> -->
+    <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/param/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/param/move_base_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
   </node>
 
   <node pkg="shared_control" type="motion_manager.py" name="motion_manager"/>

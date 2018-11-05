@@ -19,7 +19,6 @@ class INTERFACE_VISUALIZER:
         self.dst = Point()
         self.pose = Pose()
 
-        rospy.Subscriber('gvg', MarkerArray, self.load_spatial_info)
         rospy.Subscriber('interface/lighter', Point, self.update_lighter)
         rospy.Subscriber('interface/flicker', Point, self.update_flicker)
         rospy.Subscriber('interface/douser', Int32, self.update_douser)
@@ -29,11 +28,6 @@ class INTERFACE_VISUALIZER:
         self.publisher = rospy.Publisher('interface', MarkerArray, queue_size=1)
 
         rospy.Timer(rospy.Duration(rospy.get_param('~publish_cycle', 0.3)), self.publish)
-
-    def load_spatial_info(self, data):
-        """공간정보를 불러온다"""
-        self.gvg_node = copy.deepcopy(data.markers[0])
-        self.gvg_edge = copy.deepcopy(data.markers[1])
 
     def update_lighter(self, data):
         """마커를 활성화한다"""
@@ -66,11 +60,6 @@ class INTERFACE_VISUALIZER:
     def publish(self, event):
         """마커를 발행한다"""
         interf = []
-        try:                                # GVG 마커를 추가한다.
-            interf.append(self.gvg_node)
-            interf.append(self.gvg_edge)
-        except: pass
-
         if self.marker_state == 0:
             marker = Marker()               # 활성화 상태일 경우 원기둥마커를 추가한다.
             marker.header.stamp = rospy.Time.now()
@@ -145,7 +134,6 @@ class INTERFACE_VISUALIZER:
         compass.color.g = 1.0
         compass.color.a = 0.5
         interf.append(compass)
-
 
         self.publisher.publish(interf)      # 마커를 발행한다.
 
