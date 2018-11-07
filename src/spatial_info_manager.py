@@ -41,7 +41,7 @@ class SPATIAL_INFO_MANAGER:
                                            rospy.get_param('~custom_edge_list_y1', []),
                                            rospy.get_param('~custom_edge_list_x2', []),
                                            rospy.get_param('~custom_edge_list_y2', []),
-                                           data.info.width)
+                                           data.info.width, data.info.height)
 
         else:                                                       # 지도의 GVD를 계산한다.
             gvd = self.calc_gvd(self.map.data.reshape(data.info.height, data.info.width),
@@ -55,13 +55,13 @@ class SPATIAL_INFO_MANAGER:
             gvg = self.extract_gvg(footprint)
             self.graph = self.pruning(gvg, rospy.get_param('~gvg_minimum_path_distance', 0.3)**2)
 
-    def create_graph(self, X1, Y1, X2, Y2, w):
+    def create_graph(self, X1, Y1, X2, Y2, width, height):
         """주어진 좌표로 그래프를 구성한다"""
         g = networkx.Graph()
         res = 100
-        for i in range(0, len(X1)):
-            idx1 = int((res*Y1[i])*w + (res*X1[i]))
-            idx2 = int((res*Y2[i])*w + (res*X2[i]))
+        for i in range(0, len(X1)):     # 인덱스를 생성한다.
+            idx1 = int(res*(Y1[i]+height/2)*width + res*(X1[i]+width/2))
+            idx2 = int(res*(Y2[i]+height/2)*width + res*(X2[i]+width/2))
 
             g.add_edge(idx1, idx2)      # (x1, y1)--(x2, y2) 엣지를 구축한다.
             g.nodes[idx1]['pos'] = [X1[i], Y1[i]]
@@ -296,7 +296,7 @@ class SPATIAL_INFO_MANAGER:
             p = Point()
             p.x = self.graph.nodes[n]['pos'][0]
             p.y = self.graph.nodes[n]['pos'][1]
-            p.z = 0.1
+            p.z = 0.01
             gvg_node.points.append(p)
 
         gvg_edge = Marker()                             # GVG 엣지 마커를 생성한다.
@@ -312,12 +312,12 @@ class SPATIAL_INFO_MANAGER:
             p1 = Point()
             p1.x = self.graph.nodes[e[0]]['pos'][0]
             p1.y = self.graph.nodes[e[0]]['pos'][1]
-            p1.z = 0.1
+            p1.z = 0.01
             gvg_edge.points.append(p1)
             p2 = Point()
             p2.x = self.graph.nodes[e[1]]['pos'][0]
             p2.y = self.graph.nodes[e[1]]['pos'][1]
-            p2.z = 0.1
+            p2.z = 0.01
             gvg_edge.points.append(p2)
 
         self.publisher.publish([gvg_node, gvg_edge])     # GVG 마커를 출력한다.

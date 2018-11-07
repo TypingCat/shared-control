@@ -43,7 +43,7 @@ class KEYBOARD:
             self.key = sys.stdin.read(1)
             if self.key == '\x03':      # ctrl+c가 들어오면 키보드와의 연결을 종료한다.
                 self.key_watcher.shutdown()
-            elif self.key == 'w':       # Eye blink를 대신하여 trigger를 발행한다.
+            elif self.key == 's':       # Eye blink를 대신하여 trigger를 발행한다.
                 self.publisher_eyeblink.publish(2)
         else:
             self.key = ''

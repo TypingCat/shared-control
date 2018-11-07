@@ -1,8 +1,8 @@
 <launch>
 
   <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
-    <arg name="initial_pose_x" default="-0.54"/>
-    <arg name="initial_pose_y" default="-3.64"/>
+    <arg name="initial_pose_x" default="-4.6"/>
+    <arg name="initial_pose_y" default="3.0"/>
   </include>
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base">

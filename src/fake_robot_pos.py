@@ -67,6 +67,10 @@ class FAKE_ROBOT_POS:
     def update_target(self, data):
         """목표를 갱신한다"""
         self.target = data
+        robot_th = tf.transformations.euler_from_quaternion([data.orientation.x,
+                                                             data.orientation.y,
+                                                             data.orientation.z,
+                                                             data.orientation.w])[2]
 
     def navigation(self, event):
         """목표를 향해 이동한다"""
