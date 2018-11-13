@@ -8,6 +8,7 @@ import tf
 from geometry_msgs.msg import Pose, Point
 from std_msgs.msg import Int32
 
+from shared_control.msg import MID
 from shared_control.srv import Nearest, Neighbors, Node, MotorImagery
 
 
@@ -19,10 +20,13 @@ class TASK_PLANNER:
         # self.nearest = 0      # 로봇과 가장 가까운 노드
         # self.history = [-1, -1]     # 목표노드 기록
         # self.questions = []         # 질문 목록
-        self.state = -1              # 상태: -1=수면, 0=대기, 1=이벤트, 2=트리거
+        self.state = -1              # 상태: -1=휴면, 0=활동, 1=노드발견, 2=대기
         # self.count = 0
         # self.dst = Point()
         # self.init_confirm = [0, 0]
+        self.patience = rospy.get_param('~patience', 1.0)
+        self.regret = False
+        self.eyeblink = rospy.get_time()
 
         rospy.wait_for_service('gvg/nearest')   # 서비스 초기화를 기다린다.
         rospy.wait_for_service('gvg/neighbors')
@@ -35,9 +39,10 @@ class TASK_PLANNER:
         # rospy.Subscriber('interface/destination', Point, self.update_dst)
 
         self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
-        # self.publisher_lighter = rospy.Publisher('interface/lighter', Point, queue_size=1)
-        # self.publisher_flicker = rospy.Publisher('interface/flicker', Point, queue_size=1)
-        # self.publisher_douser = rospy.Publisher('interface/douser', Int32, queue_size=1)
+        self.publisher_douser = rospy.Publisher('interface/douser', Int32, queue_size=1)
+        self.publisher_MID_L = rospy.Publisher('interface/MID_L', MID, queue_size=1)
+        self.publisher_MID_R = rospy.Publisher('interface/MID_R', MID, queue_size=1)
+        self.publisher_MID_confirm = rospy.Publisher('interface/MID_confirm', MID, queue_size=1)
 
         self.get_nearest = rospy.ServiceProxy('gvg/nearest', Nearest)   # 서비스들을 등록한다.
         self.get_neighbors = rospy.ServiceProxy('gvg/neighbors', Neighbors)
@@ -47,7 +52,6 @@ class TASK_PLANNER:
         self.mount_gvg()                                                # 이동을 시작한다.
         rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.explosion)
 
-        rospy.loginfo('')
         rospy.loginfo('준비되었습니다. Eyeblink는 \'s\', motorimagery는 \'a, d\'입니다.')
 
     def mount_gvg(self):
@@ -70,7 +74,7 @@ class TASK_PLANNER:
         #     for id in options:
         #         self.questions.append(id)
 
-        if self.state == 1:                             # 노드 위에 정지해 있다면,
+        if self.state == 1:                     # 노드 위에 정지해 있다면,
             neighbors = list(self.get_neighbors(self.history[0]).ids)
             try:
                 neighbors.remove(self.history[1])
@@ -79,39 +83,45 @@ class TASK_PLANNER:
             if len(neighbors) == 0:
                 rospy.loginfo("그래프가 이상해!")
 
-            elif len(neighbors) == 1:                   # 길이 하나밖에 없다면 이동한다.
+            elif len(neighbors) == 1:           # 길이 하나밖에 없다면 이동한다.
                 self.send_target(neighbors[0])
                 self.state = 0
                 rospy.sleep(rospy.get_param('~planning_cycle', 0.5))
 
-            elif len(neighbors) == 2:                   # 길이 두개라면 질문한다.
-                p0 = self.get_node(self.nearest).point  # 중앙을 파악한다.
+            elif len(neighbors) == 2:           # 길이 두개라면 질문한다.
+                p0 = self.get_node(self.nearest).point
                 p1 = self.get_node(neighbors[0]).point
                 p2 = self.get_node(neighbors[1]).point
+                dth, th1, th2 = self.head_target(p0, p1, p2)
 
-                th1 = math.atan2(p1.y-p0.y, p1.x-p0.x)
-                th2 = math.atan2(p2.y-p0.y, p2.x-p0.x)
-                dth = (th2 - th1 + math.pi)%(2*math.pi) - math.pi
-                th = th1 + dth/2
+                if dth > 0:                     # 방향을 정렬한다.
+                    neighbors[0], neighbors[1] = neighbors[1], neighbors[0]
+                    th1, th2 = th2, th1
 
-                # rospy.loginfo([th1*180/math.pi, th2*180/math.pi, th*180/math.pi])
+                left = MID()                    # 선택지 마커를 출력한다.
+                left.point = p0
+                left.th = th1
+                self.publisher_MID_L.publish(left)
+                right = MID()
+                right.point = p0
+                right.th = th2
+                self.publisher_MID_R.publish(right)
 
-                self.head_target(self.nearest, th)
+                answer = self.get_motorimagery((neighbors[0], neighbors[1])).id
+                if answer == neighbors[0]:      # MI로 질문한다.
+                    self.prearrangement = [neighbors[0], neighbors[1]]
+                else:
+                    self.prearrangement = [neighbors[1], neighbors[0]]
+                    th1, th2 = th2, th1
 
+                direction = MID()               # 선택지 마커를 출력한다.
+                direction.point = p0
+                direction.th = th1
+                self.publisher_MID_confirm.publish(direction)
 
+                self.state = 2                  # 대기상태로 돌입한다.
+                rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.confirm, oneshot=True)
 
-
-                # dx = pose.position.x - self.pose.position.x         # 방향을 설정한다.
-                # dy = pose.position.y - self.pose.position.y
-                #
-                # get_node
-                # th1 =
-                # dth1 =
-
-
-                # 질문
-                # answer = self.get_motorimagery((neighbors[0], neighbors[1])).id
-                # self.send_target(neighbors[0])
             else:
                 rospy.loginfo("갈림길이 너무 많은데요?")
 
@@ -185,6 +195,18 @@ class TASK_PLANNER:
     #
     #     return options
 
+    def confirm(self, event):
+        """변동사항을 대비하여 실행을 잠시 유보한다"""
+        time_start = rospy.get_time()
+        while (rospy.get_time() - time_start < self.patience) and (self.eyeblink - time_start < 0):
+            rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
+        if self.eyeblink - time_start > 0:
+            self.prearrangement[0], self.prearrangement[1] = self.prearrangement[1], self.prearrangement[0]
+
+        self.send_target(self.prearrangement[0])
+        self.publisher_douser.publish(self.prearrangement[0])
+        self.state = 0
+
     def send_target(self, id):
         """이동로봇에게 목표자세를 전송한다"""
         pose = Pose()
@@ -199,33 +221,33 @@ class TASK_PLANNER:
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
-        # self.publisher_lighter.publish(pose.position)   # 화면에 출력한다.
-
         self.publisher_target.publish(pose)             # 목표를 발행한다.
         self.history[1] = self.history[0]               # 이동했음을 기록한다.
         self.history[0] = id
 
-    def head_target(self, id, th):
+    def head_target(self, p0, p1, p2):
         """로봇이 특정 각도를 바라보도록 한다"""
-        pose = Pose()
-        pose.position = self.get_node(id).point             # 위치를 설정한다.
+        th1 = math.atan2(p1.y-p0.y, p1.x-p0.x)          # 사잇각을 계산한다.
+        th2 = math.atan2(p2.y-p0.y, p2.x-p0.x)
+        dth = (th2 - th1 + math.pi)%(2*math.pi) - math.pi
+        th = th1 + dth/2
+
+        pose = Pose()                                   # 자세를 결정한다.
+        pose.position = p0
         q = tf.transformations.quaternion_from_euler(0, 0, th)
         pose.orientation.x = q[0]
         pose.orientation.y = q[1]
         pose.orientation.z = q[2]
         pose.orientation.w = q[3]
 
-        # self.publisher_flicker.publish(pose.position)   # 화면에 출력한다.
-
         self.publisher_target.publish(pose)             # 목표를 발행한다.
+
+        return dth, th1, th2
 
     def explosion(self, event):
         """이동로봇의 임무계획시점을 판단한다"""
         need_plan = False       # 노드에 도달하여 대기중이라면 다음 움직임을 계획한다.
         try:
-
-            # rospy.loginfo([self.state, self.move, self.history[0], self.nearest])
-
             if (self.state == 0)&\
                (self.move == 0)&\
                (self.history[0] == self.nearest):
@@ -233,7 +255,7 @@ class TASK_PLANNER:
         except:
             return
 
-        if need_plan:
+        if need_plan:           # 계획을 시작한다.
             self.state = 1
             rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
 
@@ -250,6 +272,8 @@ class TASK_PLANNER:
 
     def percussion(self, data):
         """트리거가 발생하면 이동목표를 갱신한다"""
+        self.eyeblink = rospy.get_time()
+
         # if self.state == 0:
         #     self.state = 2
         #     rospy.Timer(rospy.Duration(rospy.get_param('~planning_cycle', 0.5)), self.planning, oneshot=True)
