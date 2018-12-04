@@ -8,12 +8,14 @@
     <param name="pose_x" value="-4.6"/>
     <param name="pose_y" value="3.0"/>
     <param name="pose_th" value="0.0"/>
-    <param name="velocity_lin" value="0.26"/>
+    <!-- <param name="velocity_lin" value="0.26"/> -->
+    <param name="velocity_lin" value="1.26"/>
     <param name="velocity_ang" value="1.82"/>
     <param name="margin_lin" value="0.1"/>
     <param name="margin_ang" value="0.1"/>
     <param name="sim_cycle" value="0.1"/>
-    <param name="oscillation" value="0.01"/>
+    <!-- <param name="oscillation" value="0.01"/> -->
+    <param name="oscillation" value="0.05"/>
   </node>
 
   <include file="$(find shared_control)/launch/shared_control.launch"/>
