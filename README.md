@@ -9,17 +9,13 @@
 
 ## 1. 개요
 ### 1.1. 목표
-조이스틱 사용자 대비 이동시간 300% 이내에 무작위 목적지에 도달
+조이스틱 사용자 대비 이동시간 ~~300%~~ 200% 이내에 무작위 목적지에 도달
 
-### 1.2. 시나리오
-1. 로봇에게는 지도가 주어진다. 로봇은 이 지도를 바탕으로 GVG를 구축한다.
-2. 로봇은 자신의 위치를 GVG 수준에서 파악할 수 있으며, 현재 위치와 인접한 노드들을 이동대상으로 본다.
-3. 로봇은 정지중일 경우,
-    - Eye blink 신호를 받으면 움직일 방향을 motor imagery로 묻는다.
-4. 로봇은 주행중일 경우,
-    - Eye blink 신호를 받으면 정지한다.
-    - 교차로에 진입하면 정지하고, 움직일 방향을 motor imagery로 묻는다.
-    - 말단에 진입하면 정지한다.
+### 1.2. 방침
+1. 로봇에게는 지도가 주어진다. 로봇은 자신의 위치를 GVG 수준에서 파악할 수 있으며, 현재 위치와 인접한 노드들을 이동대상으로 본다.
+2. 로봇은 교차로에 도달하면 motor imagery를 통해 사용자에게 이동방향을 질문한다.
+3. 로봇은 막다른 길에 다다르면 대기한다.
+4. 사용자는 eye blink로 선택을 번복하거나 대기상태를 해제할 수 있다.
 
 ### 1.3. 협업 구조
 - 김래현박사님팀
@@ -44,6 +40,7 @@
     - `1.1.1` 평가 모듈 추가
     - `1.1.2` Joystick 추가
     - `1.1.3` 그래프 수동작성기능 추가
+- `1.2.0` 행동방침 변경
 
 
 ## 2. 개발환경
@@ -63,34 +60,39 @@
 
 ## 3. 기능
 ### 3.1. Task planner
+이동로봇의 행동방침을 결정한다. 현재 상황을 파악하여 로봇의 이동목표를 결정하거나 질문을 생성한다.
 - Subscribed Topics
     - bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
-    - interface/lighter ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
-    - interface/flicker ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
     - interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+    - interface/MID_L (shared_control/MID), Motor imagery 선택지를 나타내는 왼쪽 화살표 메타정보
+    - interface/MID_R (shared_control/MID), Motor imagery 선택지를 나타내는 오른쪽 화살표 메타정보
+    - interface/MID_confirm (shared_control/MID), Motor imagery가 선택한 결과를 나타내는 화살표 메타정보
 - Paramters
-    - spin_cycle (float, default: 0.1), 기본적인 단위연산주기
-    - planning_cycle (float, default: 0.5), 계획의 단위연산주기
+    - spin_cycle (float, default: 0.1), 연산주기
 - Expected behaviors
-    - Task planner는 4개의 상태: `수면` `대기` `목표노드 도착` `eyeblink`를 갖는 finite-state machine이다.
-    - 이동로봇이 목표노드에 도달하거나 eyeblink를 수신하는 이벤트가 발생하면 상태천이를 검토한다.
-    - Task planner와 이동로봇의 상태에 따라 선택지를 결정한다.
-    - 선택지를 binary question으로 파싱하여 motor imagery에게 전달한다.
-    - 획득한 답변을 로봇의 목표자세로 변환하여 출력한다. 이동과 정지 모두 자세로 간주한다.
+    - Task planner는 4개의 상태를 갖는 finite-state machine이다.
+
+      | 상태 | -1 | 0 | 1 | 2 |
+      | :-: | :-: | :-: | :-: | :-: |
+      | 설명 | 휴면 | 대기 | 계획 | 이동 |
+
+    - 이동로봇이 목표노드에 도달하거나 eye blink를 수신하는 이벤트가 발생하면 다음 이동목표를 검토한다.
+    - 이동로봇의 상태와 GVG상의 위치에 따라 사용자의 선택지를 좁힌다. 선택할 필요가 없는 경우에는 질문할 필요 없이 이동하거나 대기한다.
+    - 선택지를 binary question으로 변환하여 사용자에게 motor imagery로 질문한다.
+    - 획득한 답변을 로봇의 목표자세로 변환하여 출력한다.
 - Issues
     - [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
         - 아직은 현재위치가 속한 GVG 엣지를 판단할 수 없다.
-        - 차선책으로써 가장 가까운 노드로 이동한다.
+        - 차선책으로 초기화되면 가장 가까운 노드로 이동한다.
     - [x] 테스트를 위해 `fake_bci` `fake_robot`을 운용한다.
         - ~~이동로봇의 좌표계는 발행하지 않는다.~~
         - 이동로봇의 좌표계를 방송한다.
         - BCI의 정확도는 반영하지 않는다.
     - [x] Motor imagery 문답 시 다른 기능들이 정지한다.
-        - 일회성 타이머로 연산을 분리한다.
         - 이벤트 전후로 다른 연산요청을 처리한다.
         - 상태 갱신과정을 간소화한다.
     - [x] 노드의 초기화가 실패한다.
@@ -104,11 +106,17 @@
         - 계획 관련 작업을 모두 하나의 함수에서 처리한다.
     - [x] 이동로봇 기준의 시야에서는 선택지가 확인되지 않는다.
         - 선택지를 정면에 놓고 이동 여부를 질문하도록 방침을 변경한다.
-    - [ ] 오래 기동하면 state machine이 무너진다.
-        - 주로 타이머에서 문제가 발생한다.
-        - 뒤늦게 갱신되는 상태로 인해 노드도달여부 인지가 불안정했었다. 노드도달여부를 몇차례 연속으로 확인함으로써 `shared_control: explosion` 함수를 안정화시켰다.
+    - [x] 오래 기동하면 state machine이 무너진다.
+        - 다른 패키지와의 타이머가 엇갈리며 문제가 발생한다.
+        - ~~뒤늦게 갱신되는 상태로 인해 노드도달여부 인지가 불안정했었다. 노드도달여부를 몇차례 연속으로 확인함으로써 `shared_control: explosion` 함수를 안정화시켰다.~~
+        - 계획 상태를 추가하고 상태천이의 조건을 좁힌다.
+        - 계획에 한정하여 일회성 타이머로 상태천이를 처리한다.
+    - [ ] 교차로가 3갈래 이하인 그래프에서만 작동한다.
+        - Motor imagery가 binary question만 처리할 수 있는 상황에 맞추어 행동방침을 변경하였다.
+        - 현재는 4갈래 이상의 교차로가 발생하면 대기한다.
 
 ### 3.2. Spatial information manager
+공간정보를 처리한다. 주어진 지도를 GVG로 변환하고 검색서비스를 제공한다.
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 - Published Topics
@@ -155,28 +163,34 @@
     - [x] GVG가 불안정하여 가끔 서비스가 실패한다.
         - 초기화 도중 혹은 잦은 서비스 요청에서 발생한다.
         - 예외처리를 추가하여 서비스에 실패했음을 알린다.
-    - [ ] 시연을 위해 GVG가 아닌 임의의 그래프가 필요하다.
-    - [ ] 마커 `interface/graph`를 본 패키지에서 임시로 출력한다. `interface_visualizer` 패키지로 옮겨야 한다.
+    - [x] 시연을 위해 GVG가 아닌 임의의 그래프 생성기능이 필요하다.
 
 ### 3.3. Interface visualizer
+시각화를 담당한다. 사용자가 상황을 파악할 수 있도록 주행환경과 인터페이스를 마커로 발행한다.
 - Subscribed Topics
-    - interface/lighter ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
-    - interface/flicker ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
     - interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+    - interface/MID_L (shared_control/MID), Motor imagery 선택지를 나타내는 왼쪽 화살표 메타정보
+    - interface/MID_R (shared_control/MID), Motor imagery 선택지를 나타내는 오른쪽 화살표 메타정보
+    - interface/MID_confirm (shared_control/MID), Motor imagery가 선택한 결과를 나타내는 화살표 메타정보
+    - interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+    - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
     - interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Parameters
-    - publish_cycle (float, default: 1.0), `interface`의 발행 주기
+    - publish_cycle (float, default: 0.3), `interface`의 발행 주기
+    - MI_marker_len (float, default: 1.0), Motor imagery 선택지를 나타내는 화살표의 길이
 - Issues
     - [x] 아직 인터페이스 규모가 크지 않아 구현하지 않는다.
         - 시각화가 필요한 노드에서 직접 마커를 출력했었으나, 이제 마커를 단일 타이머에서 정리하여 출력한다.
         - 마커의 주기적인 재발행 혹은 정보의 구체적인 이미지화를 돕는다.
 
 ### 3.4. Map server
+이미지로부터 격자지도를 생성한다.
 - Published Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
 
 ### 3.5. Rviz
+마커를 수집하여 화면에 출력한다.
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
     - interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
@@ -188,14 +202,16 @@
         - 즉 해당 토픽들은 테스트를 위한 마커이다. 실제 시스템과 연결할 때에는 해당 패키지에서 마커를 발행하거나, 그에 준하는 정보를 발행해 주어야 한다.
 
 ### 3.6 Evaluator
+이동로봇의 움직임을 테스트한다. 무작위 혹은 주어진 목표까지 이동하기까지의 시간을 기록한다.
 - Subscribed Topics
     - map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
-    - interface/destination
+    - interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
 
-### 3.7. (테스트 전용) Fake BCI
+### 3.7. BCI
+실제 BCI와 통신한다. Motor imagery와 eye blink 기능을 제공한다.
 - Subscribed Topics
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
@@ -205,16 +221,15 @@
         - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 - Issues
-    - [ ] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
+    - [x] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
 
-### 3.8. (테스트 전용) Fake robot
+### 3.8. Fake robot POS
+이동로봇이 목표자세를 향해 이동하는 것처럼 시뮬레이션한다. 주행환경을 무시한다.
 - Subscribed Topics
     - robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
-    - cmd_vel ([geometry_msgs/Twist](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Twist.html))
 - Published Topics
     - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
     - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
-    - robot/marker ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Broadcasted Transformations
     - `map`~`odom`, 이동로봇의 초기위치
     - `odom`~`base_footprint`
@@ -229,9 +244,27 @@
     - sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
     - oscillation (float, default: 0.01)
 - Issues
-    - [ ] `Fake robot` 노드를 실제 이동로봇으로 대체해야 한다.
     - [x] 좌표계가 발행되지 않아 rviz에서 이동로봇을 정상적으로 출력하지 못한다.
         - 직접 좌표계를 계산하여 발행한다.
+    - [ ] 움직임이 불안정하다. 파라미터를 어떻게 설정했느냐에 따라 목표에 수렴하지 못하거나 진동할 수도 있다.
+
+### 3.9. Fake robot VEL
+이동로봇이 목표속도를 따라 이동하는 것처럼 시뮬레이션한다. 주행환경을 무시한다.
+- Subscribed Topics
+    - cmd_vel ([geometry_msgs/Twist](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Twist.html))
+- Published Topics
+    - robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
+    - robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+- Broadcasted Transformations
+    - `map`~`odom`, 이동로봇의 초기위치
+    - `odom`~`base_footprint`
+- Paramters
+    - pose_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
+    - pose_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
+    - pose_th (float, default: 0.0), 이동로봇의 방향각 초기값
+    - velocity_lin (float, default: 0.26), 이동로봇의 선속도
+    - velocity_ang (float, default: 1.82), 이동로봇의 각속도
+    - sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
 
 
 ## 4. 사용법
@@ -248,30 +281,29 @@ $ cd ~/catkin_ws
 $ catkin_make
 ```
 
-XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`를 같이 누르면 된다. 그리고 다음을 실행한다.
+### 4.2. 추가장비 연결
+XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
 ```
 $ sudo rmmod xpad
 $ sudo xboxdrv
 ```
 
-
-### 4.2. 실행
+### 4.3. 실행
 본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
-- $ roslaunch shared_control key_sim.launch
-    - 입력: keyboard
-    - 출력: simple simulator
-- $ roslaunch shared_control key_gzb.launch
-    - 입력: keyboard
-    - 출력: gazebo simulator
-- $ roslaunch shared_control joy_sim.launch
-    - 입력: joystick
-    - 출력: simple simulator
-- $ roslaunch shared_control joy_gzb.launch
-    - 입력: joystick
-    - 출력: gazebo simulator
-- $ roslaunch shared_control bci_sim.launch
-    - 입력: BCI
-    - 출력: simple simulator
+
+| 입력 \ 출력 | 시뮬레이션 | Gazebo |
+| :-: | :-: | :-: |
+| 키보드 | \$ roslaunch shared_control key_sim.launch | \$ roslaunch shared_control key_gzb.launch |
+| 조이스틱 | \$ roslaunch shared_control joy_sim.launch | \$ roslaunch shared_control joy_gzb.launch |
+| BCI | \$ roslaunch shared_control bci_sim.launch | |
+
+- 입력
+    - 키보드: BCI를 대체하는 인터페이스이다. 키 `a`와 `d`가 motor imagery, 키 `s` 가 eye blink를 대체한다.
+    - 조이스틱: XBOX360 조이스틱으로 로봇의 속도를 직접 제어할 수 있다.
+    - BCI: Brain-Computer Interface.
+- 출력
+    - 시뮬레이션: 단순한 수식으로 로봇의 좌표만 계산한다.
+    - Gazebo: 로봇과 주행환경을 시뮬레이션한다. 실제 로봇과 동일한 메시지를 다룬다.
 
 
 ## 5. 색인
@@ -285,9 +317,7 @@ $ sudo xboxdrv
 - ~~Error-Related Negativity (ERN)~~
 
 ### 5.2. Generalized Voronoi Graph (GVG)
-지도의 뼈대를 표현한 그래프이다. Brushfire-based AGVD calculation을 사용하여 계산한다.
-- 이동로봇의 선택지를 최적화하고, BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
-- 현재는 정적인 환경에서만 작동한다.
+지도의 뼈대를 표현한 그래프이다. Brushfire-based AGVD calculation을 사용하여 계산한다. 이동로봇의 선택지를 최적화하고 BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
 
 ### 5.3. Navigation
 ROS의 `navigation` 스택을 활용하여 이동로봇의 위치를 추정하고 목표로 이동시킨다. 신라대의 `motion_manager`: https://github.com/ZeroAnu/motion_manager 에서 움직임을 관리하고 있다.

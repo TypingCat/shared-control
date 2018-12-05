@@ -48,7 +48,7 @@ class TASK_PLANNER:
             try:                                # 가장 가까운 노드를 검색한다.
                 nearest = self.get_nearest(self.pose.position).id
             except:
-                rospy.sleep(rospy.get_param('~planning_cycle', 0.5))
+                rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
         self.history = [nearest, nearest, nearest, -1]         # 목표, 현재, 최근, 이전
 
         self.send_target(nearest)               # 가장 가까운 노드로 이동한다.
@@ -267,7 +267,7 @@ class TASK_PLANNER:
     #     return options
 
     def go_around(self, event):
-        """명령을 행동으로 옮긴다"""
+        """이동한다"""
         # time_start = rospy.get_time()
         # while (rospy.get_time() - time_start < self.patience) and (self.eyeblink - time_start < 0):
         #     rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
@@ -286,6 +286,7 @@ class TASK_PLANNER:
                 self.eyeblink = now
                 self.prearrangement[0] = self.prearrangement[0] + 1
                 self.send_target(self.prearrangement[self.prearrangement[0]%3+1])
+                self.publisher_douser.publish(self.state)
 
             rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
 

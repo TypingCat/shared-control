@@ -29,7 +29,6 @@ class INTERFACE_VISUALIZER:
         rospy.Subscriber('interface/MID_L', MID, self.update_flicker_L)
         rospy.Subscriber('interface/MID_R', MID, self.update_flicker_R)
         rospy.Subscriber('interface/MID_confirm', MID, self.update_lighter)
-        rospy.Subscriber('interface/douser', Int32, self.update_douser)
         rospy.Subscriber('interface/destination', Point, self.update_dst)
         rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
