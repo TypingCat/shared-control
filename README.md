@@ -74,12 +74,7 @@
 - Paramters
     - spin_cycle (float, default: 0.1), 연산주기
 - Expected behaviors
-    - Task planner는 4개의 상태를 갖는 finite-state machine이다.
-
-      | 상태 | -1 | 0 | 1 | 2 |
-      | :-: | :-: | :-: | :-: | :-: |
-      | 설명 | 휴면 | 대기 | 계획 | 이동 |
-
+    - Task planner는 4개의 상태(휴면, 대기, 계획, 이동)을 갖는 finite-state machine이다.
     - 이동로봇이 목표노드에 도달하거나 eye blink를 수신하는 이벤트가 발생하면 다음 이동목표를 검토한다.
     - 이동로봇의 상태와 GVG상의 위치에 따라 사용자의 선택지를 좁힌다. 선택할 필요가 없는 경우에는 질문할 필요 없이 이동하거나 대기한다.
     - 선택지를 binary question으로 변환하여 사용자에게 motor imagery로 질문한다.
@@ -272,7 +267,7 @@
 본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
 ```
 $ cd ~/catkin_ws/src
-$ git clone https://github.com/Taemin0707/shared_control.git
+$ git clone https://github.com/finiel/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
 $ git clone https://github.com/ZeroAnu/motion_manager.git
 $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
@@ -281,7 +276,7 @@ $ cd ~/catkin_ws
 $ catkin_make
 ```
 
-### 4.2. 추가장비 연결
+### 4.2. 조이스틱 연결
 XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
 ```
 $ sudo rmmod xpad

@@ -5,9 +5,9 @@
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
   <node pkg="shared_control" type="fake_robot_vel.py" name="fake_robot_vel" output="screen">
-    <param name="pose_x" value="-0.54"/>
-    <param name="pose_y" value="-3.64"/>
-    <param name="pose_th" value="90"/>
+    <param name="pose_x" value="-5.0"/>
+    <param name="pose_y" value="0.0"/>
+    <param name="pose_th" value="0.0"/>
     <param name="velocity_lin" value="0.26"/>
     <param name="velocity_ang" value="1.82"/>
     <param name="sim_cycle" value="0.1"/>

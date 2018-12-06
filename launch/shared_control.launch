@@ -22,9 +22,9 @@
 
   <node pkg="shared_control" type="evaluator.py" name="evaluator" output="screen">
     <param name="spin_cycle" value="0.1"/>
-    <param name="destination_margin" value="0.15"/>
-    <!-- <rosparam param="destination_list_x"> [0.37, 1.29, -2.76, -7.58, -3.97] </rosparam>
-    <rosparam param="destination_list_y"> [-2.76, 0.06, 0.44, 0.51, 2.68] </rosparam> -->
+    <param name="destination_margin" value="0.5"/>
+    <rosparam param="destination_list_x"> [6.0] </rosparam>
+    <rosparam param="destination_list_y"> [1.6] </rosparam>
     <param name="destination_spawn_x_min" value="-5.0"/>
     <param name="destination_spawn_x_max" value="5.0"/>
     <param name="destination_spawn_y_min" value="-5.0"/>

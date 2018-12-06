@@ -10,8 +10,8 @@
   </include>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle
-              -x -0.54
-              -y -3.64
+              -x -5.0
+              -y 0.0
               -z 0.0
               -param robot_description"/>
 
