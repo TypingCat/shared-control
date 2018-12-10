@@ -92,9 +92,9 @@
 - Published Topics
     + robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
     + interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
-    + interface/MID_L (shared_control/MID), Motor imagery 선택지를 나타내는 왼쪽 화살표 메타정보
-    + interface/MID_R (shared_control/MID), Motor imagery 선택지를 나타내는 오른쪽 화살표 메타정보
-    + interface/MID_confirm (shared_control/MID), Motor imagery가 선택한 결과를 나타내는 화살표 메타정보
+    + interface/MID_L (shared_control/MID), Motor imagery를 나타내는 화살표 메타정보
+    + interface/MID_R (shared_control/MID)
+    + interface/MID_confirm (shared_control/MID)
 - Paramters
     + spin_cycle (float, default: 0.1)
 - Expected behaviors
@@ -155,7 +155,7 @@
     + gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     + gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     + gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    + custom_edge_list_x1 (float, default: []), 엣지 (x1, y1)--(x2, y2)로 구성되는 그래프. 입력하면 해당 그래프가 GVG를 대체한다.
+    + custom_edge_list_x1 (float, default: []), 엣지 (x1, y1, x2, y2)로 구성되는 그래프. 입력하면 해당 그래프가 GVG를 대체한다.
     + custom_edge_list_y1 (float, default: [])
     + custom_edge_list_x2 (float, default: [])
     + custom_edge_list_y2 (float, default: [])
@@ -189,9 +189,9 @@
 시각화를 담당한다. 사용자가 상황을 파악할 수 있도록 주행환경과 인터페이스를 마커로 발행한다.
 - Subscribed Topics
     + interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
-    + interface/MID_L (shared_control/MID), Motor imagery 선택지를 나타내는 왼쪽 화살표 메타정보
-    + interface/MID_R (shared_control/MID), Motor imagery 선택지를 나타내는 오른쪽 화살표 메타정보
-    + interface/MID_confirm (shared_control/MID), Motor imagery가 선택한 결과를 나타내는 화살표 메타정보
+    + interface/MID_L (shared_control/MID), Motor imagery를 나타내는 화살표 메타정보
+    + interface/MID_R (shared_control/MID)
+    + interface/MID_confirm (shared_control/MID)
     + interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
     + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
