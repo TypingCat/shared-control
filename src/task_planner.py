@@ -46,13 +46,13 @@ class TASK_PLANNER:
         self.state = -1
         nearest = -1
         while nearest == -1:
-            try:                                        # 가장 가까운 노드를 검색한다.
+            try:                                            # 가장 가까운 노드를 검색한다.
                 nearest = self.get_nearest(self.pose.position).id
             except:
                 rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
 
-        self.history = [nearest, nearest, nearest, -1]  # 목표, 현재, 최근, 이전
-        self.send_target(nearest)                       # 가장 가까운 노드로 이동한다.
+        self.history = [nearest, nearest, nearest, nearest] # 목표, 현재, 최근, 이전
+        self.send_target(nearest)                           # 가장 가까운 노드로 이동한다.
 
     def percussion(self, data):
         """트리거가 발생하면 이동목표를 갱신한다"""

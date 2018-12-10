@@ -17,7 +17,6 @@ class INTERFACE_VISUALIZER:
     def __init__(self):
         self.gvg_node = Marker()
         self.gvg_edge = Marker()
-        # self.marker_point = Point()
         self.MI_marker_len = rospy.get_param('~MI_marker_len', 1.0)
         self.MI_points_L = []
         self.MI_points_R = []

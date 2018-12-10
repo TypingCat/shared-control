@@ -15,15 +15,15 @@
     + [Interface visualizer](#interface-visualizer)
     + [Evaluator](#evaluator)
     + [BCI](#bci)
-    + [Fake robot (position)](#fake-robot-(position))
-    + [Fake robot (velocity)](#fake-robot-(velocity))
+    + [Fake robot POS](#fake-robot-pos)
+    + [Fake robot VEL](#fake-robot-vel)
 4. [사용법](#사용법)
     + [설치](#설치)
     + [조이스틱 연결](#조이스틱-연결)
     + [실행](#실행)
-5. [색인](#색인)
-    + [Brain-Computer Interface (BCI)](#brain-computer-interface-(bci))
-    + [Generalized Voronoi Graph (GVG)](#generalized-voronoi-graph-(gvg))
+5. [추가설명](#추가설명)
+    + [Brain-Computer Interface](#brain-computer-interface)
+    + [Generalized Voronoi Graph](#generalized-voronoi-graph)
 
 > 패키지 관리자 노진홍
 <br> 인턴, 지능로봇연구단, 한국과학기술연구원
@@ -96,17 +96,17 @@
     + interface/MID_R (shared_control/MID), Motor imagery 선택지를 나타내는 오른쪽 화살표 메타정보
     + interface/MID_confirm (shared_control/MID), Motor imagery가 선택한 결과를 나타내는 화살표 메타정보
 - Paramters
-    + spin_cycle (float, default: 0.1), 연산주기
+    + spin_cycle (float, default: 0.1)
 - Expected behaviors
     + Task planner는 4개의 상태(휴면, 대기, 계획, 이동)을 갖는 finite-state machine이다.
+    + Task planner는 이동로봇의 상태와 GVG상의 위치에 따라 사용자의 선택지를 좁힌다. 선택할 필요가 없는 경우에는 질문할 필요 없이 이동하거나 대기한다.
     + 이동로봇이 목표노드에 도달하거나 eye blink를 수신하는 이벤트가 발생하면 다음 이동목표를 검토한다.
-    + 이동로봇의 상태와 GVG상의 위치에 따라 사용자의 선택지를 좁힌다. 선택할 필요가 없는 경우에는 질문할 필요 없이 이동하거나 대기한다.
     + 선택지를 binary question으로 변환하여 사용자에게 motor imagery로 질문한다.
-    + 획득한 답변을 로봇의 목표자세로 변환하여 출력한다.
+    + 획득한 답변을 로봇의 목표자세로 변환하여 발행한다.
 - Issues
     + [ ] 시작하면 일단 가장 가까운 GVG 노드로 이동한다.
         - 아직은 현재위치가 속한 GVG 엣지를 판단할 수 없다.
-        - 차선책으로 초기화되면 가장 가까운 노드로 이동한다.
+        - 차선책으로, 초기화되면 일단 가장 가까운 노드로 이동한다.
     + [x] 테스트를 위해 `fake_bci` `fake_robot`을 운용한다.
         - ~~이동로봇의 좌표계는 발행하지 않는다.~~
         - 이동로봇의 좌표계를 방송한다.
@@ -147,7 +147,7 @@
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
     + gvg/neighbors (shared_control/Neighbors), 입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다.
         - 입력: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
-        - 반환: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+        - 반환: ids[] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
     + gvg/node (shared_control/Node), 입력한 id를 갖는 노드의 속성을 반환한다.
         - 입력: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
         - 반환: point ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
@@ -155,7 +155,7 @@
     + gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     + gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
     + gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    + custom_edge_list_x1 (float, default: []), GVG 대신 임의로 (x1, y1)--(x2, y2) 형태의 엣지를 생성한다. 센티미터 단위로 입력받는다.
+    + custom_edge_list_x1 (float, default: []), 엣지 (x1, y1)--(x2, y2)로 구성되는 그래프. 입력하면 해당 그래프가 GVG를 대체한다.
     + custom_edge_list_y1 (float, default: [])
     + custom_edge_list_x2 (float, default: [])
     + custom_edge_list_y2 (float, default: [])
@@ -197,8 +197,8 @@
 - Published Topics
     + interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Parameters
-    + publish_cycle (float, default: 0.3), `interface`의 발행 주기
     + MI_marker_len (float, default: 1.0), Motor imagery 선택지를 나타내는 화살표의 길이
+    + publish_cycle (float, default: 0.3)
 - Issues
     + [x] 아직 인터페이스 규모가 크지 않아 구현하지 않는다.
         - 시각화가 필요한 노드에서 직접 마커를 출력했었으나, 이제 마커를 단일 타이머에서 정리하여 출력한다.
@@ -212,6 +212,15 @@
     + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
     + interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
+- Parameters
+    + destination_margin (float, default: 0.5), 목적지 반경
+    + destination_spawn_x_min (float, default: -5.0), 목적지 무작위 발생영역 (x_min, x_max, y_min, y_max)
+    + destination_spawn_x_max (float, default: 5.0)
+    + destination_spawn_y_min (float, default: -5.0)
+    + destination_spawn_y_max (float, default: 5.0)
+    + destination_list_x (float, default: []), 목적지 리스트 (x, y). 입력하면 목적지가 고정된다.
+    + destination_list_y (float, default: [])
+    + spin_cycle (float, default: 0.1)
 
 ### BCI
 실제 BCI와 통신한다. Motor imagery와 eye blink 기능을 제공한다.
@@ -221,12 +230,12 @@
     + bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
 - Services
     + bci/motorimagery (shared_control/MotorImagery), 입력받은 리스트(binary question)의 요소 중 하나를 반환한다. 키보드를 인터페이스로 사용한다.
-        - 입력: ids\[\] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
+        - 입력: ids[] ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 - Issues
     + [x] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
 
-### Fake robot (position)
+### Fake robot POS
 이동로봇이 목표자세를 향해 이동하는 것처럼 시뮬레이션한다. 주행환경을 무시한다.
 - Subscribed Topics
     + robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
@@ -237,21 +246,21 @@
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`
 - Paramters
-    + pose_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
-    + pose_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
-    + pose_th (float, default: 0.0), 이동로봇의 방향각 초기값
-    + velocity_lin (float, default: 0.26), 이동로봇의 선속도
-    + velocity_ang (float, default: 1.82), 이동로봇의 각속도
-    + margin_lin (float, default: 0.1)
+    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, th) 초기값
+    + pose_y (float, default: 0.0)
+    + pose_th (float, default: 0.0)
+    + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
+    + velocity_ang (float, default: 1.82)
+    + margin_lin (float, default: 0.1), 제어 마진 (lin, ang)
     + margin_ang (float, default: 0.1)
-    + sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
-    + oscillation (float, default: 0.01)
+    + oscillation (float, default: 0.01), 허용진동 최대값
+    + sim_cycle (float, default: 0.1)
 - Issues
     + [x] 좌표계가 발행되지 않아 rviz에서 이동로봇을 정상적으로 출력하지 못한다.
         - 직접 좌표계를 계산하여 발행한다.
     + [ ] 움직임이 불안정하다. 파라미터를 어떻게 설정했느냐에 따라 목표에 수렴하지 못하거나 진동할 수도 있다.
 
-### Fake robot (velocity)
+### Fake robot VEL
 이동로봇이 목표속도를 따라 이동하는 것처럼 시뮬레이션한다. 주행환경을 무시한다.
 - Subscribed Topics
     + cmd_vel ([geometry_msgs/Twist](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Twist.html))
@@ -262,12 +271,12 @@
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`
 - Paramters
-    + pose_x (float, default: 0.0), 이동로봇의 x축 좌표 초기값
-    + pose_y (float, default: 0.0), 이동로봇의 y축 좌표 초기값
-    + pose_th (float, default: 0.0), 이동로봇의 방향각 초기값
-    + velocity_lin (float, default: 0.26), 이동로봇의 선속도
-    + velocity_ang (float, default: 1.82), 이동로봇의 각속도
-    + sim_cycle (float, default: 0.1), 시뮬레이션 연산주기
+    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, th) 초기값
+    + pose_y (float, default: 0.0)
+    + pose_th (float, default: 0.0)
+    + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
+    + velocity_ang (float, default: 1.82)
+    + sim_cycle (float, default: 0.1)
 
 
 ## 사용법
@@ -301,16 +310,16 @@ $ sudo xboxdrv
 | BCI | \$ roslaunch shared_control bci_sim.launch | |
 
 - 입력
-    - 키보드: BCI를 대체하는 인터페이스이다. 키 `a`와 `d`가 motor imagery, 키 `s` 가 eye blink를 대체한다.
-    - 조이스틱: XBOX360 조이스틱으로 로봇의 속도를 직접 제어할 수 있다.
-    - BCI: Brain-Computer Interface.
+    + 키보드: BCI를 대체하는 인터페이스이다. 키 `a`와 `d`가 motor imagery, 키 `s` 가 eye blink를 대체한다.
+    + 조이스틱: XBOX360 조이스틱으로 로봇의 속도를 직접 제어할 수 있다.
+    + BCI: Brain-Computer Interface.
 - 출력
-    - 시뮬레이션: 단순한 수식으로 로봇의 좌표만 계산한다.
-    - Gazebo: 로봇과 주행환경을 시뮬레이션한다. 실제 로봇과 동일한 메시지를 다룬다.
+    + 시뮬레이션: 단순한 수식으로 로봇의 좌표만 계산한다.
+    + Gazebo: 로봇과 주행환경을 시뮬레이션한다. 실제 로봇과 동일한 메시지를 다룬다.
 
 
-## 색인
-### Brain-Computer Interface (BCI)
+## 추가설명
+### Brain-Computer Interface
 사용자의 뇌파(electroencephalography, EEG)를 사용하는 인터페이스이다.
 - Motor imagery
     + 사용자에게 질문하고 답변을 뇌파로 인식한다.
@@ -319,5 +328,5 @@ $ sudo xboxdrv
     + 사용자의 눈 깜빡임을 뇌파로 인식한다.
 - ~~Error-Related Negativity (ERN)~~
 
-### Generalized Voronoi Graph (GVG)
-지도의 뼈대를 표현한 그래프이다. Brushfire-based AGVD calculation을 사용하여 계산한다. 이동로봇의 선택지를 최적화하고 BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
+### Generalized Voronoi Graph
+공간을 표현하는 그래프이다. 본 패키지에서는 Brushfire-based AGVD calculation을 사용하여 metric map을 그래프로 변환한다. 이동로봇의 선택지를 최적화하고 BCI에 질문을 요청하는 순간을 결정할 목적으로 활용한다.
