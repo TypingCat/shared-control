@@ -31,19 +31,16 @@ class KEYBOARD:
 
         rospy.Service('bci/motorimagery', MotorImagery, self.motorimagery)
 
-    def __del__(self):
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
-
     def spin(self, event):
         """키보드 입력을 획득한다"""
-        tty.setraw(sys.stdin.fileno())  # 키보드와 연결한다.
-
+        tty.setcbreak(sys.stdin.fileno())   # 키보드와 연결한다.
         rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+
         if rlist:
             self.key = sys.stdin.read(1)
-            if self.key == '\x03':      # ctrl+c가 들어오면 키보드와의 연결을 종료한다.
+            if self.key == '\x03':          # ctrl+c가 들어오면 키보드와의 연결을 종료한다.
                 self.key_watcher.shutdown()
-            elif self.key == 's':       # Eye blink를 대신하여 trigger를 발행한다.
+            elif self.key == 's':           # Eye blink를 대신하여 trigger를 발행한다.
                 self.publisher_eyeblink.publish(2)
         else:
             self.key = ''

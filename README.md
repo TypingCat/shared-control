@@ -6,9 +6,11 @@
     + [방침](#방침)
     + [협업구조](#협업구조)
     + [변경점](#변경점)
-2. [개발환경](#개발환경)
-    + [소프트웨어](#소프트웨어)
-    + [하드웨어](#하드웨어)
+2. [사용법](#사용법)
+    + [개발환경](#개발환경)
+    + [설치](#설치)
+    + [조이스틱 연결](#조이스틱-연결)
+    + [실행](#실행)
 3. [기능](#기능)
     + [Task planner](#task-planner)
     + [Spatial information manager](#spatial-information-manager)
@@ -17,10 +19,7 @@
     + [BCI](#bci)
     + [Fake robot POS](#fake-robot-pos)
     + [Fake robot VEL](#fake-robot-vel)
-4. [사용법](#사용법)
-    + [설치](#설치)
-    + [조이스틱 연결](#조이스틱-연결)
-    + [실행](#실행)
+4. [로드맵](#로드맵)
 5. [추가설명](#추가설명)
     + [Brain-Computer Interface](#brain-computer-interface)
     + [Generalized Voronoi Graph](#generalized-voronoi-graph)
@@ -67,19 +66,52 @@
 - `1.2.0` 행동방침 변경
 
 
-## 개발환경
-### 소프트웨어
-- Ubuntu 16.04
-- ROS kinetic
-    + Turtlebot3
-    + Turtlebot3_msgs
-- Python 2.7
-    + NetworkX 2.1
+## 사용법
+### 개발환경
+- 소프트웨어
+    + Ubuntu 16.04
+    + ROS kinetic
+    + Python 2.7
+- 하드웨어
+    + Turtlebot3 Waffle
+    + XBOX360 무선 컨트롤러
 
-### 하드웨어
-- Turtlebot3 Waffle
-    + Gazebo 시뮬레이션
-- XBOX360 무선 컨트롤러
+### 설치
+본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
+```
+$ cd ~/catkin_ws/src
+$ git clone https://github.com/finiel/shared_control.git
+$ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
+$ git clone https://github.com/ZeroAnu/motion_manager.git
+$ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
+$ pip install networkx
+$ cd ~/catkin_ws
+$ catkin_make
+```
+
+### 조이스틱 연결
+XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
+```
+$ sudo rmmod xpad
+$ sudo xboxdrv
+```
+
+### 실행
+본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
+
+| 입력 \ 출력 | 시뮬레이션 | Gazebo |
+| :-: | :-: | :-: |
+| 키보드 | \$ roslaunch shared_control key_sim.launch | \$ roslaunch shared_control key_gzb.launch |
+| 조이스틱 | \$ roslaunch shared_control joy_sim.launch | \$ roslaunch shared_control joy_gzb.launch |
+| BCI | \$ roslaunch shared_control bci_sim.launch | |
+
+- 입력
+    + 키보드: BCI를 대체하는 인터페이스이다. 키 `a`와 `d`가 motor imagery, 키 `s` 가 eye blink를 대체한다.
+    + 조이스틱: XBOX360 조이스틱으로 로봇의 속도를 직접 제어할 수 있다.
+    + BCI: Brain-Computer Interface.
+- 출력
+    + 시뮬레이션: 단순한 수식으로 로봇의 좌표만 계산한다.
+    + Gazebo: 로봇과 주행환경을 시뮬레이션한다. 실제 로봇과 동일한 메시지를 다룬다.
 
 
 ## 기능
@@ -279,43 +311,31 @@
     + sim_cycle (float, default: 0.1)
 
 
-## 사용법
-### 설치
-본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
-```
-$ cd ~/catkin_ws/src
-$ git clone https://github.com/finiel/shared_control.git
-$ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
-$ git clone https://github.com/ZeroAnu/motion_manager.git
-$ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
-$ pip install networkx
-$ cd ~/catkin_ws
-$ catkin_make
-```
-
-### 조이스틱 연결
-XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
-```
-$ sudo rmmod xpad
-$ sudo xboxdrv
-```
-
-### 실행
-본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
-
-| 입력 \ 출력 | 시뮬레이션 | Gazebo |
-| :-: | :-: | :-: |
-| 키보드 | \$ roslaunch shared_control key_sim.launch | \$ roslaunch shared_control key_gzb.launch |
-| 조이스틱 | \$ roslaunch shared_control joy_sim.launch | \$ roslaunch shared_control joy_gzb.launch |
-| BCI | \$ roslaunch shared_control bci_sim.launch | |
-
-- 입력
-    + 키보드: BCI를 대체하는 인터페이스이다. 키 `a`와 `d`가 motor imagery, 키 `s` 가 eye blink를 대체한다.
-    + 조이스틱: XBOX360 조이스틱으로 로봇의 속도를 직접 제어할 수 있다.
-    + BCI: Brain-Computer Interface.
-- 출력
-    + 시뮬레이션: 단순한 수식으로 로봇의 좌표만 계산한다.
-    + Gazebo: 로봇과 주행환경을 시뮬레이션한다. 실제 로봇과 동일한 메시지를 다룬다.
+## 로드맵
+| 목표개발시점 | 인터페이스 | 이동로봇 제어 | 주행환경 구축 | 임무 계획 |
+| :-: | :-: | :-: | :-: | :-: |
+| | 개발자 인터페이스 구축 | | | |
+| 1월 | 패키지 문서화 | | | |
+| | | Motion manager 개선 | | |
+| 2월 | BCI 인터페이스 통합 | | | |
+| | | | | 예외상황 처리 |
+| | | | 이동로봇 프레임 조정 | |
+| | | | (터틀봇 버거 도입) | |
+| | | Navigation 최적화 | | |
+| | 이동로봇 상태 시각화 | | | |
+| | | | | 움직임 정책 조정 |
+| | | Cartographer 도입 | | |
+| | | | (조립형 주행환경 구성) | |
+| | | | 지도 프로토콜 변경 | |
+| 7월 | | | 실제 주행환경정보 구축 | |
+| | | 원격통신기능 추가 | | |
+| | | | (팬틸트-카메라 추가) | |
+| | | | (모니터 추가) | |
+| | | (화상채팅기능 추가) | | |
+| | 1인칭 인터페이스 구축 | | | |
+| | (개발환경 모듈화) | | | |
+| 10월 | | | | 평가 시나리오 구현 |
+| | | | | (BCI: ERN 대응기능 추가) |
 
 
 ## 추가설명

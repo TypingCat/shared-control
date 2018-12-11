@@ -39,11 +39,10 @@ class TASK_PLANNER:
 
         self.mount_gvg()                                                # 이동을 시작한다.
         rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.explosion)
-        rospy.loginfo('준비되었습니다. Eyeblink는 \'s\', motorimagery는 \'a, d\'입니다.')
+        print('준비되었습니다. Eyeblink는 \'s\', motorimagery는 \'a, d\'입니다.')
 
     def mount_gvg(self):
         """이동로봇을 GVG 위로 이동시킨다"""
-        self.state = -1
         nearest = -1
         while nearest == -1:
             try:                                            # 가장 가까운 노드를 검색한다.
@@ -53,6 +52,7 @@ class TASK_PLANNER:
 
         self.history = [nearest, nearest, nearest, nearest] # 목표, 현재, 최근, 이전
         self.send_target(nearest)                           # 가장 가까운 노드로 이동한다.
+        self.state = -1
 
     def percussion(self, data):
         """트리거가 발생하면 이동목표를 갱신한다"""
@@ -61,7 +61,7 @@ class TASK_PLANNER:
 
             neighbors = list(self.get_neighbors(self.history[1]).ids)
             if len(neighbors) == 1:                 # 길이 하나밖에 없다면,
-                rospy.loginfo("일단 이동합니다.")      # 질문할 필요 없이 이동한다.
+                print('이동합니다.')                  # 질문할 필요 없이 이동한다.
                 self.send_target(neighbors[0])
 
         else:                                       # 아니면 시간을 기록한다.
@@ -77,6 +77,8 @@ class TASK_PLANNER:
                need_plan = True
         except:
             return
+
+        # print(self.state),
 
         if need_plan:                               # 계획을 시작한다.
             self.state = 1
@@ -100,15 +102,14 @@ class TASK_PLANNER:
 
         if len(neighbors) == 0:                 # 막다른 길일 경우,
             self.state = -1
-            rospy.loginfo("대기합니다.")          # 휴면상태로 전환한다.
+            print('대기합니다.')                  # 휴면상태로 전환한다.
 
         elif len(neighbors) == 1:               # 길이 하나밖에 없다면,
-            rospy.loginfo("일단 이동합니다.")      # 질문할 필요 없이 이동한다.
-
+            print('이동합니다.')                  # 질문할 필요 없이 이동한다.
             self.send_target(neighbors[0])
 
         elif len(neighbors) == 2:               # 길이 두개라면,
-            rospy.loginfo("방향을 선택해 주세요.")  # MI로 질문한다.
+            print('방향을 선택해 주세요.')           # MI로 질문한다.
 
             p0 = self.get_node(self.history[1]).point
             p1 = self.get_node(neighbors[0]).point
@@ -139,22 +140,15 @@ class TASK_PLANNER:
             direction.th = th1
             self.publisher_MID_confirm.publish(direction)
 
-            rospy.loginfo("가즈아!")
-            rospy.loginfo(self.history)
-            rospy.loginfo(neighbors)
-
             rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.go_around, oneshot=True)                       # 행동을 취한다.
 
         else:
             self.state = -1
             rospy.loginfo("갈림길이... 너무 많은데요?")
-            rospy.loginfo(self.history)
-            rospy.loginfo(neighbors)
 
     def go_around(self, event):
         """이동한다"""
         self.send_target(self.prearrangement[1])
-        rospy.loginfo(self.prearrangement)
 
         now = rospy.get_time()
         while self.state == 2:          # 목표에 도달하기 전에,

@@ -59,7 +59,8 @@ class EVALUATOR:
         if self.state == 0:                                 # 초기화중일 경우,
             try:                                            # 대기를 확인하고 다음으로 넘어간다.
                 self.dst_point = self.select_destination()
-                rospy.loginfo("목적지: [%f, %f]"%(self.dst_point.x, self.dst_point.y))
+                print('목적지: [%f, %f]'%(self.dst_point.x, self.dst_point.y))
+                # rospy.loginfo("목적지: [%f, %f]"%(self.dst_point.x, self.dst_point.y))
                 self.state = 1
             except: pass
 
