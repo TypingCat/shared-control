@@ -19,8 +19,7 @@
     + [BCI](#bci)
     + [Fake robot POS](#fake-robot-pos)
     + [Fake robot VEL](#fake-robot-vel)
-4. [로드맵](#로드맵)
-5. [추가설명](#추가설명)
+4. [추가설명](#추가설명)
     + [Brain-Computer Interface](#brain-computer-interface)
     + [Generalized Voronoi Graph](#generalized-voronoi-graph)
 
@@ -54,27 +53,31 @@
 ![아키텍처](image/architecture.png)
 
 ### 변경점
-- `1.0.0` 노드 사이의 프로토콜 확립; 테스트 모듈 구현
-    + `1.0.1` Task planner 구축
-    + `1.0.2` Gazebo 연결
-    + `1.0.3` Interface visualizer 구축
-    + `1.0.4` 이동로봇 좌표계 구축
-- `1.1.0` 실제 BCI 연결 시도
-    + `1.1.1` 평가 모듈 추가
-    + `1.1.2` Joystick 추가
-    + `1.1.3` 그래프 수동작성기능 추가
-- `1.2.0` 행동방침 변경
+`1.0.0` 2018.09.18. 노드 사이의 프로토콜 확립
+<br> `1.0.1` 2018.10.05. Task planner 구축
+<br> `1.0.2` 2018.10.16. Gazebo 연결
+<br> `1.0.3` 2018.10.22. Interface visualizer 구축
+<br> `1.0.4` 2018.10.25. 이동로봇 좌표계 구축
+
+`1.1.0` 2018.10.16. 실제 BCI와 연결
+<br> `1.1.1` 2018.10.26. 평가 모듈 추가
+<br> `1.1.2` 2018.10.30. Joystick 추가
+<br> `1.1.3` 2018.11.05. 그래프 수동작성기능 추가
+
+`1.2.0` 2018.12.04. 행동방침 변경
+<br> `1.2.1` 2018.12.14. 실행파일 인자 공유
 
 
 ## 사용법
 ### 개발환경
-- 소프트웨어
-    + Ubuntu 16.04
-    + ROS kinetic
-    + Python 2.7
-- 하드웨어
-    + Turtlebot3 Waffle
-    + XBOX360 무선 컨트롤러
+소프트웨어
+- Ubuntu 16.04
+- ROS kinetic (with Turtlebot3 package)
+- Python 2.7 (with NetworkX 2.1)
+
+하드웨어
+- Turtlebot3 Waffle (Gazebo)
+- XBOX360 remote controller
 
 ### 설치
 본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
@@ -97,7 +100,7 @@ $ sudo xboxdrv
 ```
 
 ### 실행
-본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 초기자세와 같은 주요 변수들은 실행파일 상단에서 `arg`로 관리되며, 그 외의 파라미터는 해당 launch 파일에서 수정할 수 있다.
+본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 이하의 테이블에서 해당되는 명령어를 터미널에 입력하면 된다. 초기자세와 같은 주요 파라미터는 실행파일 상단에 `arg`로 설정되어 있다.
 
 | 입력 \ 출력 | 시뮬레이션 | Gazebo |
 | :-: | :-: | :-: |
@@ -116,7 +119,7 @@ $ sudo xboxdrv
 
 ## 기능
 ### Task planner
-이동로봇의 행동방침을 결정한다. 현재 상황을 파악하여 로봇의 이동목표를 결정하거나 질문을 생성한다.
+이동로봇의 행동방침을 반영한다. 현재 상황을 파악하여 로봇의 이동목표를 결정하거나 질문을 생성한다.
 - Subscribed Topics
     + bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
@@ -253,6 +256,8 @@ $ sudo xboxdrv
     + destination_list_x (float, default: []), 목적지 리스트 (x, y). 입력하면 목적지가 고정된다.
     + destination_list_y (float, default: [])
     + spin_cycle (float, default: 0.1)
+- Issues
+    + [ ] 목표 도착시점을 정확히 잡지 못한다. 목표영역에 들어간 순간부터 정지할 때까지 계속 도착했음을 알린다.
 
 ### BCI
 실제 BCI와 통신한다. Motor imagery와 eye blink 기능을 제공한다.
@@ -266,6 +271,7 @@ $ sudo xboxdrv
         - 반환: id ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
 - Issues
     + [x] `Fake BCI` 노드를 실제 BCI로 대체해야 한다.
+    + [ ] 테스트 편의를 위해 BCI와 동일하게 간접제어방식인 키보드 인터페이스와 통합해야 한다.
 
 ### Fake robot POS
 이동로봇이 목표자세를 향해 이동하는 것처럼 시뮬레이션한다. 주행환경을 무시한다.
@@ -309,35 +315,6 @@ $ sudo xboxdrv
     + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
     + velocity_ang (float, default: 1.82)
     + sim_cycle (float, default: 0.1)
-
-
-## 로드맵
-| 목표개발시점 | 인터페이스 | 이동로봇 제어 | 주행환경 구축 | 임무 계획 |
-| :-: | :-: | :-: | :-: | :-: |
-| | 개발자 인터페이스 구축 | | | |
-| 1월 | 패키지 문서화 | | | |
-| | | Motion manager 개선 | | |
-| 2월 | BCI 인터페이스 통합 | | | |
-| | | | | 예외상황 처리 |
-| | | | 이동로봇 프레임 조정 | |
-| | | | (터틀봇 버거 도입) | |
-| | | (개발환경 업데이트) | | |
-| | | Navigation 최적화 | | |
-| | 이동로봇 상태 시각화 | | | |
-| | | | | 움직임 정책 조정 |
-| | | Cartographer 도입 | | |
-| | | | 지도 프로토콜 갱신 | |
-| | | | (조립형 주행환경 구성) | |
-| | | | 실제 주행환경정보 구축 | |
-| 7월 | | | | 실제환경에서의 주행 |
-| | | 원격통신기능 추가 | | |
-| | | | (팬틸트-카메라 추가) | |
-| | | | (모니터 추가) | |
-| | | (화상채팅기능 추가) | | |
-| | 1인칭 인터페이스 구축 | | | |
-| | (개발환경 모듈화) | | | |
-| 10월 | | | | 평가 시나리오 구현 |
-| | | | | (BCI: ERN 대응기능 추가) |
 
 
 ## 추가설명
