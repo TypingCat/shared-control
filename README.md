@@ -19,7 +19,8 @@
     + [BCI](#bci)
     + [Fake robot POS](#fake-robot-pos)
     + [Fake robot VEL](#fake-robot-vel)
-4. [추가설명](#추가설명)
+4. [로드맵](#로드맵)
+5. [추가설명](#추가설명)
     + [Brain-Computer Interface](#brain-computer-interface)
     + [Generalized Voronoi Graph](#generalized-voronoi-graph)
 
@@ -315,6 +316,35 @@ $ sudo xboxdrv
     + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
     + velocity_ang (float, default: 1.82)
     + sim_cycle (float, default: 0.1)
+
+
+## 로드맵
+| 목표개발시점 | 인터페이스 | 이동로봇 제어 | 주행환경 구축 | 임무 계획 |
+| :-: | :-: | :-: | :-: | :-: |
+| | 개발자 인터페이스 구축 | | | |
+| 1월 | 패키지 문서화 | | | |
+| | | Motion manager 개선 | | |
+| 2월 | BCI 인터페이스 통합 | | | |
+| | | | | 예외상황 처리 |
+| | | | 이동로봇 프레임 조정 | |
+| | | | (터틀봇 버거 도입) | |
+| | | (개발환경 업데이트) | | |
+| | | Navigation 최적화 | | |
+| | 이동로봇 상태 시각화 | | | |
+| | | | | 움직임 정책 조정 |
+| | | Cartographer 도입 | | |
+| | | 지도 프로토콜 갱신 | | |
+| | | | (조립형 주행환경 구성) | |
+| | | | 실제 주행환경정보 구축 | |
+| 7월 | | | | 실제 환경에서의 주행 |
+| | | 원격통신기능 추가 | | |
+| | | | (팬틸트-카메라 추가) | |
+| | | | (모니터 추가) | |
+| | | (화상채팅기능 추가) | | |
+| | 1인칭 인터페이스 구축 | | | |
+| | (개발환경 모듈화) | | | |
+| 10월 | | | | 평가 시나리오 구현 |
+| | | | | (BCI: ERN 대응기능 추가) |
 
 
 ## 추가설명
