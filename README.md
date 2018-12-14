@@ -97,7 +97,7 @@ $ sudo xboxdrv
 ```
 
 ### 실행
-본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 파라미터는 해당 launch 파일에서 수정할 수 있다.
+본 패키지는 입력과 출력에 따른 실행방법들을 제공한다. 초기자세와 같은 주요 변수들은 실행파일 상단에서 `arg`로 관리되며, 그 외의 파라미터는 해당 launch 파일에서 수정할 수 있다.
 
 | 입력 \ 출력 | 시뮬레이션 | Gazebo |
 | :-: | :-: | :-: |
@@ -278,9 +278,9 @@ $ sudo xboxdrv
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`
 - Paramters
-    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, th) 초기값
+    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, Y) 초기값
     + pose_y (float, default: 0.0)
-    + pose_th (float, default: 0.0)
+    + pose_Y (float, default: 0.0)
     + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
     + velocity_ang (float, default: 1.82)
     + margin_lin (float, default: 0.1), 제어 마진 (lin, ang)
@@ -303,9 +303,9 @@ $ sudo xboxdrv
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`
 - Paramters
-    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, th) 초기값
+    + pose_x (float, default: 0.0), 이동로봇의 자세 (x, y, Y) 초기값
     + pose_y (float, default: 0.0)
-    + pose_th (float, default: 0.0)
+    + pose_Y (float, default: 0.0)
     + velocity_lin (float, default: 0.26), 이동로봇의 속도 (lin, ang)
     + velocity_ang (float, default: 1.82)
     + sim_cycle (float, default: 0.1)
@@ -321,13 +321,15 @@ $ sudo xboxdrv
 | | | | | 예외상황 처리 |
 | | | | 이동로봇 프레임 조정 | |
 | | | | (터틀봇 버거 도입) | |
+| | | (개발환경 업데이트) | | |
 | | | Navigation 최적화 | | |
 | | 이동로봇 상태 시각화 | | | |
 | | | | | 움직임 정책 조정 |
 | | | Cartographer 도입 | | |
+| | | | 지도 프로토콜 갱신 | |
 | | | | (조립형 주행환경 구성) | |
-| | | | 지도 프로토콜 변경 | |
-| 7월 | | | 실제 주행환경정보 구축 | |
+| | | | 실제 주행환경정보 구축 | |
+| 7월 | | | | 실제환경에서의 주행 |
 | | | 원격통신기능 추가 | | |
 | | | | (팬틸트-카메라 추가) | |
 | | | | (모니터 추가) | |

@@ -60,7 +60,7 @@ class EVALUATOR:
             try:                                            # 대기를 확인하고 다음으로 넘어간다.
                 self.dst_point = self.select_destination()
                 print('목적지: [%f, %f]'%(self.dst_point.x, self.dst_point.y))
-                # rospy.loginfo("목적지: [%f, %f]"%(self.dst_point.x, self.dst_point.y))
+
                 self.state = 1
             except: pass
 
@@ -77,7 +77,7 @@ class EVALUATOR:
                 self.dst_num = self.dst_num + 1
                 self.state = 0
 
-                rospy.loginfo('[%d] 소요시간: %f초'%(self.dst_num, rospy.get_time()-self.time_start))
+                print('[%d] 소요시간: %f초'%(self.dst_num, rospy.get_time()-self.time_start))
 
         p = Point()                                         # 목적지를 발행한다.
         p.x = self.dst_point.x

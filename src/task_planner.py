@@ -40,6 +40,7 @@ class TASK_PLANNER:
         self.mount_gvg()                                                # 이동을 시작한다.
         rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.explosion)
         print('준비되었습니다. Eyeblink는 \'s\', motorimagery는 \'a, d\'입니다.')
+        print('')
 
     def mount_gvg(self):
         """이동로봇을 GVG 위로 이동시킨다"""
@@ -101,15 +102,15 @@ class TASK_PLANNER:
         except: pass
 
         if len(neighbors) == 0:                 # 막다른 길일 경우,
-            self.state = -1
             print('대기합니다.')                  # 휴면상태로 전환한다.
+            self.state = -1
 
         elif len(neighbors) == 1:               # 길이 하나밖에 없다면,
             print('이동합니다.')                  # 질문할 필요 없이 이동한다.
             self.send_target(neighbors[0])
 
         elif len(neighbors) == 2:               # 길이 두개라면,
-            print('방향을 선택해 주세요.')           # MI로 질문한다.
+            print('방향을 선택해 주세요.')          # MI로 질문한다.
 
             p0 = self.get_node(self.history[1]).point
             p1 = self.get_node(neighbors[0]).point
@@ -140,14 +141,15 @@ class TASK_PLANNER:
             direction.th = th1
             self.publisher_MID_confirm.publish(direction)
 
-            rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.go_around, oneshot=True)                       # 행동을 취한다.
+            rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.go_around, oneshot=True)      # 행동을 취한다.
 
         else:
             self.state = -1
-            rospy.loginfo("갈림길이... 너무 많은데요?")
+            rospy.loginfo('갈림길이... 너무 많은데요?')
 
     def go_around(self, event):
         """이동한다"""
+        print('이동합니다.')
         self.send_target(self.prearrangement[1])
 
         now = rospy.get_time()
@@ -156,6 +158,8 @@ class TASK_PLANNER:
                 self.eyeblink = now
                 self.prearrangement[0] = self.prearrangement[0] + 1
                 self.send_target(self.prearrangement[self.prearrangement[0]%3+1])
+
+                print('목표를 변경합니다.')
                 self.publisher_douser.publish(self.state)
 
             rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
