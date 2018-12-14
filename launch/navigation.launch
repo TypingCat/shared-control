@@ -1,8 +1,13 @@
 <launch>
 
+  <arg name="robot_pose_x" default="0.0"/>
+  <arg name="robot_pose_y" default="0.0"/>
+  <arg name="robot_pose_Y" default="0.0"/>
+
   <include file="$(find turtlebot3_navigation)/launch/amcl.launch">
-    <arg name="initial_pose_x" default="-5.0"/>
-    <arg name="initial_pose_y" default="0.0"/>
+    <arg name="initial_pose_x" default="$(arg robot_pose_x)"/>
+    <arg name="initial_pose_y" default="$(arg robot_pose_y)"/>
+    <arg name="initial_pose_a" default="$(arg robot_pose_Y)"/>
   </include>
 
   <node pkg="move_base" type="move_base" respawn="false" name="move_base">

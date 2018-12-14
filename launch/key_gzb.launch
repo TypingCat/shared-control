@@ -1,14 +1,25 @@
 <launch>
 
+  <arg name="robot_pose_x" value="-5.0"/>
+  <arg name="robot_pose_y" value="0.0"/>
+  <arg name="robot_pose_Y" value="1.0"/>
+
   <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
+  <include file="$(find shared_control)/launch/gazebo.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+  </include>
 
-  <include file="$(find shared_control)/launch/gazebo.launch"/>
-  <include file="$(find shared_control)/launch/navigation.launch"/>
+  <include file="$(find shared_control)/launch/navigation.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+  </include>
   <include file="$(find shared_control)/launch/shared_control.launch"/>
 
   <node pkg="shared_control" type="keyboard.py" name="keyboard" output="screen"/>
-
   <node pkg="rviz" type="rviz" name="rviz"
         args="-d $(find shared_control)/rviz/gazebo_test.rviz"/>
 

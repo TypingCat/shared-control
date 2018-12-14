@@ -1,5 +1,9 @@
 <launch>
 
+  <arg name="robot_pose_x" default="0.0"/>
+  <arg name="robot_pose_y" default="0.0"/>
+  <arg name="robot_pose_Y" default="0.0"/>
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find turtlebot3_gazebo)/models/silla_univ.house.world"/>
     <arg name="paused" value="false"/>
@@ -10,9 +14,9 @@
   </include>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle
-              -x -5.0
-              -y 0.0
-              -z 0.0
+              -x $(arg robot_pose_x)
+              -y $(arg robot_pose_y)
+              -Y $(arg robot_pose_Y)
               -param robot_description"/>
 
 </launch>
