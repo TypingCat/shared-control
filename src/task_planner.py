@@ -5,7 +5,7 @@ import rospy
 import math
 import tf
 
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, PoseWithCovarianceStamped
 from std_msgs.msg import Int32
 
 from shared_control.msg import MID
@@ -24,7 +24,7 @@ class TASK_PLANNER:
 
         rospy.Subscriber('bci/eyeblink', Int32, self.percussion)
         rospy.Subscriber('robot/state', Int32, self.update_state)
-        rospy.Subscriber('robot/pose', Pose, self.update_pose)
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
         self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
         self.publisher_douser = rospy.Publisher('interface/douser', Int32, queue_size=1)
@@ -206,8 +206,8 @@ class TASK_PLANNER:
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
-        self.pose = data    # 현재 자세를 갱신한다.
-        try:                # 가장 가까운 노드를 갱신한다.
+        self.pose = data.pose.pose      # 현재 자세를 갱신한다.
+        try:                            # 가장 가까운 노드를 갱신한다.
             self.history[1] = self.get_nearest(self.pose.position).id
         except: pass
 

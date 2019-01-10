@@ -6,7 +6,7 @@ import random
 import math
 
 from nav_msgs.msg import OccupancyGrid, MapMetaData
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, PoseWithCovarianceStamped
 from std_msgs.msg import Int32
 
 from shared_control.srv import Nearest, Node
@@ -43,7 +43,7 @@ class EVALUATOR:
 
         rospy.Subscriber('map', OccupancyGrid, self.load_map)
         rospy.Subscriber('robot/state', Int32, self.update_state)
-        rospy.Subscriber('robot/pose', Pose, self.update_pose)
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
         self.publisher_dst = rospy.Publisher('interface/destination', Point, queue_size=1)
 
@@ -110,8 +110,7 @@ class EVALUATOR:
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
-        self.pose = data                                                # 현재 자세를 갱신한다.
-
+        self.pose = data.pose.pose                                      # 현재 자세를 갱신한다.
         try:
             self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.
             p = self.get_node(self.nearest[0]).point

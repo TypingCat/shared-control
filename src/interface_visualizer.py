@@ -6,7 +6,7 @@ import copy
 import math
 
 from visualization_msgs.msg import MarkerArray, Marker
-from geometry_msgs.msg import Pose, Point
+from geometry_msgs.msg import Pose, Point, PoseWithCovarianceStamped
 from std_msgs.msg import Int32, ColorRGBA
 
 from shared_control.msg import MID
@@ -29,7 +29,7 @@ class INTERFACE_VISUALIZER:
         rospy.Subscriber('interface/MID_R', MID, self.update_flicker_R)
         rospy.Subscriber('interface/MID_confirm', MID, self.update_lighter)
         rospy.Subscriber('interface/destination', Point, self.update_dst)
-        rospy.Subscriber('robot/pose', Pose, self.update_pose)
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
         self.publisher = rospy.Publisher('interface', MarkerArray, queue_size=1)
 
@@ -89,7 +89,7 @@ class INTERFACE_VISUALIZER:
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
-        self.pose = data
+        self.pose = data.pose.pose
 
     def publish(self, event):
         """마커를 발행한다"""
