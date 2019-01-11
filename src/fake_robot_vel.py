@@ -6,7 +6,7 @@ import math
 import numpy
 import tf
 
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import Pose, Twist, PoseWithCovarianceStamped
 from std_msgs.msg import Int32
 
 
@@ -20,7 +20,7 @@ class FAKE_ROBOT_VEL:
         rospy.Subscriber('cmd_vel', Twist, self.update_cmd)
 
         self.publisher_state = rospy.Publisher('robot/state', Int32, queue_size=1)
-        self.publisher_pose = rospy.Publisher('robot/pose', Pose, queue_size=1)
+        self.publisher_pose = rospy.Publisher('robot/pose', PoseWithCovarianceStamped, queue_size=1)
 
         self.broadcaster = tf.TransformBroadcaster()
 
@@ -78,8 +78,19 @@ class FAKE_ROBOT_VEL:
         else:
             self.state = 1
 
+        p = PoseWithCovarianceStamped()
+        p.header.stamp = rospy.Time.now()
+        p.header.frame_id = 'map'
+        p.pose.pose = self.pose
+        p.pose.covariance = [0.1,   0, 0, 0, 0, 0,
+                               0, 0.1, 0, 0, 0, 0,
+                               0,   0, 0, 0, 0, 0,
+                               0,   0, 0, 0, 0, 0,
+                               0,   0, 0, 0, 0, 0,
+                               0,   0, 0, 0, 0, 0.05]
+
         self.publisher_state.publish(self.state)        # 계산된 자세를 발행한다.
-        self.publisher_pose.publish(self.pose)
+        self.publisher_pose.publish(p)
         self.broadcast_tf(self.pose)
 
     def broadcast_tf(self, pose):

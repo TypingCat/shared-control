@@ -8,7 +8,7 @@ import select
 import tty
 import socket
 
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped
 from std_msgs.msg import Int32
 from visualization_msgs.msg import MarkerArray, Marker
 
@@ -23,7 +23,7 @@ class FAKE_BCI:
         self.key_watcher = rospy.Timer(rospy.Duration(0.1), self.spin)
         self.pose = Pose()
 
-        rospy.Subscriber('robot/pose', Pose, self.update_pose)
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
         self.eyeblink_publisher = rospy.Publisher('bci/eyeblink', Int32, queue_size=1)
 
@@ -123,7 +123,7 @@ class FAKE_BCI:
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
-        self.pose = data
+        self.pose = data.pose.pose
 
 
 if __name__ == '__main__':

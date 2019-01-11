@@ -42,7 +42,7 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /interface
+          Marker Topic: /interface/graph
           Name: GVG
           Namespaces:
             "": true
@@ -63,6 +63,36 @@ Visualization Manager:
           Namespaces:
             "": true
           Queue Size: 100
+          Value: true
+        - Alpha: 1
+          Axes Length: 0.200000003
+          Axes Radius: 0.0299999993
+          Class: rviz/PoseWithCovariance
+          Color: 255; 25; 0
+          Covariance:
+            Orientation:
+              Alpha: 0.5
+              Color: 255; 255; 127
+              Color Style: Unique
+              Frame: Local
+              Offset: 1
+              Scale: 1
+              Value: true
+            Position:
+              Alpha: 0.300000012
+              Color: 204; 51; 204
+              Scale: 1
+              Value: true
+            Value: true
+          Enabled: true
+          Head Length: 0.300000012
+          Head Radius: 0.100000001
+          Name: Pose
+          Shaft Length: 1
+          Shaft Radius: 0.0500000007
+          Shape: Axes
+          Topic: /robot/pose
+          Unreliable: false
           Value: true
       Enabled: true
       Name: Shared control
@@ -112,6 +142,29 @@ Visualization Manager:
           Shaft Diameter: 0.100000001
           Shaft Length: 0.100000001
           Topic: /move_base/DWAPlannerROS/local_plan
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 255; 0; 0
+          Enabled: true
+          Head Diameter: 0.300000012
+          Head Length: 0.200000003
+          Length: 0.300000012
+          Line Style: Lines
+          Line Width: 0.0299999993
+          Name: Path
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Radius: 0.0299999993
+          Shaft Diameter: 0.100000001
+          Shaft Length: 0.100000001
+          Topic: /move_base/NavfnROS/plan
           Unreliable: false
           Value: true
       Enabled: true
@@ -211,6 +264,7 @@ Visualization Manager:
         Shared control:
           GVG: true
           Interface: true
+          Pose: true
           Robot: true
           Value: true
         Value: true
@@ -232,7 +286,7 @@ Visualization Manager:
       Max Color: 255; 255; 255
       Max Intensity: 999999
       Min Color: 0; 0; 0
-      Min Intensity: 2.35023335e-35
+      Min Intensity: 0
       Name: LaserScan
       Position Transformer: XYZ
       Queue Size: 10

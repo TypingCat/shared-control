@@ -7,7 +7,6 @@ import sys
 import select
 import tty
 
-from geometry_msgs.msg import Pose
 from std_msgs.msg import Int32
 from visualization_msgs.msg import MarkerArray, Marker
 
@@ -20,12 +19,9 @@ class KEYBOARD:
         self.key = ''
         self.key_setting = termios.tcgetattr(sys.stdin)
         self.key_watcher = rospy.Timer(rospy.Duration(0.1), self.spin)
-        self.pose = Pose()
 
         rospy.wait_for_service('gvg/node')
         self.get_node = rospy.ServiceProxy('gvg/node', Node)
-
-        rospy.Subscriber('robot/pose', Pose, self.update_pose)
 
         self.publisher_eyeblink = rospy.Publisher('bci/eyeblink', Int32, queue_size=1)
 
@@ -61,10 +57,6 @@ class KEYBOARD:
             rospy.sleep(0.1)
 
         return {'id': answer}
-
-    def update_pose(self, data):
-        """로봇의 자세를 갱신한다"""
-        self.pose = data
 
 
 if __name__ == '__main__':
