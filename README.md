@@ -67,6 +67,7 @@
 
 `1.2.0` 2018.12.04. 행동방침 변경
 <br> `1.2.1` 2018.12.14. 실행파일 인자 공유
+<br> `1.2.2` 2019.01.11. Motion manager 인터럽트 기능 추가
 
 
 ## 사용법
@@ -86,7 +87,6 @@
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/finiel/shared_control.git
 $ git clone https://yssmecha@bitbucket.org/yssmecha/turtlebot3_gazebo.git
-$ git clone https://github.com/ZeroAnu/motion_manager.git
 $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
 $ pip install networkx
 $ cd ~/catkin_ws
@@ -124,7 +124,7 @@ $ sudo xboxdrv
 - Subscribed Topics
     + bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
     + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Published Topics
     + robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
     + interface/douser ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
@@ -170,6 +170,8 @@ $ sudo xboxdrv
         - Motor imagery가 binary question만 처리할 수 있는 상황에 맞추어 행동방침을 변경하였다.
         - 현재는 4갈래 이상의 교차로가 발생하면 대기한다.
         - 현재는 말단노드에서만 출발이 가능하다.
+    + [x] 초기화 도중에는 초기위치로의 이동명령 전달이 불안정하다.
+        - 로봇이 움직일 때까지 이동을 시도한다.
 
 ### Spatial information manager
 공간정보를 처리한다. 주어진 지도를 GVG로 변환하고 검색서비스를 제공한다.
@@ -221,6 +223,23 @@ $ sudo xboxdrv
         - 예외처리를 추가하여 서비스에 실패했음을 알린다.
     + [x] 시연을 위해 GVG가 아닌 임의의 그래프 생성기능이 필요하다.
 
+### Motion manager
+이동로봇의 목표자세를 관리한다.
+- Subscribed Topics
+    + robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+- Published Topics
+    + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
+- Paramters
+    + spin_cycle (float, default: 0.1)
+- Issues
+    + [x] 인터럽트를 지원하지 않는다.
+        - 이동하는 도중에는 새로운 명령을 수행하지 않는다.
+        - 이동에 성공할 때까지 대기하는 것이 아니라, 목표가 변경되었는지를 주기적으로 확인한다.
+        - Actionlib에서 goal handler의 상태를 추적한다.
+    + [x] 불필요한 변환단계를 거친다.
+        - 로봇의 자세 `robot/pose`는 이제 motion manager가 분배하는 것이 아니라 필요한 노드에서 직접 구독한다.
+        - 기존의 메시지 `Pose`를 `PoseWithCovarianceStamped`로 갱신한다.
+
 ### Interface visualizer
 시각화를 담당한다. 사용자가 상황을 파악할 수 있도록 주행환경과 인터페이스를 마커로 발행한다.
 - Subscribed Topics
@@ -229,7 +248,7 @@ $ sudo xboxdrv
     + interface/MID_R (shared_control/MID)
     + interface/MID_confirm (shared_control/MID)
     + interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Published Topics
     + interface ([visualization_msgs/MarkerArray](http://docs.ros.org/api/navi_msgs/html/msg/MarkerArray.html))
 - Parameters
@@ -245,7 +264,7 @@ $ sudo xboxdrv
 - Subscribed Topics
     + map ([nav_msgs/OccupancyGrid](http://docs.ros.org/api/navi_msgs/html/msg/OccupancyGrid.html))
     + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html))
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Published Topics
     + interface/destination ([geometry_msgs/Point](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Point.html))
 - Parameters
@@ -263,7 +282,7 @@ $ sudo xboxdrv
 ### BCI
 실제 BCI와 통신한다. Motor imagery와 eye blink 기능을 제공한다.
 - Subscribed Topics
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Published Topics
     + bci/eyeblink ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), 눈을 깜빡인 횟수
 - Services
@@ -280,7 +299,7 @@ $ sudo xboxdrv
     + robot/target ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
 - Published Topics
     + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Broadcasted Transformations
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`
@@ -305,7 +324,7 @@ $ sudo xboxdrv
     + cmd_vel ([geometry_msgs/Twist](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Twist.html))
 - Published Topics
     + robot/state ([std_msgs/Int32](http://docs.ros.org/kinetic/api/std_msgs/html/msg/Int32.html)), `0`은 정지, `1`은 이동하는 중을 나타낸다.
-    + robot/pose ([geometry_msgs/Pose](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/Pose.html))
+    + robot/pose ([geometry_msgs/PoseWithCovarianceStamped](http://docs.ros.org/kinetic/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html))
 - Broadcasted Transformations
     + `map`~`odom`, 이동로봇의 초기위치
     + `odom`~`base_footprint`

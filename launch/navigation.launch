@@ -51,7 +51,7 @@
     <rosparam file="$(find shared_control)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
   </node>
 
-  <node pkg="shared_control" type="motion_manager.py" name="motion_manager" output="screen">
+  <node pkg="shared_control" type="motion_manager.py" name="motion_manager">
     <param name="spin_cycle" value="0.1"/>
   </node>
 

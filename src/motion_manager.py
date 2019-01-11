@@ -3,7 +3,6 @@
 
 import rospy
 import actionlib
-import copy
 
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Int32
@@ -16,36 +15,34 @@ class MOTION_MANAGER:
     def __init__(self):
         self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.client.wait_for_server()
-        self.state = 0
+        self.goal = MoveBaseGoal()
+        self.goal.target_pose.header.frame_id = 'map'
+        self.seq = [0, 0]
 
         rospy.Subscriber('robot/target', Pose, self.update_target)
 
         self.publisher_state = rospy.Publisher('robot/state', Int32, queue_size=1)
 
-        rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.test)
-
-        rospy.loginfo('초기화 완료')
+        rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.control)
 
     def update_target(self, data):
-        goal = MoveBaseGoal()                                       # 목표를 설정한다.
-        goal.target_pose.header.frame_id = 'map'
-        goal.target_pose.header.stamp = rospy.Time.now()
-        goal.target_pose.pose.position.x = data.position.x
-        goal.target_pose.pose.position.y = data.position.y
-        goal.target_pose.pose.position.z = data.position.z
-        goal.target_pose.pose.orientation.x = data.orientation.x
-        goal.target_pose.pose.orientation.y = data.orientation.y
-        goal.target_pose.pose.orientation.z = data.orientation.z
-        goal.target_pose.pose.orientation.w = data.orientation.w
+        self.seq[1] = rospy.get_time()          # 목표를 기록한다.
+        self.goal.target_pose.header.stamp = rospy.Time.now()
+        self.goal.target_pose.pose = data
 
-        self.client.send_goal(goal)
-        self.state = 1
-        self.client.wait_for_result()
-        self.state = 0
+    def control(self, event):
+        if self.seq[0] != self.seq[1]:          # 새로운 목표가 확인된다면,
+            self.seq[0] = self.seq[1]           # 목표를 갱신한다.
+            self.client.cancel_goal()
+            self.client.wait_for_server()
+            self.client.send_goal(self.goal)
 
-    def test(self, event):
-        self.publisher_state.publish(self.state)
-        # rospy.loginfo(self.state)
+        if self.seq[0] == 0:                    # 현재상태를 발행한다.
+            self.publisher_state.publish(0)     # simple_action_client: ACTIVE(1)
+        elif self.client.get_state() != 1:
+            self.publisher_state.publish(0)
+        else:
+            self.publisher_state.publish(1)
 
 
 if __name__ == '__main__':
