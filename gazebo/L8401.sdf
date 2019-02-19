@@ -2590,7 +2590,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.44825 1.84922 0.337287 0 -0 0</pose>
     </model>
@@ -2698,7 +2698,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.64795 4.11 0 0 -0 0</pose>
     </model>
@@ -2799,7 +2799,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>5.12093 2.35408 1 0 -0 0</pose>
     </model>
@@ -2900,7 +2900,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>5.1019 1.25294 1 0 -0 0</pose>
     </model>
@@ -3002,7 +3002,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3 4 0.615 0 -0 0</pose>
     </model>
@@ -3560,7 +3560,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.16934 1.11427 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -4118,7 +4118,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.14765 2.74464 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -4676,7 +4676,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.22319 1.1653 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -5234,7 +5234,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.22713 2.73508 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -5336,7 +5336,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.06212 1.95668 0 0 -0 0</pose>
     </model>
@@ -5894,7 +5894,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.43426 5.83635 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -6452,7 +6452,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.66607 5.72203 0.419999 2e-06 2e-06 0.000144</pose>
     </model>
@@ -6554,7 +6554,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.75929 2.71542 0.615 0 -0 0</pose>
     </model>
@@ -6656,7 +6656,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.06686 5.70967 0.615 0 -0 0</pose>
     </model>
@@ -6758,7 +6758,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.1987 5.63006 0.615 0 -0 0</pose>
     </model>
@@ -6860,7 +6860,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.11523 1.92666 0.615 0 -0 0</pose>
     </model>
@@ -6962,7 +6962,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.10727 3.49819 0.615 0 -0 0</pose>
     </model>
@@ -7064,7 +7064,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.35944 3.49265 0.615 0 -0 0</pose>
     </model>
@@ -7166,7 +7166,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.54481 4.80497 0.615 0 -0 0</pose>
     </model>
@@ -7268,7 +7268,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.42606 4.82147 0.615 0 -0 0</pose>
     </model>
@@ -7370,7 +7370,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.73909 3.49259 0.625 4e-06 1e-06 0.000106</pose>
     </model>
@@ -7472,7 +7472,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.73905 1.94127 0.615 4e-06 2e-06 0.000106</pose>
     </model>
@@ -7574,7 +7574,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.93092 5.06664 0.615 4e-06 2e-06 0.000106</pose>
     </model>
@@ -7676,7 +7676,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.0967 5.06641 0.615 4e-06 2e-06 0.000106</pose>
     </model>
@@ -7777,7 +7777,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.68329 1.58618 0.5 0 -0 0</pose>
     </model>
@@ -7878,7 +7878,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.27215 2.51937 0.25 0 -0 0</pose>
     </model>
@@ -7979,7 +7979,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.04513 1.51743 0.25 0 -0 0</pose>
     </model>
@@ -8080,7 +8080,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.06973 2.7202 0.25 0 -0 0</pose>
     </model>
@@ -8181,7 +8181,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>0.883029 1.46117 0.5 0 -0 0</pose>
     </model>
@@ -8282,7 +8282,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.19331 4.06816 0.305 0 -0 0</pose>
     </model>
@@ -8383,7 +8383,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.70747 0.787019 0.305 0 -0 0</pose>
     </model>
@@ -8484,7 +8484,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.16238 2.84721 0.5 0 -0 0</pose>
     </model>
@@ -8585,7 +8585,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.64277 4.13484 0.5 0 -0 0</pose>
     </model>
@@ -8686,7 +8686,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.29654 4.74857 0.25 0 -0 0</pose>
     </model>
@@ -8789,7 +8789,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.17801 1.09914 0.5 0 -0 0</pose>
     </model>
@@ -8890,7 +8890,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.14971 0.774172 0.25 0 -0 0</pose>
     </model>
@@ -8993,7 +8993,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.73858 1.34727 0.13 0 -0 0</pose>
     </model>
@@ -9096,7 +9096,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.63915 3.36984 0.13 0 -0 0</pose>
     </model>
@@ -9197,7 +9197,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.84939 4.28417 0.5 0 -0 0</pose>
     </model>
@@ -9298,7 +9298,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.42956 4.64591 0.5 0 -0 0</pose>
     </model>
@@ -9517,7 +9517,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.43317 5.63625 0.11 0 -0 0</pose>
     </model>
@@ -9736,7 +9736,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.50849 5.61412 0 0 -0 0</pose>
     </model>
@@ -9955,7 +9955,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.50052 6.32026 0.11 0 -0 0</pose>
     </model>
@@ -10056,7 +10056,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.89074 4.95664 0.5 0 -0 0</pose>
     </model>
@@ -10159,7 +10159,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.80767 5.05263 0.5 0 -0 0</pose>
     </model>
@@ -10260,7 +10260,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>3.82827 1.03112 0.5 0 -0 0</pose>
     </model>
@@ -10361,7 +10361,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.42613 4.37473 0.5 0 -0 0</pose>
     </model>
@@ -10464,7 +10464,7 @@
           </surface>
         </collision>
       </link>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.24959 6.19498 0.13 0 -0 0</pose>
     </model>
@@ -10681,7 +10681,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>5.4289 5.2061 0.5 0 -0 3.1415</pose>
     </model>
@@ -10898,7 +10898,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>5.42891 4.30776 0.5 0 -0 3.1415</pose>
     </model>
@@ -11345,7 +11345,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>6.95763 3.03589 0.5 0 -0 0</pose>
     </model>
@@ -11792,7 +11792,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.61825 2.60846 0 0 -0 0</pose>
     </model>
@@ -12239,7 +12239,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>1.05954 5.79155 0 0 -0 0</pose>
     </model>
@@ -12686,7 +12686,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>2.74006 5.8983 0 0 -0 0</pose>
     </model>
@@ -13133,7 +13133,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.15179 2.6824 0 0 -0 0</pose>
     </model>
@@ -13580,7 +13580,7 @@
           </ode>
         </physics>
       </joint>
-      <static>0</static>
+      <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>4.1237 1.05508 0 0 -0 3.1415</pose>
     </model>
