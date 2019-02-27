@@ -4,8 +4,8 @@
   <arg name="robot_pose_y" default="0.0"/>
   <arg name="robot_pose_Y" default="0.0"/>
 
+  # 주행환경: L8401
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <!-- <arg name="world_name" value="$(find turtlebot3_gazebo)/models/silla_univ.house.world"/> -->
     <arg name="world_name" value="$(find shared_control)/gazebo/L8401.sdf"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
@@ -13,11 +13,15 @@
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
   </include>
+
+  # 이동로봇: Turtlebot3_waffle
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle
               -x $(arg robot_pose_x)
               -y $(arg robot_pose_y)
               -Y $(arg robot_pose_Y)
               -param robot_description"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
 </launch>
