@@ -39,8 +39,7 @@ class DirectController:
             self.publisher_command.publish(2)
         elif key == 's':    # stop
             self.publisher_command.publish(3)
-        elif key == 'x':    # backward
-            self.publisher_command.publish(4)
+
 
 
 if __name__ == '__main__':
