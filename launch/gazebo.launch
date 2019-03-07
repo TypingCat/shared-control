@@ -14,7 +14,7 @@
     <arg name="debug" value="false"/>
   </include>
 
-  # 이동로봇: Turtlebot3_waffle  
+  # 이동로봇: Turtlebot3 waffle
   <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle
