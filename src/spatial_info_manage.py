@@ -13,7 +13,7 @@ from std_msgs.msg import ColorRGBA
 from shared_control.srv import Nearest, Neighbors, Node
 
 
-class SPATIAL_INFO_MANAGER:
+class SpatialInfoManage:
     """지도로부터 GVG를 생성하고 관련 서비스를 제공한다."""
     def __init__(self):
         self.map = OccupancyGrid()
@@ -360,5 +360,5 @@ class SPATIAL_INFO_MANAGER:
 
 if __name__ == '__main__':
     rospy.init_node('spatial_info_manager')
-    spatial_info_manager = SPATIAL_INFO_MANAGER()
+    sim = SpatialInfoManage()
     rospy.spin()

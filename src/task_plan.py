@@ -22,7 +22,7 @@ C_YELLO = "\033[33m"
 C_END   = "\033[0m"
 
 
-class TASK_PLAN:
+class TaskPlan:
     """로봇의 구체적인 임무를 결정한다"""
     def __init__(self):
         print(C_YELLO + 'Task planner, GVG 서비스 확인중...' + C_END)
@@ -236,9 +236,6 @@ class TASK_PLAN:
         goal = MoveBaseGoal()
         goal.target_pose.header.frame_id = 'map'                        # 좌표계를 설정한다.
         goal.target_pose.pose.position = self.get_node(id).point        # 위치를 설정한다.
-        # nearest = Point()
-        # nearest = self.get_node(self.get_nearest(self.pose.position).id).point
-        # rospy.loginfo(nearest)
         dx = goal.target_pose.pose.position.x - self.pose.position.x    # 방향을 설정한다.
         dy = goal.target_pose.pose.position.y - self.pose.position.y
         th = math.atan2(dy, dx)
@@ -247,34 +244,24 @@ class TASK_PLAN:
         goal.target_pose.pose.orientation.y = q[1]
         goal.target_pose.pose.orientation.z = q[2]
         goal.target_pose.pose.orientation.w = q[3]
-        # print('({0}, {1}, {2}) vs ({3}, {4}, {5})'.format(goal.target_pose.pose.position.x, goal.target_pose.pose.position.y, th, self.prev_goal.x, self.prev_goal.y, self.prev_goal.z))
 
-        # diff = abs(goal.target_pose.pose.position.x - self.prev_goal.x)\
-        #      + abs(goal.target_pose.pose.position.y - self.prev_goal.y)\
-        #      + abs(th - self.prev_goal.z)                               # 목표중복을 검토한다.
-        # if diff > 0.1:
-        #     self.prev_goal.x = goal.target_pose.pose.position.x         # 목표로 이동한다.
-        #     self.prev_goal.y = goal.target_pose.pose.position.y
-        #     self.prev_goal.z = th
-        #     self.client.cancel_goal()
-        #     self.client.wait_for_server()
-        #     self.client.send_goal(goal)
-        #     print(C_RED + '{}, 목표중복으로 취소'.format(id) + C_END)
-
-        if force == True:
+        if force == True:                                               # 이동명령을 내린다.
             self.client.cancel_goal()
             self.client.wait_for_server()
         self.client.send_goal(goal)
 
     def head_to(self, id, force=False):
         """로봇이 특정 각도를 바라보도록 한다"""
+        if (not self.move_result.status == 3) and (force == False):
+            return
+
         goal = MoveBaseGoal()
         goal.target_pose.header.frame_id = 'map'                    # 좌표계를 설정한다.
         goal.target_pose.pose.position.x = self.pose.position.x     # 위치를 설정한다.
         goal.target_pose.pose.position.y = self.pose.position.y
-        p = Pose()
+        p = Pose()                                                  # 방향을 설정한다.
         p.position = self.get_node(id).point
-        dx = p.position.x - self.pose.position.x                    # 방향을 설정한다.
+        dx = p.position.x - self.pose.position.x
         dy = p.position.y - self.pose.position.y
         th = math.atan2(dy, dx)
         q = tf.transformations.quaternion_from_euler(0, 0, th)
@@ -283,27 +270,10 @@ class TASK_PLAN:
         goal.target_pose.pose.orientation.z = q[2]
         goal.target_pose.pose.orientation.w = q[3]
 
-        diff = abs(goal.target_pose.pose.position.x                     # 중복성을 검토한다.
-                 - self.goal_prev.target_pose.pose.position.x)\
-             + abs(goal.target_pose.pose.position.y
-                 - self.goal_prev.target_pose.pose.position.y)\
-             + abs(goal.target_pose.pose.orientation.x
-                 - self.goal_prev.target_pose.pose.orientation.x)\
-             + abs(goal.target_pose.pose.orientation.y
-                 - self.goal_prev.target_pose.pose.orientation.y)\
-             + abs(goal.target_pose.pose.orientation.z
-                 - self.goal_prev.target_pose.pose.orientation.z)\
-             + abs(goal.target_pose.pose.orientation.w
-                 - self.goal_prev.target_pose.pose.orientation.w)
-        if diff < 0.1:
-            return
-
-        print(C_YELLO + '{}'.format(diff) + C_END)
-        if diff > 0.1:
-            self.goal_prev = copy.copy(goal)
-            self.client.cancel_goal()                                   # 목표로 이동한다.
+        if force == True:                                           # 이동명령을 내린다.
+            self.client.cancel_goal()
             self.client.wait_for_server()
-            self.client.send_goal(goal)
+        self.client.send_goal(goal)
 
     def update_move_result(self, data):
         """로봇의 상태를 갱신한다"""
@@ -322,5 +292,5 @@ class TASK_PLAN:
 
 if __name__ == '__main__':
     rospy.init_node('task_planner')
-    tp = TASK_PLAN()
+    tp = TaskPlan()
     rospy.spin()

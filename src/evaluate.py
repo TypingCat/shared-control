@@ -12,7 +12,7 @@ from std_msgs.msg import Int32
 from shared_control.srv import Nearest, Node
 
 
-class EVALUATOR:
+class Evaluate:
     """움직임을 평가한다"""
     def __init__(self):
         self.map = MapMetaData()
@@ -120,5 +120,5 @@ class EVALUATOR:
 
 if __name__ == '__main__':
     rospy.init_node('evaluator')
-    evaluator = EVALUATOR()
+    e = Evaluate()
     rospy.spin()

@@ -11,7 +11,7 @@ from std_msgs.msg import Int32, ColorRGBA
 from shared_control.msg import MID
 
 
-class INTERFACE_VISUALIZER:
+class Visualize:
     """인터페이스를 시각화한다."""
     def __init__(self):
         self.gvg_node = Marker()
@@ -189,6 +189,6 @@ class INTERFACE_VISUALIZER:
 
 
 if __name__ == '__main__':
-    rospy.init_node('interface_visualizer')
-    interface_visualizer = INTERFACE_VISUALIZER()
+    rospy.init_node('visualizer')
+    v = Visualize()
     rospy.spin()
