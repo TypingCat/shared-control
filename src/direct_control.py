@@ -2,16 +2,17 @@
 #-*-coding: utf-8-*-
 
 import rospy
-import termios
-import sys
-import select
-import tty
-import copy
 import tf
+import termios, sys, select, tty
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Joy
+
+C_RED   = "\033[31m"
+C_GREEN = "\033[32m"
+C_YELLO = "\033[33m"
+C_END   = "\033[0m"
 
 
 class DirectControl:
@@ -20,12 +21,13 @@ class DirectControl:
         self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)
         self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
 
-        self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-
         rospy.Subscriber('joy', Joy, self.joystick)
 
+        self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+
         self.key_setting = termios.tcgetattr(sys.stdin)
-        self.key_watcher = rospy.Timer(rospy.Duration(rospy.get_param('~freq', 0.1)), self.keyboard)
+        self.key_watcher = rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.keyboard)
+        print(C_GREEN + 'Direct controller, 초기화 완료' + C_END)
 
     def get_key(self):
         """키보드 입력을 획득한다"""
@@ -56,6 +58,8 @@ class DirectControl:
         elif key == 'x':    # barkward
             cmd_vel.linear.x = -self.robot_vel_lin
             cmd_vel.angular.z = 0.
+        else:
+            return
 
         self.publisher_cmd_vel.publish(cmd_vel)
 

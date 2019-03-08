@@ -2,7 +2,6 @@
 #-*-coding: utf-8-*-
 
 import rospy
-import copy
 import math
 
 from visualization_msgs.msg import MarkerArray, Marker
