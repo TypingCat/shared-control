@@ -23,14 +23,14 @@ class Visualize:
         self.dst = Point()
         self.pose = Pose()
 
-        rospy.Subscriber('interface/douser', Int32, self.update_douser)
-        rospy.Subscriber('interface/MID_L', MID, self.update_flicker_L)
-        rospy.Subscriber('interface/MID_R', MID, self.update_flicker_R)
-        rospy.Subscriber('interface/MID_confirm', MID, self.update_lighter)
-        rospy.Subscriber('interface/destination', Point, self.update_dst)
+        rospy.Subscriber('visual/douser', Int32, self.update_douser)
+        rospy.Subscriber('visual/MID_L', MID, self.update_flicker_L)
+        rospy.Subscriber('visual/MID_R', MID, self.update_flicker_R)
+        rospy.Subscriber('visual/MID_confirm', MID, self.update_lighter)
+        rospy.Subscriber('visual/destination', Point, self.update_dst)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
-        self.publisher = rospy.Publisher('interface', MarkerArray, queue_size=1)
+        self.publisher = rospy.Publisher('visual', MarkerArray, queue_size=1)
 
         rospy.Timer(rospy.Duration(rospy.get_param('~publish_cycle', 0.3)), self.publish)
 

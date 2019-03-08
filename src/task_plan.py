@@ -34,7 +34,7 @@ class TaskPlan:
         self.get_nearest = rospy.ServiceProxy('gvg/nearest', Nearest)
         self.get_neighbors = rospy.ServiceProxy('gvg/neighbors', Neighbors)
         self.get_node = rospy.ServiceProxy('gvg/node', Node)
-        self.get_motorimagery = rospy.ServiceProxy('bci/motorimagery', MotorImagery)
+        # self.get_motorimagery = rospy.ServiceProxy('bci_motorimagery', MotorImagery)
         print(C_YELLO + 'Task planner, GVG 서비스 확인 완료' + C_END)
 
         print(C_YELLO + 'Task planner, 자율주행 서비스 확인중...' + C_END)
@@ -51,10 +51,10 @@ class TaskPlan:
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
 
         # self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
-        # self.publisher_douser = rospy.Publisher('interface/douser', Int32, queue_size=1)
-        # self.publisher_MID_L = rospy.Publisher('interface/MID_L', MID, queue_size=1)
-        # self.publisher_MID_R = rospy.Publisher('interface/MID_R', MID, queue_size=1)
-        # self.publisher_MID_confirm = rospy.Publisher('interface/MID_confirm', MID, queue_size=1)
+        # self.publisher_douser = rospy.Publisher('visual/douser', Int32, queue_size=1)
+        # self.publisher_MID_L = rospy.Publisher('visual/MID_L', MID, queue_size=1)
+        # self.publisher_MID_R = rospy.Publisher('visual/MID_R', MID, queue_size=1)
+        # self.publisher_MID_confirm = rospy.Publisher('visual/MID_confirm', MID, queue_size=1)
 
         self.mount_gvg()                                            # 이동을 시작한다.
         print(C_YELLO + 'Task planner, 자율주행 서비스 확인 완료' + C_END)
@@ -109,12 +109,8 @@ class TaskPlan:
             try:
                 nearest = self.get_nearest(self.pose.position).id
             except:
-                rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
+                rospy.sleep(rospy.get_param('~plan_cycle', 1.0))
 
-        # self.history = [nearest, nearest, nearest, nearest] # 목표, 현재, 최근, 이전
-
-        # self.move = 0
-        # while self.move == 0:
         self.move_to(nearest)   # 가장 가까운 노드로 이동한다.
         while self.move_result.goal_id.stamp.nsecs == 0:
             rospy.sleep(rospy.get_param('~plan_cycle', 1.0))

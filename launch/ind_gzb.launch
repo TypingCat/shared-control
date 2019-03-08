@@ -30,6 +30,6 @@
     <param name="spin_cycle" value="0.1"/> -->
   </node>
   <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-        args="-d $(find shared_control)/rviz/develop.rviz"/>
+        args="-d $(find shared_control)/rviz/dev_indirect.rviz"/>
 
 </launch>

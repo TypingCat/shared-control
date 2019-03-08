@@ -23,14 +23,14 @@ class FAKE_BCI:
         self.key_watcher = rospy.Timer(rospy.Duration(0.1), self.spin)
         self.pose = Pose()
 
-        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
+        rospy.Subscriber('robot_pose', PoseWithCovarianceStamped, self.update_pose)
 
-        self.eyeblink_publisher = rospy.Publisher('bci/eyeblink', Int32, queue_size=1)
+        self.eyeblink_publisher = rospy.Publisher('bci_eyeblink', Int32, queue_size=1)
 
-        rospy.Service('bci/motorimagery', MotorImagery, self.motorimagery)
+        rospy.Service('bci_motorimagery', MotorImagery, self.motorimagery)
 
-        rospy.wait_for_service('gvg/node')
-        self.get_node = rospy.ServiceProxy('gvg/node', Node)
+        rospy.wait_for_service('gvg_node')
+        self.get_node = rospy.ServiceProxy('gvg_node', Node)
 
         self.connect()
 

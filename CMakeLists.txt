@@ -51,6 +51,9 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   MID.msg
+  MotorImageryCue.msg
+  MotorImageryResult.msg
+  EyeblinkResult.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -108,7 +111,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES shared_control
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 

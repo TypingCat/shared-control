@@ -12,6 +12,11 @@ from std_msgs.msg import ColorRGBA
 
 from shared_control.srv import Nearest, Neighbors, Node
 
+C_RED   = "\033[31m"
+C_GREEN = "\033[32m"
+C_YELLO = "\033[33m"
+C_END   = "\033[0m"
+
 
 class SpatialInfoManage:
     """지도로부터 GVG를 생성하고 관련 서비스를 제공한다."""
@@ -20,15 +25,16 @@ class SpatialInfoManage:
         self.gvd = OccupancyGrid()
         self.graph = networkx.Graph()
 
+        print(C_YELLO + 'Spatial info manager, GVG 서비스 준비중...' + C_END)
         rospy.Subscriber('map', OccupancyGrid, self.load_map)
-
-        self.publisher = rospy.Publisher('interface/graph', MarkerArray, queue_size=1)
-
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
+        print(C_YELLO + 'Spatial info manager, GVG 서비스 시작' + C_END)
 
+        self.publisher = rospy.Publisher('visual/graph', MarkerArray, queue_size=1)
         rospy.Timer(rospy.Duration(0.3), self.publish)
+        print(C_GREEN + 'Spatial info manager, 초기화 완료' + C_END)
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""

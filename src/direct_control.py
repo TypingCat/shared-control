@@ -55,7 +55,7 @@ class DirectControl:
         elif key == 's':    # stop
             cmd_vel.linear.x = 0.
             cmd_vel.angular.z = 0.
-        elif key == 'x':    # barkward
+        elif key == 'x':    # backward
             cmd_vel.linear.x = -self.robot_vel_lin
             cmd_vel.angular.z = 0.
         else:
