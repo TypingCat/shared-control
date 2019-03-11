@@ -9,9 +9,9 @@ import actionlib
 import termios, sys, select, tty
 
 from geometry_msgs.msg import Pose, Point, PoseWithCovarianceStamped, Twist
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Header
 
-from shared_control.msg import MID
+from shared_control.msg import MID, MotorImageryResult, EyeblinkResult
 from shared_control.srv import Nearest, Neighbors, Node, MotorImagery
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatusArray, GoalStatus
@@ -21,139 +21,183 @@ C_GREEN = "\033[32m"
 C_YELLO = "\033[33m"
 C_END   = "\033[0m"
 
+S_SLEEP = 0
+S_DIRECT = 1
+S_INDIRECT_WAIT = 2
+S_INDIRECT_BUSY = 3
+
 
 class TaskPlan:
     """로봇의 구체적인 임무를 결정한다"""
     def __init__(self):
-        print(C_YELLO + 'Task planner, GVG 서비스 확인중...' + C_END)
+        # 파라미터 설정
+        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
+        self.plan_cycle = rospy.Duration(rospy.get_param('~plan_cycle', 0.5))
+        self.node_radius = rospy.get_param('~node_radius', 1.0)
+
+        # 서비스 확인
+        print(C_YELLO + '\rTask planner, GVG 서비스 확인중...' + C_END)
         self.eyeblink = rospy.get_time()
         rospy.wait_for_service('gvg/nearest')
         rospy.wait_for_service('gvg/neighbors')
         rospy.wait_for_service('gvg/node')
-
         self.get_nearest = rospy.ServiceProxy('gvg/nearest', Nearest)
         self.get_neighbors = rospy.ServiceProxy('gvg/neighbors', Neighbors)
         self.get_node = rospy.ServiceProxy('gvg/node', Node)
-        # self.get_motorimagery = rospy.ServiceProxy('bci_motorimagery', MotorImagery)
-        print(C_YELLO + 'Task planner, GVG 서비스 확인 완료' + C_END)
+        print(C_YELLO + '\rTask planner, GVG 서비스 확인 완료' + C_END)
 
-        print(C_YELLO + 'Task planner, 자율주행 서비스 확인중...' + C_END)
+        print(C_YELLO + '\rTask planner, 자율주행 서비스 확인중...' + C_END)
         self.prev_goal = Point()
         self.move_result = GoalStatus()
         self.move_result.status = 3
         self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.client.wait_for_server()
-
-        # rospy.Subscriber('bci/eyeblink', Int32, self.percussion)
-        # rospy.Subscriber('robot/state', Int32, self.update_state)
-        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
-        # rospy.Subscriber('move_base/status', GoalStatusArray, self.update_state)
+        rospy.Subscriber('interf/eyeblink_result', EyeblinkResult, self.percussion)
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
-
         # self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
         # self.publisher_douser = rospy.Publisher('visual/douser', Int32, queue_size=1)
         # self.publisher_MID_L = rospy.Publisher('visual/MID_L', MID, queue_size=1)
         # self.publisher_MID_R = rospy.Publisher('visual/MID_R', MID, queue_size=1)
         # self.publisher_MID_confirm = rospy.Publisher('visual/MID_confirm', MID, queue_size=1)
-
+        self.robot_state = S_SLEEP
         self.mount_gvg()                                            # 이동을 시작한다.
-        print(C_YELLO + 'Task planner, 자율주행 서비스 확인 완료' + C_END)
+        print(C_YELLO + '\rTask planner, 자율주행 서비스 확인 완료' + C_END)
 
-        # print(C_YELLO + 'Task planner, BCI 서비스 확인중...' + C_END)
-        # rospy.wait_for_service('bci/motorimagery')
-        # print(C_YELLO + 'Task planner, BCI 서비스 확인 완료' + C_END)
+        print(C_YELLO + '\rTask planner, BCI 서비스 확인중...' + C_END)
+        rospy.wait_for_service('interf/motorimagery')
+        self.get_motorimagery = rospy.ServiceProxy('interf/motorimagery', MotorImagery)
+        print(C_YELLO + '\rTask planner, BCI 서비스 확인 완료' + C_END)
 
-        # rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.explosion)
-        print(C_GREEN + 'Task planner, 초기화 완료' + C_END)
-
+        # 초기화
+        rospy.Timer(self.plan_cycle, self.explosion)
     #     self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
     #     self.key_setting = termios.tcgetattr(sys.stdin)
-    #     self.key_watcher = rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.keyboard)
-    #
-    # def get_key(self):
-    #     """키보드 입력을 획득한다"""
-    #     tty.setraw(sys.stdin.fileno())
-    #     select.select([sys.stdin], [], [], 0)
-    #     key = sys.stdin.read(1)
-    #     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
-    #     return key
-    #
-    # def keyboard(self, event):
-    #     """키보드 입력을 제어명령으로 변환한다"""
-    #     cmd_vel = Twist()
-    #     key = self.get_key()
-    #     if key == '\x03':   # ctrl+c
-    #         self.key_watcher.shutdown()
-    #     elif key == 'a':    # left
-    #         cmd_vel.linear.x = 0.
-    #         cmd_vel.angular.z = 1.0
-    #     elif key == 'w':    # forward
-    #         cmd_vel.linear.x = 0.26
-    #         cmd_vel.angular.z = 0.
-    #     elif key == 'd':    # right
-    #         cmd_vel.linear.x = 0.
-    #         cmd_vel.angular.z = -1.0
-    #     elif key == 's':    # stop
-    #         cmd_vel.linear.x = 0.
-    #         cmd_vel.angular.z = 0.
-    #     elif key == 'x':    # backward
-    #         cmd_vel.linear.x = -0.26
-    #         cmd_vel.angular.z = 0.
-    #
-    #     self.publisher_cmd_vel.publish(cmd_vel)
+    #     self.key_watcher = rospy.Timer(self.spin_cycle, self.keyboard)
+        print(C_GREEN + '\rTask planner, 초기화 완료' + C_END)
 
     def mount_gvg(self):
         """이동로봇을 GVG 위로 이동시킨다"""
+        # 가장 가까운 노드를 성공할 때까지 검색한다.
         nearest = -1
-        while nearest == -1:    # 가장 가까운 노드를 성공할 때까지 검색한다.
+        while nearest == -1:
             try:
-                nearest = self.get_nearest(self.pose.position).id
+                nearest = self.get_nearest(self.robot_pose.position).id
             except:
-                rospy.sleep(rospy.get_param('~plan_cycle', 1.0))
+                rospy.sleep(self.plan_cycle)
 
-        self.move_to(nearest)   # 가장 가까운 노드로 이동한다.
+        # 가장 가까운 노드로 이동한다.
+        self.move_to(nearest)
         while self.move_result.goal_id.stamp.nsecs == 0:
-            rospy.sleep(rospy.get_param('~plan_cycle', 1.0))
+            rospy.sleep(self.plan_cycle)
 
-    # def percussion(self, data):
-    #     """트리거가 발생하면 이동목표를 갱신한다"""
-    #     if self.state == -1:                        # 휴면 상태인 로봇을 깨운다.
-    #         self.state = 0
-    #
-    #         neighbors = list(self.get_neighbors(self.history[1]).ids)
-    #         if len(neighbors) == 1:                 # 길이 하나밖에 없다면,
-    #             print('이동합니다.')                  # 질문할 필요 없이 이동한다.
-    #             self.move_to(neighbors[0])
-    #
+        # 현재상태를 기록한다.
+        self.departure_node = nearest
+        self.destination_node = nearest
+
+    def percussion(self, data):
+        """획득한 데이터를 장전-격발한다"""
+        if data.num == 3:                   # 상태 반전(휴면<->작동)
+            if self.robot_state == S_SLEEP:
+                self.robot_state = S_INDIRECT_WAIT
+            else:
+                self.robot_state = S_SLEEP
     #     else:                                       # 아니면 시간을 기록한다.
     #         self.eyeblink = rospy.get_time()
-    #
-    # def explosion(self, event):
-    #     """이동로봇의 임무계획시점을 판단한다"""
-    #     need_plan = False                           # 노드에 도달하면 다음 움직임을 계획한다.
-    #     try:                                        # 단 초기화가 완료될 때까지는 실행하지 않는다.
-    #         if (self.state == 0)&\
-    #            (self.move == 0)&\
-    #            (self.history[0] == self.history[1]):
-    #            need_plan = True
-    #     except:
-    #         return
-    #
-    #     # print(self.state),
-    #
-    #     if need_plan:                               # 계획을 시작한다.
-    #         self.state = 1
-    #
-    #         self.publisher_douser.publish(self.state)
-    #         rospy.Timer(rospy.Duration(rospy.get_param('~plan_cycle', 1.0)), self.planning, oneshot=True)
-    #
-    #     elif (self.state == 2)&\
-    #          (self.move == 0)&\
-    #          (self.history[0] == self.history[1]):  # 목표에 도달했음을 기록한다.
-    #         self.state = 0
-    #         self.history[3] = self.history[2]
-    #         self.history[2] = self.history[1]
-    #
+
+    def explosion(self, event):
+        """로봇에 과부하를 걸어 폭발시킨다"""
+        if not self.robot_state == S_INDIRECT_WAIT:
+            return
+
+        # 목적지 도달여부를 확인한다.
+        des_node_position = self.get_node(self.destination_node).point
+        des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_position.x)**2
+                                 +(self.robot_pose.position.y - des_node_position.y)**2)
+        # if not self.get_nearest(self.robot_pose.position).id == self.destination_node:
+        #     return
+        if des_node_dist > self.node_radius:
+            return
+
+        # 목표도달여부를 확인한다.
+        # if (self.robot_state == S_INDIRECT_BUSY) and (self.move_result.status == 3):
+        #     self.robot_state = S_INDIRECT_WAIT
+        # 실행조건을 확인한다.
+        # if not self.robot_state == S_INDIRECT_WAIT:
+        #     return
+        # if self.robot_state == S_INDIRECT_WAIT:
+        #     self.robot_state = S_INDIRECT_BUSY
+        # self.move_result.status == 3
+
+        # 선택지를 확인한다.
+        des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
+        choice = des_node_neighbors
+        try:
+            choice.remove(self.departure_node)
+        except: pass
+
+        # 선택지가 하나라면 바로 이동한다.
+        if len(choice) == 1:
+            print('\rTask planner/explosion, 이웃 판정 1')
+            self.move_to(choice[0])
+            self.departure_node = self.destination_node
+            self.destination_node = choice[0]
+
+        # 선택지가 둘 이상이라면 motorimagery를 요청한다.
+        else:
+
+            # a = rospy.Time.now()
+            # rospy.sleep(self.spin_cycle)
+            # b = rospy.Time.now()
+            # c = a - b
+            # rospy.loginfo(a)
+            # rospy.loginfo(b)
+            # rospy.loginfo(c)
+
+            print('\rTask planner/explosion, 이웃 판정 2~')
+            self.robot_state = S_INDIRECT_BUSY
+
+            cue = Header()
+            cue.stamp = rospy.Time.now()
+            mi = self.get_motorimagery(cue)
+
+            print('\rTask planner/explosion, MI 받음: {}'.format(mi.dir))
+
+
+        # 왼쪽! 오른쪽! 확인
+        # 거리 확인
+
+
+
+        # need_plan = False                           # 노드에 도달하면 다음 움직임을 계획한다.
+        # try:                                        # 단 초기화가 완료될 때까지는 실행하지 않는다.
+        #     if (self.state == 0)&\
+        #        (self.move == 0)&\
+        #        (self.history[0] == self.history[1]):
+        #        need_plan = True
+        # except:
+        #     return
+        #
+        # # print(self.state),
+        #
+        # if need_plan:                               # 계획을 시작한다.
+        #     self.state = 1
+        #
+        #     self.publisher_douser.publish(self.state)
+        #     rospy.Timer(rospy.Duration(rospy.get_param('~plan_cycle', 1.0)), self.planning, oneshot=True)
+        #
+        # elif (self.state == 2)&\
+        #      (self.move == 0)&\
+        #      (self.history[0] == self.history[1]):  # 목표에 도달했음을 기록한다.
+        #     self.state = 0
+        #     self.history[3] = self.history[2]
+        #     self.history[2] = self.history[1]
+
+        # 움직임이 종료될 때까지 대기한다.
+        # if (not self.move_result.status == 3)
+        # self.robot_state = S_INDIRECT_WAIT
+
+
     # def planning(self, event):
     #     """움직임을 계획한다"""
     #     neighbors = list(self.get_neighbors(self.history[2]).ids)
@@ -225,15 +269,19 @@ class TaskPlan:
     #         rospy.sleep(rospy.get_param('~spin_cycle', 0.1))
 
     def move_to(self, id, force=False):
+        # print('\rmove_to, 목표 획득 {}'.format(id))
         """로봇을 해당노드로 이동시킨다"""
+        # 아직 이전목표에 도달하지 않았다면 새로운 명령은 무시한다.
         if (not self.move_result.status == 3) and (force == False):
             return
+        # print('\rmove_to, 이동 시작')
 
+        # 이동목표를 설정한다.
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = 'map'                        # 좌표계를 설정한다.
-        goal.target_pose.pose.position = self.get_node(id).point        # 위치를 설정한다.
-        dx = goal.target_pose.pose.position.x - self.pose.position.x    # 방향을 설정한다.
-        dy = goal.target_pose.pose.position.y - self.pose.position.y
+        goal.target_pose.header.frame_id = 'map'                        # 좌표계
+        goal.target_pose.pose.position = self.get_node(id).point        # 자세
+        dx = goal.target_pose.pose.position.x - self.robot_pose.position.x
+        dy = goal.target_pose.pose.position.y - self.robot_pose.position.y
         th = math.atan2(dy, dx)
         q = tf.transformations.quaternion_from_euler(0, 0, th)
         goal.target_pose.pose.orientation.x = q[0]
@@ -241,24 +289,27 @@ class TaskPlan:
         goal.target_pose.pose.orientation.z = q[2]
         goal.target_pose.pose.orientation.w = q[3]
 
-        if force == True:                                               # 이동명령을 내린다.
+        # 이동명령을 내린다.
+        if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
         self.client.send_goal(goal)
 
     def head_to(self, id, force=False):
-        """로봇이 특정 각도를 바라보도록 한다"""
+        """로봇이 해당각도를 바라보도록 한다"""
+        # 아직 이전목표에 도달하지 않았다면 새로운 명령은 무시한다.
         if (not self.move_result.status == 3) and (force == False):
             return
 
+        # 이동목표를 설정한다.
         goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = 'map'                    # 좌표계를 설정한다.
-        goal.target_pose.pose.position.x = self.pose.position.x     # 위치를 설정한다.
-        goal.target_pose.pose.position.y = self.pose.position.y
-        p = Pose()                                                  # 방향을 설정한다.
+        goal.target_pose.header.frame_id = 'map'                        # 좌표계
+        goal.target_pose.pose.position.x = self.robot_pose.position.x   # 자세
+        goal.target_pose.pose.position.y = self.robot_pose.position.y
+        p = Pose()
         p.position = self.get_node(id).point
-        dx = p.position.x - self.pose.position.x
-        dy = p.position.y - self.pose.position.y
+        dx = p.position.x - self.robot_pose.position.x
+        dy = p.position.y - self.robot_pose.position.y
         th = math.atan2(dy, dx)
         q = tf.transformations.quaternion_from_euler(0, 0, th)
         goal.target_pose.pose.orientation.x = q[0]
@@ -266,7 +317,8 @@ class TaskPlan:
         goal.target_pose.pose.orientation.z = q[2]
         goal.target_pose.pose.orientation.w = q[3]
 
-        if force == True:                                           # 이동명령을 내린다.
+        # 이동명령을 내린다.
+        if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
         self.client.send_goal(goal)
@@ -279,11 +331,11 @@ class TaskPlan:
         # except: pass
     #     self.move = data.data
 
-    def update_pose(self, data):
+    def update_robot_pose(self, data):
         """로봇의 자세를 갱신한다"""
-        self.pose = data.pose.pose      # 현재 자세를 갱신한다.
-        # try:                            # 가장 가까운 노드를 갱신한다.
-        #     self.history[1] = self.get_nearest(self.pose.position).id
+        self.robot_pose = data.pose.pose    # 현재 자세를 갱신한다.
+        # try:                                # 가장 가까운 노드를 갱신한다.
+        #     self.history[1] = self.get_nearest(self.robot_pose.position).id
         # except: pass
 
 if __name__ == '__main__':

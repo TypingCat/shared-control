@@ -1,2 +1,2 @@
-uint32 seq
-uint8 dir
+Header header
+int32 dir

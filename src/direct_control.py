@@ -27,7 +27,7 @@ class DirectControl:
 
         self.key_setting = termios.tcgetattr(sys.stdin)
         self.key_watcher = rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.keyboard)
-        print(C_GREEN + 'Direct controller, 초기화 완료' + C_END)
+        print(C_GREEN + '\rDirect controller, 초기화 완료' + C_END)
 
     def get_key(self):
         """키보드 입력을 획득한다"""

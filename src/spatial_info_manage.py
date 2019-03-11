@@ -25,16 +25,16 @@ class SpatialInfoManage:
         self.gvd = OccupancyGrid()
         self.graph = networkx.Graph()
 
-        print(C_YELLO + 'Spatial info manager, GVG 서비스 준비중...' + C_END)
+        print(C_YELLO + '\rSpatial info manager, GVG 서비스 준비중...' + C_END)
         rospy.Subscriber('map', OccupancyGrid, self.load_map)
         rospy.Service('gvg/nearest', Nearest, self.get_nearest)
         rospy.Service('gvg/neighbors', Neighbors, self.get_neighbors)
         rospy.Service('gvg/node', Node, self.get_node)
-        print(C_YELLO + 'Spatial info manager, GVG 서비스 시작' + C_END)
+        print(C_YELLO + '\rSpatial info manager, GVG 서비스 시작' + C_END)
 
         self.publisher = rospy.Publisher('visual/graph', MarkerArray, queue_size=1)
         rospy.Timer(rospy.Duration(0.3), self.publish)
-        print(C_GREEN + 'Spatial info manager, 초기화 완료' + C_END)
+        print(C_GREEN + '\rSpatial info manager, 초기화 완료' + C_END)
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""

@@ -1,9 +1,9 @@
 <launch>
 
   # 파라미터 설정
-  <arg name="robot_pose_x" value="4.4"/>    # 이동로봇의 초기자세
-  <arg name="robot_pose_y" value="1.6"/>
-  <arg name="robot_pose_Y" value="1.0"/>
+  <arg name="robot_pose_x" value="-6.0"/>    # 이동로봇의 초기자세
+  <arg name="robot_pose_y" value="0.0"/>
+  <arg name="robot_pose_Y" value="0.0"/>
   <arg name="robot_vel_lin" value="0.26"/>  # 이동로봇의 최고속도
   <arg name="robot_vel_ang" value="1.0"/>
 
