@@ -8,8 +8,8 @@ import termios, sys, select, tty
 from std_msgs.msg import Int32, Header
 from visualization_msgs.msg import MarkerArray, Marker
 
-from shared_control.msg import MotorImageryCue, MotorImageryResult, EyeblinkResult
-from shared_control.srv import MotorImagery, Node
+from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult
+from shared_control.srv import Motorimagery, Node
 
 C_RED   = "\033[31m"
 C_GREEN = "\033[32m"
@@ -31,22 +31,22 @@ class Interface:
 
         # 입출력 설정
         print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
-        self.publisher_motorimagery_cue = rospy.Publisher('interf/motorimagery_cue', MotorImageryCue, queue_size=1)
+        self.publisher_motorimagery_cue = rospy.Publisher('interf/motorimagery_cue', MotorimageryCue, queue_size=1)
 
         self.motorimagery_header = Header()
-        self.motorimagery_result = MotorImageryResult()
-        rospy.Subscriber('interf/motorimagery_result', MotorImageryResult, self.update_motorimagery_result)
+        self.motorimagery_result = MotorimageryResult()
+        rospy.Subscriber('interf/motorimagery_result', MotorimageryResult, self.update_motorimagery_result)
 
-        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorImageryResult, queue_size=1)
+        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
 
-        rospy.Service('interf/motorimagery', MotorImagery, self.motorimagery)
+        rospy.Service('interf/motorimagery', Motorimagery, self.motorimagery)
         print(C_YELLO + '\rInterfacer, BCI 서비스 시작' + C_END)
         print(C_GREEN + '\rInterfacer, 초기화 완료' + C_END)
 
     def motorimagery(self, request):
         """Motorimagery를 위한 서비스를 관리한다"""
         # Cue를 발행한다.
-        cue = MotorImageryCue()
+        cue = MotorimageryCue()
         cue.header = copy.copy(request.header)
         self.publisher_motorimagery_cue.publish(cue)
 
@@ -69,7 +69,7 @@ class Keyboard:
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
 
         # 입출력 설정
-        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorImageryResult, queue_size=1)
+        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
         self.publisher_eyeblink_result = rospy.Publisher('interf/eyeblink_result', EyeblinkResult, queue_size=1)
 
         # 초기화

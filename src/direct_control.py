@@ -18,8 +18,8 @@ C_END   = "\033[0m"
 class DirectControl:
     """이동로봇을 직접 제어한다"""
     def __init__(self):
-        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)    # 최대 0.26
-        self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)    # 최대 1.82
+        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)
+        self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
 
         rospy.Subscriber('joy', Joy, self.joystick)
 

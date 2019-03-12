@@ -22,7 +22,6 @@
   <node pkg="shared_control" type="direct_control.py" name="direct_controller" output="screen" respawn="true">
     <param name="robot_vel_lin" value="$(arg robot_vel_lin)"/>
     <param name="robot_vel_ang" value="$(arg robot_vel_ang)"/>
-    <param name="spin_cycle" value="0.1"/>
   </node>
   <node pkg="rviz" type="rviz" name="rviz" respawn="true"
         args="-d $(find shared_control)/rviz/dev_direct.rviz"/>

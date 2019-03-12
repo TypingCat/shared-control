@@ -51,15 +51,15 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   MID.msg
-  MotorImageryCue.msg
-  MotorImageryResult.msg
+  MotorimageryCue.msg
+  MotorimageryResult.msg
   EyeblinkResult.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  MotorImagery.srv
+  Motorimagery.srv
   Nearest.srv
   Neighbors.srv
   Node.srv

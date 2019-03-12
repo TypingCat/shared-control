@@ -1,9 +1,11 @@
 <launch>
 
+  # 파라미터 설정
   <arg name="robot_pose_x" default="0.0"/>
   <arg name="robot_pose_y" default="0.0"/>
   <arg name="robot_pose_Y" default="0.0"/>
 
+  # 위치추정
   <node pkg="amcl" type="amcl" name="amcl">
     <remap from="amcl_pose"                 to="robot/pose"/>
     <param name="min_particles"             value="500"/>
@@ -19,7 +21,6 @@
     <param name="initial_pose_y"            value="$(arg robot_pose_y)"/>
     <param name="initial_pose_a"            value="$(arg robot_pose_Y)"/>
     <param name="gui_publish_rate"          value="50.0"/>
-
     <param name="laser_max_range"           value="3.5"/>
     <param name="laser_max_beams"           value="180"/>
     <param name="laser_z_hit"               value="0.5"/>
@@ -30,7 +31,6 @@
     <param name="laser_lambda_short"        value="0.1"/>
     <param name="laser_likelihood_max_dist" value="2.0"/>
     <param name="laser_model_type"          value="likelihood_field"/>
-
     <param name="odom_model_type"           value="diff"/>
     <param name="odom_alpha1"               value="0.1"/>
     <param name="odom_alpha2"               value="0.1"/>
@@ -40,9 +40,9 @@
     <param name="base_frame_id"             value="base_footprint"/>
   </node>
 
+  # 자율주행
   <node pkg="move_base" type="move_base" name="move_base">
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
-
     <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
     <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap"/>
     <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
@@ -50,9 +50,5 @@
     <rosparam file="$(find shared_control)/param/move_base_params.yaml" command="load"/>
     <rosparam file="$(find shared_control)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
   </node>
-
-  <!-- <node pkg="shared_control" type="motion_manage.py" name="motion_manager">
-    <param name="spin_cycle" value="0.1"/>
-  </node> -->
 
 </launch>

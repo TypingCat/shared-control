@@ -21,17 +21,17 @@
     <rosparam param="custom_edge_list_y2"> [2.7, 2.7, 4.5, 5.1, 4.5, 5.1, 4.5, 4.95, 2.7, 2.1, 1.2] </rosparam>
   </node> -->
 
+  # 공유제어
   <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
-    <param name="spin_cycle" value="0.1"/>
+    <param name="robot_vel_ang" value="0.7"/>
   </node>
 
+  # 평가
   <node pkg="shared_control" type="visualize.py" name="visualizer" output="screen">
     <param name="publish_cycle" value="0.3"/>
     <param name="MI_marker_len" value="1.0"/>
   </node>
-
   <node pkg="shared_control" type="evaluate.py" name="evaluator" output="screen">
-    <param name="spin_cycle" value="0.1"/>
     <param name="destination_margin" value="0.5"/>
     <rosparam param="destination_list_x"> [6.0] </rosparam>
     <rosparam param="destination_list_y"> [1.6] </rosparam>
