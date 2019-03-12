@@ -5,7 +5,7 @@ import rospy
 import copy
 import termios, sys, select, tty
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Header
 from visualization_msgs.msg import MarkerArray, Marker
 
 from shared_control.msg import MotorImageryCue, MotorImageryResult, EyeblinkResult
@@ -33,6 +33,7 @@ class Interface:
         print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
         self.publisher_motorimagery_cue = rospy.Publisher('interf/motorimagery_cue', MotorImageryCue, queue_size=1)
 
+        self.motorimagery_header = Header()
         self.motorimagery_result = MotorImageryResult()
         rospy.Subscriber('interf/motorimagery_result', MotorImageryResult, self.update_motorimagery_result)
 
@@ -50,12 +51,14 @@ class Interface:
         self.publisher_motorimagery_cue.publish(cue)
 
         # 답변을 확인한다.
-        while self.motorimagery_result.header.stamp < cue.header.stamp:
+        while self.motorimagery_header.stamp < cue.header.stamp:
             rospy.sleep(self.spin_cycle)
-        return self.motorimagery_result
+        return {'header': self.motorimagery_header,
+                'dir': self.motorimagery_result.dir}
 
     def update_motorimagery_result(self, data):
         """획득한 motorimagery를 기록한다"""
+        self.motorimagery_header.stamp = rospy.Time.now()
         self.motorimagery_result = copy.copy(data)
 
 
@@ -84,38 +87,22 @@ class Keyboard:
     def spin(self, event):
         """키보드 입력을 메시지로 발행한다"""
         key = self.get_key()
-        mi = MotorImageryResult()
-        eb = EyeblinkResult()
         if key == '\x03':   # ctrl+c
             self.key_watcher.shutdown()
         elif key == 'a':
-            mi.header.stamp = rospy.Time.now()
-            mi.dir = M_LEFT
-            self.publisher_motorimagery_result.publish(mi)
+            self.publisher_motorimagery_result.publish(M_LEFT)
         elif key == 'w':
-            mi.header.stamp = rospy.Time.now()
-            mi.dir = M_FORWARD
-            self.publisher_motorimagery_result.publish(mi)
+            self.publisher_motorimagery_result.publish(M_FORWARD)
         elif key == 'd':
-            mi.header.stamp = rospy.Time.now()
-            mi.dir = M_RIGHT
-            self.publisher_motorimagery_result.publish(mi)
+            self.publisher_motorimagery_result.publish(M_RIGHT)
         elif key == 's':
-            mi.header.stamp = rospy.Time.now()
-            mi.dir = M_STOP
-            self.publisher_motorimagery_result.publish(mi)
+            self.publisher_motorimagery_result.publish(M_STOP)
         elif key == 'x':
-            mi.header.stamp = rospy.Time.now()
-            mi.dir = M_BACKWARD
-            self.publisher_motorimagery_result.publish(mi)
+            self.publisher_motorimagery_result.publish(M_BACKWARD)
         elif key == '2':
-            eb.header.stamp = rospy.Time.now()
-            eb.num = 2
-            self.publisher_eyeblink_result.publish(eb)
+            self.publisher_eyeblink_result.publish(2)
         elif key == '3':
-            eb.header.stamp = rospy.Time.now()
-            eb.num = 3
-            self.publisher_eyeblink_result.publish(eb)
+            self.publisher_eyeblink_result.publish(3)
         else:
             return
 
