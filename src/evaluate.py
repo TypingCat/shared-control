@@ -12,7 +12,7 @@ from std_msgs.msg import Int32
 from shared_control.srv import Nearest, Node
 
 
-class EVALUATOR:
+class Evaluate:
     """움직임을 평가한다"""
     def __init__(self):
         self.map = MapMetaData()
@@ -45,7 +45,7 @@ class EVALUATOR:
         rospy.Subscriber('robot/state', Int32, self.update_state)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
-        self.publisher_dst = rospy.Publisher('interface/destination', Point, queue_size=1)
+        self.publisher_dst = rospy.Publisher('visual/destination', Point, queue_size=1)
 
         rospy.Timer(rospy.Duration(rospy.get_param('~spin_cycle', 0.1)), self.evaluation)
 
@@ -59,7 +59,7 @@ class EVALUATOR:
         if self.state == 0:                                 # 초기화중일 경우,
             try:                                            # 대기를 확인하고 다음으로 넘어간다.
                 self.dst_point = self.select_destination()
-                print('목적지: [%f, %f]'%(self.dst_point.x, self.dst_point.y))
+                # print('목적지: [%f, %f]'%(self.dst_point.x, self.dst_point.y))
 
                 self.state = 1
             except: pass
@@ -120,5 +120,5 @@ class EVALUATOR:
 
 if __name__ == '__main__':
     rospy.init_node('evaluator')
-    evaluator = EVALUATOR()
+    e = Evaluate()
     rospy.spin()

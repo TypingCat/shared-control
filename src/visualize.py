@@ -2,7 +2,6 @@
 #-*-coding: utf-8-*-
 
 import rospy
-import copy
 import math
 
 from visualization_msgs.msg import MarkerArray, Marker
@@ -12,7 +11,7 @@ from std_msgs.msg import Int32, ColorRGBA
 from shared_control.msg import MID
 
 
-class INTERFACE_VISUALIZER:
+class Visualize:
     """인터페이스를 시각화한다."""
     def __init__(self):
         self.gvg_node = Marker()
@@ -24,14 +23,14 @@ class INTERFACE_VISUALIZER:
         self.dst = Point()
         self.pose = Pose()
 
-        rospy.Subscriber('interface/douser', Int32, self.update_douser)
-        rospy.Subscriber('interface/MID_L', MID, self.update_flicker_L)
-        rospy.Subscriber('interface/MID_R', MID, self.update_flicker_R)
-        rospy.Subscriber('interface/MID_confirm', MID, self.update_lighter)
-        rospy.Subscriber('interface/destination', Point, self.update_dst)
+        rospy.Subscriber('visual/douser', Int32, self.update_douser)
+        rospy.Subscriber('visual/MID_L', MID, self.update_flicker_L)
+        rospy.Subscriber('visual/MID_R', MID, self.update_flicker_R)
+        rospy.Subscriber('visual/MID_confirm', MID, self.update_lighter)
+        rospy.Subscriber('visual/destination', Point, self.update_dst)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_pose)
 
-        self.publisher = rospy.Publisher('interface', MarkerArray, queue_size=1)
+        self.publisher = rospy.Publisher('visual', MarkerArray, queue_size=1)
 
         rospy.Timer(rospy.Duration(rospy.get_param('~publish_cycle', 0.3)), self.publish)
 
@@ -190,6 +189,6 @@ class INTERFACE_VISUALIZER:
 
 
 if __name__ == '__main__':
-    rospy.init_node('interface_visualizer')
-    interface_visualizer = INTERFACE_VISUALIZER()
+    rospy.init_node('visualizer')
+    v = Visualize()
     rospy.spin()
