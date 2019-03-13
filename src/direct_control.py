@@ -9,10 +9,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Joy
 
-C_RED   = "\033[31m"
-C_GREEN = "\033[32m"
-C_YELLO = "\033[33m"
-C_END   = "\033[0m"
+from reserved_words import *
 
 
 class DirectControl:
