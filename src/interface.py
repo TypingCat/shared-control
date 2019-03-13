@@ -10,17 +10,7 @@ from visualization_msgs.msg import MarkerArray, Marker
 
 from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult
 from shared_control.srv import Motorimagery, Node
-
-C_RED   = "\033[31m"
-C_GREEN = "\033[32m"
-C_YELLO = "\033[33m"
-C_END   = "\033[0m"
-
-M_LEFT = 1
-M_FORWARD = 2
-M_RIGHT = 3
-M_STOP = 4
-M_BACKWARD = 5
+from reserved_words import *
 
 
 class Interface:

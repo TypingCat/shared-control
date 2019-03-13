@@ -87,18 +87,23 @@ $ sudo xboxdrv
 ```
 
 ### 실행
-두 가지 방식을 지원한다. 첫번째는 이동방향을 묻고 답하는 간접제어방식이다. 키보드 혹은 BCI로 입력한다.
-```
-$ roslaunch shared_control ind_gzb.launch
-```
-
-두번째는 평가기준으로 활용할 직접제어방식이다. 키보드 혹은 조이스틱으로 입력한다.
+공유제어 시스템은 두 가지 제어방식을 지원한다. 첫번째는 평가기준으로 활용할 직접제어방식이다. 키보드 혹은 조이스틱으로 입력한다.
 ```
 $ roslaunch shared_control dir_gzb.launch
 ```
 
+두번째는 이동방향을 묻고 답하는 간접제어방식이다. 키보드 혹은 BCI로 입력한다.
+```
+$ roslaunch shared_control ind_gzb.launch
+```
 
-## 기능
+공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
+- `interf/motorimagery_cue`, 공유제어 $\rightarrow$ BCI: Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
+- `interf/motorimagery_result`, BCI $\rightarrow$ 공유제어: Motor imagery 결과를 보낸다. <br> {1: 우, 2: 좌, ~~3: 전~~, ~~4: 후~~, ~~5: 정지~~}.
+- `interf/eyeblink_result`, BCI $\rightarrow$ 공유제어: Eye blink 결과를 보낸다. <br> {n: 깜빡임 횟수}
+
+
+## 노드
 ### Direct controller
 이동로봇의 속도를 직접 제어한다. 키보드와 조이스틱 입력을 지원한다.
 - Parameters

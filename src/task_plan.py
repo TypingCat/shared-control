@@ -10,27 +10,12 @@ import termios, sys, select, tty
 
 from geometry_msgs.msg import Pose, Point, PoseWithCovarianceStamped, Twist
 from std_msgs.msg import Int32, Header
-
-from shared_control.msg import MID, EyeblinkResult
-from shared_control.srv import Nearest, Neighbors, Node, Motorimagery
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatusArray, GoalStatus
 
-C_RED   = "\033[31m"
-C_GREEN = "\033[32m"
-C_YELLO = "\033[33m"
-C_END   = "\033[0m"
-
-S_SLEEP = 0
-S_DIRECT = 1
-S_INDIRECT_WAIT = 2
-S_INDIRECT_BUSY = 3
-
-M_LEFT = 1
-M_FORWARD = 2
-M_RIGHT = 3
-M_STOP = 4
-M_BACKWARD = 5
+from shared_control.msg import MID, EyeblinkResult
+from shared_control.srv import Nearest, Neighbors, Node, Motorimagery
+from reserved_words import *
 
 
 class TaskPlan:
