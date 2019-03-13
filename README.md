@@ -98,9 +98,9 @@ $ roslaunch shared_control ind_gzb.launch
 ```
 
 공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
-- `interf/motorimagery_cue`, 공유제어 $\rightarrow$ BCI: Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
-- `interf/motorimagery_result`, BCI $\rightarrow$ 공유제어: Motor imagery 결과를 보낸다. <br> {1: 우, 2: 좌, ~~3: 전~~, ~~4: 후~~, ~~5: 정지~~}.
-- `interf/eyeblink_result`, BCI $\rightarrow$ 공유제어: Eye blink 결과를 보낸다. <br> {n: 깜빡임 횟수}
+- `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
+- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), ~~전(3)~~, ~~후(4)~~, ~~정지(5)~~}.
+- `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
 
 
 ## 노드
