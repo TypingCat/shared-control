@@ -36,7 +36,7 @@
 
 ### 협업구조
 - 김래현박사님팀
-    + 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr)
+    + 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr), 오승훈
     + 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
     + 실무자: 노진홍(fini@kist.re.kr), 최태민(choitm0707@kist.re.kr)
@@ -99,7 +99,7 @@ $ roslaunch shared_control ind_gzb.launch
 
 공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
 - `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
-- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), ~~전(3)~~, ~~후(4)~~, ~~정지(5)~~}.
+- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), ~~전(3)~~, ~~후(4)~~, ~~정지(5)~~}
 - `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
 
 

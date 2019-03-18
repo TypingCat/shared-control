@@ -1,7 +1,6 @@
 <launch>
 
   # 주행환경 구축
-  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/map.yaml"/>
   <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen">
     <param name="gvd_PM" value="10.0"/>
     <param name="gvd_BM" value="3.74"/>

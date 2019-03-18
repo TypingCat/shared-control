@@ -12,10 +12,12 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   message_generation
+  gazebo_ros
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
+find_package(gazebo REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -112,7 +114,8 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES shared_control
   CATKIN_DEPENDS message_runtime
-#  DEPENDS system_lib
+  DEPENDS
+    gazebo_ros
 )
 
 ###########
@@ -122,8 +125,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+  ${SDFormat_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
