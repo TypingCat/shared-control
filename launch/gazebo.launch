@@ -34,10 +34,10 @@
 
   # 서버 실행
   <group if="$(arg use_clock_frequency)">
-    <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)" />
+    <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)"/>
   </group>
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
-	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)" />
+	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"/>
 
   # 이동로봇: Turtlebot3 waffle
   <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
@@ -47,11 +47,11 @@
               -y $(arg robot_pose_y)
               -Y $(arg robot_pose_Y)
               -param robot_description"/>
-  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"  respawn="true"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
   # 클라이언트 실행
   <group if="$(arg gui)">
-    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" respawn="false" output="screen" args="$(arg command_arg3)"/>
+    <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" output="screen" args="$(arg command_arg3)"/>
   </group>
 
 </launch>
