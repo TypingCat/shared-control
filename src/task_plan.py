@@ -30,7 +30,6 @@ class TaskPlan:
 
         # 서비스 확인
         print(C_YELLO + '\rTask planner, GVG 서비스 확인중...' + C_END)
-        self.eyeblink = rospy.get_time()
         rospy.wait_for_service('gvg/nearest')
         rospy.wait_for_service('gvg/neighbors')
         rospy.wait_for_service('gvg/node')
@@ -45,6 +44,7 @@ class TaskPlan:
         self.move_result.status = 3
         self.client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.client.wait_for_server()
+        self.eyeblink_time = rospy.get_time()
         rospy.Subscriber('interf/eyeblink_result', EyeblinkResult, self.percussion)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
@@ -90,10 +90,12 @@ class TaskPlan:
         """획득한 데이터를 장전-격발한다"""
         if data.num == 3:
             if self.robot_state == S_SLEEP:
-                print('\rTask planner, 상태전환: ' + C_YELLO + '활성' + C_END)
+                print('\rTask planner, Eyeblink(' + C_YELLO + '3' + C_END + ') 획득, 활성화')
                 self.robot_state = S_INDIRECT_WAIT
             else:
-                print('\rTask planner, 상태전환: ' + C_RED + '미구현' + C_END)
+                print(C_RED + '미구현' + C_END)
+        elif data.num == 2:
+            self.eyeblink_time = rospy.get_time()
 
     def explosion(self, event):
         """로봇에 과부하를 걸어 폭발시킨다"""
@@ -137,11 +139,10 @@ class TaskPlan:
             mi = self.get_motorimagery(cue)
 
             # 획득한 명령에 따라 목적지를 설정한다.
-            print('\rTask planner, Motorimagery 획득:'),
             if mi.dir == M_LEFT:
-                print(C_YELLO + '좌' + C_END)
+                print('\rTask planner, Motorimagery(' + C_YELLO + '좌' + C_END + ') 획득')
             elif mi.dir == M_RIGHT:
-                print(C_YELLO + '우' + C_END)
+                print('\rTask planner, Motorimagery(' + C_YELLO + '우' + C_END + ') 획득')
             else:
                 print(C_RED + '미구현' + C_END)
                 self.robot_state = S_INDIRECT_WAIT
@@ -169,7 +170,15 @@ class TaskPlan:
                 id = choice_th_rel.index(max(choice_th_rel))
             elif mi.dir == M_RIGHT:
                 id = choice_th_rel.index(min(choice_th_rel))
-            self.head_to(choice_th_abs[id])
+
+            # 회전 중 eyeblink를 감지하면 목표를 변경한다.
+            if self.head_to(choice_th_abs[id]):
+                print('\rTask planner, Eyeblink(' + C_YELLO + '2' + C_END + ') 획득, 목표 변경')
+                th_robot = tf.transformations.euler_from_quaternion(
+                    [self.robot_pose.orientation.x, self.robot_pose.orientation.y,
+                     self.robot_pose.orientation.z, self.robot_pose.orientation.w])[2]
+                choice_th_new = [abs(self.round(th - th_robot)) for th in choice_th_abs]
+                id = choice_th_new.index(min(choice_th_new))
 
             # 이동한다.
             print('\rTask planner, 다음 노드로 이동')
@@ -210,8 +219,11 @@ class TaskPlan:
 
     def head_to(self, th_target):
         """로봇이 해당각도만큼 회전한다"""
+        interrupt = False
+
         # 목표에 도달할 때까지 회전한다.
         dth = 1
+        t = rospy.get_time()
         while abs(dth) > 0.1:
             th = tf.transformations.euler_from_quaternion(
                 [self.robot_pose.orientation.x, self.robot_pose.orientation.y,
@@ -222,9 +234,16 @@ class TaskPlan:
             self.publisher_cmd_vel.publish(vel)
             rospy.sleep(self.spin_cycle)
 
+            # 도중에 명령이 들어와도 회전을 멈춘다.
+            if self.eyeblink_time > t:
+                interrupt = True
+                break
+
         # 정지한다.
         vel = Twist()
         self.publisher_cmd_vel.publish(vel)
+        rospy.sleep(self.plan_cycle)
+        return interrupt
 
     def update_move_result(self, data):
         """로봇의 상태를 갱신한다"""

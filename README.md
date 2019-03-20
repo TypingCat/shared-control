@@ -36,7 +36,7 @@
 
 ### 협업구조
 - 김래현박사님팀
-    + 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr), 오승훈
+    + 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr), 오승준(ohseungjun@kist.re.kr)
     + 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
     + 실무자: 노진홍(fini@kist.re.kr), 최태민(choitm0707@kist.re.kr)
@@ -48,28 +48,25 @@
 ![아키텍처](image/architecture.png)
 
 ### 변경점
-`1.0.0` 노드 사이의 프로토콜 확립, `1.0.1` Task planner 구축, `1.0.2` Gazebo 연결, `1.0.3` Interface visualizer 구축, `1.0.4` 좌표계 구축
-
-`1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
-
-`1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
-
-`1.3.0` BCI-이동로봇 인터페이스 개선
+- `1.0.0` 노드 사이의 프로토콜 확립, `1.0.1` Task planner 구축, `1.0.2` Gazebo 연결, `1.0.3` Interface visualizer 구축, `1.0.4` 좌표계 구축
+- `1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
+- `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
+- `1.3.0` BCI-이동로봇 인터페이스 개선
 
 
 ## 사용법
 ### 개발환경
-소프트웨어
-- Ubuntu 16.04
-- ROS kinetic (with Turtlebot3 package)
-- Python 2.7 (with NetworkX 2.1)
-
-하드웨어
-- Turtlebot3 Waffle (Gazebo)
-- XBOX360 remote controller
+- 소프트웨어
+    + Ubuntu 16.04
+    + ROS kinetic (with Turtlebot3 package)
+    + Python 2.7 (with NetworkX 2.1)
+- 하드웨어
+    + Turtlebot3 Waffle (Gazebo)
+    + XBOX360 remote controller
 
 ### 설치
 본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
+
 ```
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/finiel/shared_control.git
@@ -81,6 +78,7 @@ $ catkin_make
 
 ### 조이스틱 연결
 XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
+
 ```
 $ sudo rmmod xpad
 $ sudo xboxdrv
@@ -88,16 +86,19 @@ $ sudo xboxdrv
 
 ### 실행
 공유제어 시스템은 두 가지 제어방식을 지원한다. 첫번째는 평가기준으로 활용할 직접제어방식이다. 키보드 혹은 조이스틱으로 입력한다.
+
 ```
 $ roslaunch shared_control dir_gzb.launch
 ```
 
 두번째는 이동방향을 묻고 답하는 간접제어방식이다. 키보드 혹은 BCI로 입력한다.
+
 ```
 $ roslaunch shared_control ind_gzb.launch
 ```
 
 공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
+
 - `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
 - `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), ~~전(3)~~, ~~후(4)~~, ~~정지(5)~~}
 - `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
@@ -106,6 +107,7 @@ $ roslaunch shared_control ind_gzb.launch
 ## 노드
 ### Direct controller
 이동로봇의 속도를 직접 제어한다. 키보드와 조이스틱 입력을 지원한다.
+
 - Parameters
     + robot_vel_lin (float, default: 0.26)
     + robot_vel_ang (float, default: 1.82)
@@ -113,6 +115,7 @@ $ roslaunch shared_control ind_gzb.launch
 
 ### Evaluator
 이동로봇의 움직임을 테스트한다. 무작위 혹은 주어진 목표까지 이동하기까지의 시간을 기록한다.
+
 - Parameters
     + destination_margin (float, default: 0.5), 목적지 반경
     + destination_spawn_x_min (float, default: -5.0), 목적지 무작위 발생영역 (x_min, x_max, y_min, y_max)
@@ -125,11 +128,13 @@ $ roslaunch shared_control ind_gzb.launch
 
 ### Interfacer
 간접제어를 위한 프로토콜을 정리한다. 키보드와 BCI 입력을 지원한다.
+
 - Parameters
     + spin_cycle (float, default: 0.1)
 
 ### Spatial information manager
 공간정보를 처리한다. 주어진 지도를 GVG로 변환하고 검색서비스를 제공한다.
+
 - Paramters
     + gvd_PM (float, default: 10.0), Origin 사이의 최소거리
     + gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
@@ -141,6 +146,7 @@ $ roslaunch shared_control ind_gzb.launch
 
 ### Task planner
 이동로봇의 행동방침을 반영한다. 현재상황을 파악하여 로봇의 이동목표를 결정하거나 질문을 생성한다.
+
 - Paramters
     + spin_cycle (float, default: 0.1)
     + plan_cycle (float, default: 0.5)
@@ -156,6 +162,7 @@ $ roslaunch shared_control ind_gzb.launch
 
 ### Visualizer
 시각화를 담당한다. 사용자가 상황을 파악할 수 있도록 주행환경과 인터페이스를 마커로 발행한다.
+
 - Parameters
     + MI_marker_len (float, default: 1.0), Motor imagery 선택지를 나타내는 화살표의 길이
     + publish_cycle (float, default: 0.3)
