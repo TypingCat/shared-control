@@ -15,7 +15,7 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
-  <arg name="world_name" default="$(find shared_control)/gazebo/silla_univ.house.world"/>
+  <arg name="world_name" default="$(find shared_control)/gazebo/L8401.sdf"/>
 
   <arg name="respawn_gazebo" default="true"/>
   <arg name="use_clock_frequency" default="false"/>

@@ -1,19 +1,19 @@
 <launch>
 
   # 파라미터 설정
-  <arg name="robot_pose_x" value="-6.0"/>    # 이동로봇의 초기자세
-  <arg name="robot_pose_y" value="0.0"/>
-  <arg name="robot_pose_Y" value="0.0"/>
+  <arg name="robot_pose_x" value="4.3"/>    # 이동로봇의 초기자세
+  <arg name="robot_pose_y" value="1.0"/>
+  <arg name="robot_pose_Y" value="0.7"/>
   <arg name="robot_vel_lin" value="0.26"/>  # 이동로봇의 최고속도
   <arg name="robot_vel_ang" value="1.0"/>
 
   # 환경 시뮬레이션
-  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/map.yaml"/>
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/L8401.yaml"/>
   <include file="$(find shared_control)/launch/gazebo.launch">
     <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
     <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
     <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
-    <arg name="gui" value="false"/>
+    <arg name="gui" value="true"/>
   </include>
 
   # 이동로봇 제어
