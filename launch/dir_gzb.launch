@@ -8,6 +8,8 @@
   <arg name="robot_vel_ang" value="1.0"/>
 
   # 환경 시뮬레이션
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/L8401.yaml"/>
+
   <include file="$(find shared_control)/launch/gazebo.launch">
     <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
     <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
@@ -16,6 +18,12 @@
   </include>
 
   # 이동로봇 제어
+  <include file="$(find shared_control)/launch/navigation.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+  </include>
+
   <node pkg="joy" type="joy_node" name="joy_node" respawn="true"/>
 
   # 인터페이스
