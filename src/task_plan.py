@@ -62,6 +62,11 @@ class TaskPlan:
         self.get_motorimagery = rospy.ServiceProxy('interf/motorimagery', Motorimagery)
         print(C_YELLO + '\rTask planner, BCI 서비스 확인 완료' + C_END)
 
+        # 기록
+        self.log_time = rospy.get_time()
+        self.log_pose_x = self.robot_pose.position.x
+        self.log_pose_y = self.robot_pose.position.y
+
         # 초기화
         rospy.Timer(self.plan_cycle, self.explosion)
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
@@ -187,6 +192,15 @@ class TaskPlan:
             self.move_to(choice[id])
 
             self.robot_state = S_INDIRECT_WAIT
+
+            # 기록한다.
+            elps_time = rospy.get_time() - self.log_time
+            elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
+            print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
+
+            self.log_time = rospy.get_time()
+            self.log_pose_x = self.robot_pose.position.x
+            self.log_pose_y = self.robot_pose.position.y
 
     def round(self, th):
         return ((th + math.pi) % (2 * math.pi)) - math.pi
