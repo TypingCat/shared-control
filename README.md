@@ -88,7 +88,7 @@ $ sudo xboxdrv
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/finiel/shared_control.git
 $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
-$ pip install networkx
+$ pip install networkx==2.1
 $ cd ~/catkin_ws
 $ catkin_make
 ```
