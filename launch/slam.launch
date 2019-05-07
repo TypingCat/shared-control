@@ -1,13 +1,13 @@
 <launch>
   # 로봇이 주행한 환경을 2차원 지도로 기록한다.
-  # 로봇: Turtlebot3 waffle(beta)
+  # 로봇: Turtlebot3 waffle(gamma)
   # 제어방식: 속도제어, 키보드 awsdx
   # 센서: RPLidar A3(ttyUSB0)
   # SLAM 패키지: GMapping
   # 지도저장 명령어: rosrun map_server map_saver -f ~/map
 
   <!-- robot -->
-  <include file="$(find shared_control)/launch/turtlebot.launch"/>
+  <!-- <include file="$(find shared_control)/launch/turtlebot.launch"/> -->
 
   <!-- control -->
   <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key"

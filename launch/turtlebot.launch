@@ -1,16 +1,16 @@
 <launch>
-  <!-- states -->
-  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find shared_control)/urdf/turtlebot3_waffle_beta.urdf.xacro'"/>
+  # States
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find shared_control)/urdf/turtlebot3_waffle_gamma.urdf.xacro'"/>
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
   <node pkg="turtlebot3_bringup" type="turtlebot3_diagnostics" name="turtlebot3_diagnostics"/>
 
-  <!-- OpenCR -->
+  # OpenCR
   <node pkg="rosserial_python" type="serial_node.py" name="turtlebot3_core">
    <param name="port" value="/dev/ttyACM0"/>
    <param name="baud" value="115200"/>
   </node>
 
-  <!-- RPLidar -->
+  # RPLidar
   <node name="rplidarNode" pkg="rplidar_ros"  type="rplidarNode" output="screen">
     <param name="serial_port"      type="string" value="/dev/ttyUSB0"/>
     <param name="serial_baudrate"  type="int"    value="256000"/>
