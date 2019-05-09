@@ -23,11 +23,11 @@ class DirectControl:
 
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
 
-        # 기록
-        rospy.sleep(1.0)
-        self.log_time = rospy.get_time()
-        self.log_pose_x = self.robot_pose.position.x
-        self.log_pose_y = self.robot_pose.position.y
+        # # 기록
+        # rospy.sleep(1.0)
+        # self.log_time = rospy.get_time()
+        # self.log_pose_x = self.robot_pose.position.x
+        # self.log_pose_y = self.robot_pose.position.y
 
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
 
@@ -62,14 +62,14 @@ class DirectControl:
             cmd_vel.linear.x = 0.
             cmd_vel.angular.z = 0.
 
-            # 기록
-            elps_time = rospy.get_time() - self.log_time
-            elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
-            print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
-
-            self.log_time = rospy.get_time()
-            self.log_pose_x = self.robot_pose.position.x
-            self.log_pose_y = self.robot_pose.position.y
+            # # 기록
+            # elps_time = rospy.get_time() - self.log_time
+            # elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
+            # print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
+            #
+            # self.log_time = rospy.get_time()
+            # self.log_pose_x = self.robot_pose.position.x
+            # self.log_pose_y = self.robot_pose.position.y
 
         elif key == 'x':    # backward
             cmd_vel.linear.x = -self.robot_vel_lin

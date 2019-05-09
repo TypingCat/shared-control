@@ -1,0 +1,57 @@
+<launch>
+  # 시뮬레이션 환경에 놓인 로봇을 직접 제어한다.
+  # 로봇: Turtlebot3 waffle(gamma)
+  # 제어방식: 속도제어, 키보드 awsd 혹은 조이스틱
+  # 조이스틱 연결 명령어: sudo rmmod xpad; sudo xboxdrv
+
+  # 파라미터 설정
+  <arg name="robot_pose_x" value="18.3"/>   # 이동로봇의 초기자세
+  <arg name="robot_pose_y" value="19.5"/>
+  <arg name="robot_pose_Y" value="1.57"/>
+  <arg name="robot_vel_lin" value="0.22"/>  # 이동로봇의 최고속도
+  <arg name="robot_vel_ang" value="1.0"/>
+
+  # 환경 시뮬레이션
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/L81.yaml"/>
+
+  <include file="$(find shared_control)/launch/gazebo.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+    <arg name="gui" value="false"/>
+  </include>
+
+  # 이동로봇 제어
+  <include file="$(find shared_control)/launch/navigation.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+  </include>
+
+  <node pkg="joy" type="joy_node" name="joy_node" respawn="true"/>
+  <node pkg="shared_control" type="direct_control.py" name="direct_controller" output="screen" respawn="true">
+    <param name="robot_vel_lin" value="$(arg robot_vel_lin)"/>
+    <param name="robot_vel_ang" value="$(arg robot_vel_ang)"/>
+  </node>
+
+  # 인터페이스
+  <node pkg="rviz" type="rviz" name="rviz" respawn="true"
+        args="-d $(find shared_control)/rviz/direct_control.rviz"/>
+
+  # 평가
+  <!-- <node pkg="shared_control" type="visualize.py" name="visualizer" output="screen">
+    <param name="publish_cycle" value="0.3"/>
+    <param name="MI_marker_len" value="1.0"/>
+  </node> -->
+
+  <!-- <node pkg="shared_control" type="evaluate.py" name="evaluator" output="screen">
+    <param name="destination_margin" value="0.5"/>
+    #<rosparam param="destination_list_x"> [6.0] </rosparam>
+    #<rosparam param="destination_list_y"> [1.6] </rosparam>
+    <param name="destination_spawn_x_min" value="0.0"/>
+    <param name="destination_spawn_x_max" value="5.4"/>
+    <param name="destination_spawn_y_min" value="0.0"/>
+    <param name="destination_spawn_y_max" value="6.6"/>
+  </node> -->
+
+</launch>

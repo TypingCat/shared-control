@@ -1,9 +1,9 @@
 <launch>
 
   # 파라미터 설정
-  <arg name="robot_pose_x" default="18.3"/>
-  <arg name="robot_pose_y" default="19.5"/>
-  <arg name="robot_pose_Y" default="1.57"/>
+  <arg name="robot_pose_x" default="0.0"/>
+  <arg name="robot_pose_y" default="0.0"/>
+  <arg name="robot_pose_Y" default="0.0"/>
 
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
@@ -39,7 +39,7 @@
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
 	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"/>
 
-  # 이동로봇: Turtlebot3 waffle
+  # 이동로봇 모델 불러오기
   <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gamma.urdf.xacro"/>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle_gamma
