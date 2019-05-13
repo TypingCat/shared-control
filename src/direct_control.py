@@ -4,8 +4,9 @@
 import rospy
 import tf
 import termios, sys, select, tty
+import math
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Joy
 
@@ -14,11 +15,22 @@ from reserved_words import *
 
 class DirectControl:
     """이동로봇을 직접 제어한다"""
+
     def __init__(self):
+        """초기화"""
+
         self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)
         self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
 
         rospy.Subscriber('joy', Joy, self.joystick)
+
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
+
+        # # 기록
+        # rospy.sleep(1.0)
+        # self.log_time = rospy.get_time()
+        # self.log_pose_x = self.robot_pose.position.x
+        # self.log_pose_y = self.robot_pose.position.y
 
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
 
@@ -28,6 +40,7 @@ class DirectControl:
 
     def get_key(self):
         """키보드 입력을 획득한다"""
+
         tty.setraw(sys.stdin.fileno())
         select.select([sys.stdin], [], [], 0)
         key = sys.stdin.read(1)
@@ -36,6 +49,7 @@ class DirectControl:
 
     def keyboard(self, event):
         """키보드 입력을 제어명령으로 변환한다"""
+
         cmd_vel = Twist()
         key = self.get_key()
         if key == '\x03':   # ctrl+c
@@ -52,6 +66,16 @@ class DirectControl:
         elif key == 's':    # stop
             cmd_vel.linear.x = 0.
             cmd_vel.angular.z = 0.
+
+            # # 기록
+            # elps_time = rospy.get_time() - self.log_time
+            # elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
+            # print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
+            #
+            # self.log_time = rospy.get_time()
+            # self.log_pose_x = self.robot_pose.position.x
+            # self.log_pose_y = self.robot_pose.position.y
+
         elif key == 'x':    # backward
             cmd_vel.linear.x = -self.robot_vel_lin
             cmd_vel.angular.z = 0.
@@ -62,11 +86,17 @@ class DirectControl:
 
     def joystick(self, data):
         """조이스틱 입력을 제어명령으로 변환한다"""
+
         cmd_vel = Twist()
         cmd_vel.linear.x = self.robot_vel_lin*data.axes[1]
         cmd_vel.angular.z = self.robot_vel_ang*data.axes[0]
 
         self.publisher_cmd_vel.publish(cmd_vel)
+
+    def update_robot_pose(self, data):
+        """로봇의 자세를 갱신한다"""
+
+        self.robot_pose = data.pose.pose
 
 
 if __name__ == '__main__':

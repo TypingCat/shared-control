@@ -15,6 +15,7 @@ from reserved_words import *
 
 class Interface:
     """사용자 입력을 관리한다"""
+
     def __init__(self):
         # 파라미터 설정
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
@@ -35,6 +36,7 @@ class Interface:
 
     def motorimagery(self, request):
         """Motorimagery를 위한 서비스를 관리한다"""
+
         # Cue를 발행한다.
         cue = MotorimageryCue()
         cue.header = copy.copy(request.header)
@@ -48,13 +50,17 @@ class Interface:
 
     def update_motorimagery_result(self, data):
         """획득한 motorimagery를 기록한다"""
+
         self.motorimagery_header.stamp = rospy.Time.now()
         self.motorimagery_result = copy.copy(data)
 
 
 class Keyboard:
     """키보드 입력을 관리한다"""
+
     def __init__(self):
+        """초기화"""
+
         # 파라미터 설정
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
 
@@ -68,6 +74,7 @@ class Keyboard:
 
     def get_key(self):
         """키보드 입력을 획득한다"""
+
         tty.setraw(sys.stdin.fileno())
         select.select([sys.stdin], [], [], 0)
         key = sys.stdin.read(1)
@@ -76,6 +83,7 @@ class Keyboard:
 
     def spin(self, event):
         """키보드 입력을 메시지로 발행한다"""
+        
         key = self.get_key()
         if key == '\x03':   # ctrl+c
             self.key_watcher.shutdown()

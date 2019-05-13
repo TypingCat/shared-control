@@ -5,7 +5,7 @@
   <arg name="robot_pose_y" default="0.0"/>
   <arg name="robot_pose_Y" default="0.0"/>
 
-  # 위치추정
+  # 위치 추정
   <node pkg="amcl" type="amcl" name="amcl">
     <remap from="amcl_pose"                 to="robot/pose"/>
     <param name="min_particles"             value="500"/>
@@ -42,7 +42,7 @@
     <param name="base_frame_id"             value="base_footprint"/>
   </node>
 
-  # 자율주행
+  # 경로 계획
   <node pkg="move_base" type="move_base" name="move_base">
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
     <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>

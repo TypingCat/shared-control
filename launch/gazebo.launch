@@ -4,6 +4,7 @@
   <arg name="robot_pose_x" default="0.0"/>
   <arg name="robot_pose_y" default="0.0"/>
   <arg name="robot_pose_Y" default="0.0"/>
+  <arg name="environment" default="L8401"/>
 
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
@@ -15,7 +16,7 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
-  <arg name="world_name" default="$(find shared_control)/gazebo/silla_univ.house.world"/>
+  <arg name="world_name" default="$(find shared_control)/gazebo/$(arg environment).sdf"/>
 
   <arg name="respawn_gazebo" default="true"/>
   <arg name="use_clock_frequency" default="false"/>
@@ -39,10 +40,10 @@
   <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
 	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"/>
 
-  # 이동로봇: Turtlebot3 waffle
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find turtlebot3_description)/urdf/turtlebot3_waffle.urdf.xacro"/>
+  # 이동로봇 모델 불러오기
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gamma.urdf.xacro"/>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-        args="-urdf -model turtlebot3_waffle
+        args="-urdf -model turtlebot3_waffle_gamma
               -x $(arg robot_pose_x)
               -y $(arg robot_pose_y)
               -Y $(arg robot_pose_Y)
