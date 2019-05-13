@@ -20,7 +20,10 @@ from reserved_words import *
 
 class TaskPlan:
     """로봇의 구체적인 임무를 결정한다"""
+
     def __init__(self):
+        """초기화"""
+
         # 파라미터 설정
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
         self.plan_cycle = rospy.Duration(rospy.get_param('~plan_cycle', 0.5))
@@ -48,14 +51,9 @@ class TaskPlan:
         rospy.Subscriber('interf/eyeblink_result', EyeblinkResult, self.percussion)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
-        # self.publisher_target = rospy.Publisher('robot/target', Pose, queue_size=1)
-        # self.publisher_douser = rospy.Publisher('visual/douser', Int32, queue_size=1)
-        # self.publisher_MID_L = rospy.Publisher('visual/MID_L', MID, queue_size=1)
-        # self.publisher_MID_R = rospy.Publisher('visual/MID_R', MID, queue_size=1)
-        # self.publisher_MID_confirm = rospy.Publisher('visual/MID_confirm', MID, queue_size=1)
         self.robot_state = S_SLEEP
-        self.mount_gvg()                                            # 이동을 시작한다.
-        print(C_YELLO + '\rTask planner, 자율주행 서비스 확인 완료' + C_END)
+        self.mount_gvg()
+        print(C_GREEN + '\rTask planner, 자율주행 서비스 초기화 완료' + C_END)
 
         print(C_YELLO + '\rTask planner, BCI 서비스 확인중...' + C_END)
         rospy.wait_for_service('interf/motorimagery')
@@ -63,9 +61,9 @@ class TaskPlan:
         print(C_YELLO + '\rTask planner, BCI 서비스 확인 완료' + C_END)
 
         # 기록
-        self.log_time = rospy.get_time()
-        self.log_pose_x = self.robot_pose.position.x
-        self.log_pose_y = self.robot_pose.position.y
+        # self.log_time = rospy.get_time()
+        # self.log_pose_x = self.robot_pose.position.x
+        # self.log_pose_y = self.robot_pose.position.y
 
         # 초기화
         rospy.Timer(self.plan_cycle, self.explosion)
@@ -74,6 +72,7 @@ class TaskPlan:
 
     def mount_gvg(self):
         """이동로봇을 GVG 위로 이동시킨다"""
+
         # 가장 가까운 노드를 성공할 때까지 검색한다.
         nearest = -1
         while nearest == -1:
@@ -84,7 +83,9 @@ class TaskPlan:
 
         # 가장 가까운 노드로 이동한다.
         self.move_to(nearest)
-        while self.move_result.goal_id.stamp.nsecs == 0:
+
+        # while self.move_result.goal_id.stamp.nsecs == 0:
+        while self.move_result.status == 0:
             rospy.sleep(self.plan_cycle)
 
         # 현재상태를 기록한다.
@@ -93,6 +94,7 @@ class TaskPlan:
 
     def percussion(self, data):
         """획득한 데이터를 장전-격발한다"""
+
         if data.num == 3:
             if self.robot_state == S_SLEEP:
                 print('\rTask planner, Eyeblink(' + C_YELLO + '3' + C_END + ') 획득, 활성화')
@@ -104,6 +106,7 @@ class TaskPlan:
 
     def explosion(self, event):
         """로봇에 과부하를 걸어 폭발시킨다"""
+
         if not self.robot_state == S_INDIRECT_WAIT:
             return
 
@@ -194,19 +197,22 @@ class TaskPlan:
             self.robot_state = S_INDIRECT_WAIT
 
             # 기록한다.
-            elps_time = rospy.get_time() - self.log_time
-            elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
-            print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
-
-            self.log_time = rospy.get_time()
-            self.log_pose_x = self.robot_pose.position.x
-            self.log_pose_y = self.robot_pose.position.y
+            # elps_time = rospy.get_time() - self.log_time
+            # elps_dist = math.sqrt((self.robot_pose.position.x - self.log_pose_x)**2 + (self.robot_pose.position.y - self.log_pose_y)**2)
+            # print("\r기록: " + C_GREEN + "%.2f[s], %.2f[m]"%(elps_time, elps_dist) + C_END)
+            #
+            # self.log_time = rospy.get_time()
+            # self.log_pose_x = self.robot_pose.position.x
+            # self.log_pose_y = self.robot_pose.position.y
 
     def round(self, th):
+        """방향각 다듬기"""
+
         return ((th + math.pi) % (2 * math.pi)) - math.pi
 
     def move_to(self, id, force=False):
         """로봇을 해당노드로 이동시킨다"""
+
         # 아직 이전목표에 도달하지 않았다면 새로운 명령은 무시한다.
         if (not self.move_result.status == 3) and (force == False):
             return
@@ -229,10 +235,14 @@ class TaskPlan:
         if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
-        self.client.send_goal(goal)
+        if math.sqrt(dx**2 + dy**2) > self.node_radius:
+            self.client.send_goal(goal)
+        else:
+            self.move_result.status = 3
 
     def head_to(self, th_target):
         """로봇이 해당각도만큼 회전한다"""
+
         interrupt = False
 
         # 목표에 도달할 때까지 회전한다.
@@ -261,10 +271,12 @@ class TaskPlan:
 
     def update_move_result(self, data):
         """로봇의 상태를 갱신한다"""
+
         self.move_result = data.status
 
     def update_robot_pose(self, data):
         """로봇의 자세를 갱신한다"""
+
         self.robot_pose = data.pose.pose
 
 

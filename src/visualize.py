@@ -13,7 +13,10 @@ from shared_control.msg import MID
 
 class Visualize:
     """인터페이스를 시각화한다."""
+
     def __init__(self):
+        """초기화"""
+
         self.gvg_node = Marker()
         self.gvg_edge = Marker()
         self.MI_marker_len = rospy.get_param('~MI_marker_len', 1.0)
@@ -36,6 +39,7 @@ class Visualize:
 
     def update_flicker_L(self, data):
         """왼쪽 마커를 점멸시킨다"""
+
         p1 = Point()
         p1.x = 0.3*math.cos(data.th) + data.point.x
         p1.y = 0.3*math.sin(data.th) + data.point.y
@@ -50,6 +54,7 @@ class Visualize:
 
     def update_flicker_R(self, data):
         """오른쪽 마커를 점멸시킨다"""
+
         p1 = Point()
         p1.x = 0.3*math.cos(data.th) + data.point.x
         p1.y = 0.3*math.sin(data.th) + data.point.y
@@ -64,6 +69,7 @@ class Visualize:
 
     def update_lighter(self, data):
         """왼쪽 마커를 점멸시킨다"""
+
         p1 = Point()
         p1.x = 0.3*math.cos(data.th) + data.point.x
         p1.y = 0.3*math.sin(data.th) + data.point.y
@@ -78,20 +84,24 @@ class Visualize:
 
     def update_douser(self, data):
         """마커를 비활성화한다"""
+
         self.MI_marker_state = -1
 
     def update_dst(self, data):
         """목적지를 갱신한다"""
+
         self.dst.x = data.x
         self.dst.y = data.y
         self.dst.z = data.z                 # 높이가 아닌 margin으로 사용한다.
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
+
         self.pose = data.pose.pose
 
     def publish(self, event):
         """마커를 발행한다"""
+
         interf = []
 
         circle = Marker()                   # 목적지 마커를 추가한다.

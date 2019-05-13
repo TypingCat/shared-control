@@ -4,6 +4,7 @@
   <arg name="robot_pose_x" default="0.0"/>
   <arg name="robot_pose_y" default="0.0"/>
   <arg name="robot_pose_Y" default="0.0"/>
+  <arg name="environment" default="L8401"/>
 
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
@@ -15,7 +16,7 @@
   <arg name="debug" default="false"/>
   <arg name="physics" default="ode"/>
   <arg name="verbose" default="false"/>
-  <arg name="world_name" default="$(find shared_control)/gazebo/L81.sdf"/>
+  <arg name="world_name" default="$(find shared_control)/gazebo/$(arg environment).sdf"/>
 
   <arg name="respawn_gazebo" default="true"/>
   <arg name="use_clock_frequency" default="false"/>

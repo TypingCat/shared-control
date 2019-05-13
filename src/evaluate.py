@@ -14,7 +14,10 @@ from shared_control.srv import Nearest, Node
 
 class Evaluate:
     """움직임을 평가한다"""
+
     def __init__(self):
+        """초기화"""
+        
         self.map = MapMetaData()
         self.state = -1                         # 상태: -1=초기화, 0=대기, 1=시작, 2=평가
         self.move = 0
@@ -51,11 +54,13 @@ class Evaluate:
 
     def load_map(self, data):
         """지도 좌표를 획득한다"""
+
         self.map = data.info
         self.state = 0
 
     def evaluation(self, event):
         """주행을 평가한다"""
+
         if self.state == 0:                                 # 초기화중일 경우,
             try:                                            # 대기를 확인하고 다음으로 넘어간다.
                 self.dst_point = self.select_destination()
@@ -87,6 +92,7 @@ class Evaluate:
 
     def select_destination(self):
         """목적지를 선택한다"""
+
         p = Point()                 # 지도로부터 위치를 선정한다.
         if len(self.dst_list)==0:   # 리스트가 주어지지 않았다면 무작위로 선정한다.
             p.x = (self.dst_x_max - self.dst_x_min)*random.random() + self.dst_x_min
@@ -106,10 +112,12 @@ class Evaluate:
 
     def update_state(self, data):
         """로봇의 상태를 갱신한다"""
+
         self.move = data.data
 
     def update_pose(self, data):
         """로봇의 자세를 갱신한다"""
+
         self.pose = data.pose.pose                                      # 현재 자세를 갱신한다.
         try:
             self.nearest[0] = self.get_nearest(self.pose.position).id   # 가장 가까운 노드를 갱신한다.

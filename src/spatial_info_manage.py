@@ -16,7 +16,10 @@ from reserved_words import *
 
 class SpatialInfoManage:
     """지도로부터 GVG를 생성하고 관련 서비스를 제공한다."""
+
     def __init__(self):
+        """초기화"""
+
         self.map = OccupancyGrid()
         self.gvd = OccupancyGrid()
         self.graph = networkx.Graph()
@@ -34,6 +37,7 @@ class SpatialInfoManage:
 
     def load_map(self, data):
         """지도로 GVD, GVG를 계산한다"""
+
         self.map.header = data.header                               # 지도를 획득한다.
         self.map.info = data.info
         self.map.data = numpy.array(data.data)
@@ -59,6 +63,7 @@ class SpatialInfoManage:
 
     def create_graph(self, X1, Y1, X2, Y2, width, height):
         """주어진 좌표로 그래프를 구성한다"""
+
         g = networkx.Graph()
         res = 100
         for i in range(0, len(X1)):     # 인덱스를 생성한다.
@@ -73,6 +78,7 @@ class SpatialInfoManage:
 
     def calc_gvd(self, data, PM, BM):
         """Brushfire-based AGVD calculation"""
+
         frontier = []                                   # 연산을 초기화한다.
         origin = numpy.ones([len(data), len(data[0]), 2])*(-1)
         brushfire = numpy.ones([len(data), len(data[0])])*(-1)
@@ -125,6 +131,7 @@ class SpatialInfoManage:
 
     def draw_footprint(self, gvd):
         """점유격자를 그래프로 변환한다"""
+
         footprint = networkx.Graph()                # 연산을 초기화한다.
         neighbor = [                   [1,  0],
                     [-1, -1], [0, -1], [1, -1]]
@@ -161,6 +168,7 @@ class SpatialInfoManage:
 
     def extract_gvg(self, footprint):
         """GVD로부터 GVG를 추출한다"""
+
         seed = [-1, 0]                              # 가장 규모가 큰 서브그래프를 확인한다.
         foot = footprint.copy()
         while len(foot.nodes) > 0:
@@ -229,6 +237,7 @@ class SpatialInfoManage:
 
     def pruning(self, gvg, minimum_path_distance):
         """GVG를 다듬는다"""
+
         knur = -1                                           # 다듬을 곳이 없을 때까지,
         while knur != 0:
             knur = 0
@@ -280,6 +289,7 @@ class SpatialInfoManage:
 
     def publish(self, event):
         """GVG를 출력한다"""
+
         gvg_node = Marker()                             # GVG 노드 마커를 생성한다.
         gvg_node.header.stamp = rospy.Time.now()
         gvg_node.header.frame_id = 'map'
@@ -326,6 +336,7 @@ class SpatialInfoManage:
 
     def get_nearest(self, request):
         """입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다"""
+
         try:
             nearest = [-1, 2147483647]
             for n in self.graph.nodes:
@@ -341,6 +352,7 @@ class SpatialInfoManage:
 
     def get_neighbors(self, request):
         """입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다"""
+
         try:
             return {'ids': list(self.graph.neighbors(request.id))}
 
@@ -350,6 +362,7 @@ class SpatialInfoManage:
 
     def get_node(self, request):
         """입력한 id를 갖는 노드의 속성을 반환한다"""
+
         p = Point()
         try:
             p.x = self.graph.nodes[request.id]['pos'][0]
@@ -359,6 +372,7 @@ class SpatialInfoManage:
             rospy.loginfo('서비스 get_node 실패')
 
         return {'point': p}
+
 
 if __name__ == '__main__':
     rospy.init_node('spatial_info_manager')
