@@ -13,7 +13,7 @@ from std_msgs.msg import Int32, Header
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatusArray, GoalStatus
 
-from shared_control.msg import MID, EyeblinkResult
+from shared_control.msg import MID, EyeblinkResult, RobotState
 from shared_control.srv import Nearest, Neighbors, Node, Motorimagery
 from reserved_words import *
 
@@ -42,6 +42,8 @@ class TaskPlan:
         print(C_YELLO + '\rTask planner, GVG 서비스 확인 완료' + C_END)
 
         print(C_YELLO + '\rTask planner, 자율주행 서비스 확인중...' + C_END)
+        self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+        self.publisher_robot_state = rospy.Publisher('interf/robot_state', RobotState, queue_size=1)
         self.prev_goal = Point()
         self.move_result = GoalStatus()
         self.move_result.status = 3
@@ -51,7 +53,8 @@ class TaskPlan:
         rospy.Subscriber('interf/eyeblink_result', EyeblinkResult, self.percussion)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
-        self.robot_state = S_SLEEP
+        # self.robot_state = S_SLEEP
+        self.robot_state = S_INDIRECT_WAIT
         self.mount_gvg()
         print(C_GREEN + '\rTask planner, 자율주행 서비스 초기화 완료' + C_END)
 
@@ -67,7 +70,6 @@ class TaskPlan:
 
         # 초기화
         rospy.Timer(self.plan_cycle, self.explosion)
-        self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
         print(C_GREEN + '\rTask planner, 초기화 완료\n' + C_END)
 
     def mount_gvg(self):
@@ -254,12 +256,28 @@ class TaskPlan:
         else:
             self.move_result.status = 3
 
+        # 움직임을 보고한다.
+        state = RobotState()
+        state.motion = M_FORWARD
+        self.publisher_robot_state.publish(state)
+
     def head_to(self, th_target):
         """로봇이 해당각도만큼 회전한다"""
 
-        interrupt = False
+        # 회전할 방향을 보고한다.
+        th = tf.transformations.euler_from_quaternion(
+            [self.robot_pose.orientation.x, self.robot_pose.orientation.y,
+             self.robot_pose.orientation.z, self.robot_pose.orientation.w])[2]
+        dth = self.round(th_target - th)
+        state = RobotState()
+        if dth > 0:
+            state.motion = M_LEFT
+        else:
+            state.motion = M_RIGHT
+        self.publisher_robot_state.publish(state)
 
         # 목표에 도달할 때까지 회전한다.
+        interrupt = False
         dth = 1
         t = rospy.get_time()
         while abs(dth) > 0.1:
