@@ -4,8 +4,8 @@
   # 제어방식: 공유제어, 키보드 awsd(motorimagery)와 23(eyeblink) 혹은 BCI
 
   # 파라미터 설정
-  <arg name="robot_pose_x" value="5.02"/>
-  <arg name="robot_pose_y" value="5.06"/>
+  <arg name="robot_pose_x" value="1.11"/>
+  <arg name="robot_pose_y" value="4.55"/>
   <arg name="robot_pose_Y" value="4.0"/>
   <arg name="robot_vel_lin" value="0.22"/>
   <arg name="robot_vel_ang" value="1.0"/>

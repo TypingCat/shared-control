@@ -33,27 +33,28 @@
 - `1.0.0` 노드 사이의 프로토콜 확립, `1.0.1` Task planner 구축, `1.0.2` Gazebo 연결, `1.0.3` Interface visualizer 구축, `1.0.4` 좌표계 구축
 - `1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
 - `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
-- `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장
+- `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화
 
 
 ## 사용법
 ### 실행
-공유제어 시스템은 두 가지 제어방식을 지원한다. 첫번째는 평가기준으로 활용할 직접제어방식이다. 키보드 혹은 조이스틱으로 입력한다.
+본 패키지는 두 가지 제어방식과 두 가지 구현방식을 지원한다. 각 방식에 해당하는 실행파일은 다음과 같다.
+
+| | 직접제어 | 공유제어 |
+|-|-|-|
+| 실제 | ~~dc.launch~~ | ~~sc.launch~~ |
+| 시뮬레이션 | dc_gzb.launch | sc_gzb.launch |
+
+예를 들어 직접제어를 시뮬레이션으로 실행하려면,
 
 ```
-$ roslaunch shared_control dir_gzb.launch
-```
-
-두번째는 이동방향을 묻고 답하는 간접제어방식이다. 키보드 혹은 BCI로 입력한다.
-
-```
-$ roslaunch shared_control ind_gzb.launch
+$ roslaunch shared_control dc_gzb.launch
 ```
 
 공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
 
 - `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
-- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), ~~전(3)~~, ~~후(4)~~, ~~정지(5)~~}
+- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), 전(3), 후(4), 정지(5)}
 - `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
 
 ### SLAM을 위한 hotspot 네트워크 설정
