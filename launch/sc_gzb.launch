@@ -11,7 +11,7 @@
   <arg name="robot_vel_ang" value="1.0"/>
 
   <arg name="environment" value="L81"/>
-  <arg name="node_radius" value="0.5"/>
+  <arg name="node_radius" value="3.0"/>
 
   # 환경 시뮬레이션
   <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg environment).yaml"/>

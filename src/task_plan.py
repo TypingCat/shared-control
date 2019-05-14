@@ -83,13 +83,27 @@ class TaskPlan:
 
         # 가장 가까운 노드로 이동한다.
         self.move_to(nearest)
-
-        # while self.move_result.goal_id.stamp.nsecs == 0:
         while self.move_result.status == 0:
             rospy.sleep(self.plan_cycle)
 
-        # 현재상태를 기록한다.
-        self.departure_node = nearest
+        # 가까운 노드의 형태를 확인한다.
+        neighbors = list(self.get_neighbors(nearest).ids)
+        if len(neighbors) < 2:
+            self.departure_node = nearest
+        else:
+            nearest_pos = self.get_node(nearest).point
+            nearest_th = math.atan2(self.robot_pose.position.y - nearest_pos.y,
+                                    self.robot_pose.position.x - nearest_pos.x)
+            closest_th = 2*math.pi
+            for node in neighbors:
+                pos = self.get_node(node).point
+                th = math.atan2(pos.y - nearest_pos.y,
+                                pos.x - nearest_pos.x)
+                th_ = abs(self.round(th - nearest_th))
+                if th_ < closest_th:
+                    closest_th = th_
+                    self.departure_node = node
+
         self.destination_node = nearest
 
     def percussion(self, data):
