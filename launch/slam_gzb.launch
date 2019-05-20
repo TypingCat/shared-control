@@ -15,8 +15,14 @@
   <arg name="environment" value="L81"/>
   <arg name="node_radius" value="3.0"/>
 
-  # 이동로봇 연결
-  <include file="$(find shared_control)/launch/turtlebot.launch"/>
+  # 환경 시뮬레이션
+  <include file="$(find shared_control)/launch/gazebo.launch">
+    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
+    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
+    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
+    <arg name="environment" value="$(arg environment)"/>
+    <arg name="gui" value="false"/>
+  </include>
 
   # 이동로봇 제어
   <node pkg="turtlebot3_teleop" type="turtlebot3_teleop_key"
