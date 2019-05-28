@@ -99,11 +99,11 @@ class TaskPlan:
         ## Eyeblink 신호 확인
         if data.num == 3:
             print('\rTask planner, Eyeblink(' + C_YELLO + '3' + C_END + ') 획득')
-            if self.robot_state == S_SLEEP:
-                self.robot_state = S_INDIRECT_WAIT
         elif data.num == 2:
             print('\rTask planner, Eyeblink(' + C_YELLO + '2' + C_END + ') 획득')
             self.eyeblink_time = rospy.get_time()
+            if self.robot_state == S_SLEEP:
+                self.robot_state = S_INDIRECT_WAIT
 
     def explosion(self, event):
         """로봇에 과부하를 걸어 폭발"""
