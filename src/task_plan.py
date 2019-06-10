@@ -13,6 +13,8 @@ from std_msgs.msg import Int32, Header
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionResult
 from actionlib_msgs.msg import GoalStatusArray, GoalStatus
 
+from move_base_msgs.msg import MoveBaseActionFeedback
+
 from shared_control.msg import MID, EyeblinkResult, RobotState
 from shared_control.srv import Nearest, Neighbors, Node, Motorimagery
 from reserved_words import *
@@ -49,7 +51,11 @@ class TaskPlan:
         self.eyeblink_time = rospy.get_time()
         rospy.Subscriber('interf/eyeblink_result', EyeblinkResult, self.percussion)
         rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
+
+        rospy.Subscriber('move_base/feedback', MoveBaseActionFeedback, self.update_move_feedback)
+        rospy.Subscriber('move_base/status', GoalStatusArray, self.update_move_status)
         rospy.Subscriber('move_base/result', MoveBaseActionResult, self.update_move_result)
+
         self.robot_state = S_INDIRECT_WAIT
         self.mount_gvg()
         print(C_GREEN + '\rTask planner, 자율주행 서비스 초기화 완료' + C_END)
@@ -243,16 +249,26 @@ class TaskPlan:
         if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
-        if math.sqrt(dx**2 + dy**2) > self.node_radius:
-            self.client.send_goal(goal)
-        else:
-            self.move_result.status = 3
+        # if math.sqrt(dx**2 + dy**2) > self.node_radius:
+        #     self.client.send_goal(goal)
+        # else:
+        #     self.move_result.status = 3
+        self.client.send_goal(goal)
         ## 움직임 알림
         state = RobotState()
         state.motion = M_FORWARD
         self.publisher_robot_state.publish(state)
 
+    def update_move_feedback(self, data):
+        # print("\r피드백: %d(%s)"%(data.status.status, data.status.text))
+        pass
+
+    def update_move_status(self, data):
+        # rospy.loginfo(data)
+        pass
+
     def update_move_result(self, data):
+        # print("\r결과: %d(%s)"%(data.status.status, data.status.text))
         self.move_result = data.status
 
     def update_robot_pose(self, data):
