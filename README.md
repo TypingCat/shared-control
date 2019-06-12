@@ -35,7 +35,8 @@
 - `1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
 - `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
 - `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
-- `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정
+- `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
+- `1.5.0` Local planner 변경
 
 
 ## 사용법
@@ -85,8 +86,10 @@ $ sudo xboxdrv
     - Turtlebot3 Waffle(Gazebo)
     - XBOX360 remote controller
 
-### 설치 순서
-본 패키지는 시뮬레이션 대상인 turtlebot3 관련 패키지가 필요하다. 공식 홈페이지의 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치하자. 그리고 이하를 따라 추가로 필요한 패키지들을 설치한다.
+### 설치 방법
+1. Turtlebot3 설치안내 중 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치한다.
+2. [TEB local planner](http://wiki.ros.org/teb_local_planner/Tutorials/Setup%20and%20test%20Optimization)를 설치한다.
+3. 그리고 이하의 명령어를 따라 설치를 마무리한다.
 
 ```
 $ cd ~/catkin_ws/src

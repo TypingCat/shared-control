@@ -18,7 +18,7 @@
   <arg name="verbose" default="false"/>
   <arg name="world_name" default="$(find shared_control)/gazebo/$(arg environment).sdf"/>
 
-  <arg name="respawn_gazebo" default="true"/>
+  <arg name="respawn_gazebo" default="false"/>
   <arg name="use_clock_frequency" default="false"/>
   <arg name="pub_clock_frequency" default="100"/>
 
