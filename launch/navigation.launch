@@ -44,14 +44,16 @@
 
   # 경로 계획
   <node pkg="move_base" type="move_base" name="move_base">
-    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
-    <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find shared_control)/param/costmap_common_params_waffle.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="local_costmap"/>
     <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
     <rosparam file="$(find shared_control)/param/global_costmap_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/move_base_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/dwa_local_planner_params_waffle.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/global_planner_params.yaml" command="load"/>
+
+    <rosparam file="$(find shared_control)/param/base_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/param/costmap_converter_params.yaml" command="load"/>
+
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
+    <param name="controller_frequency" value="10.0"/>
   </node>
 
 </launch>

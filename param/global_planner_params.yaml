@@ -1,3 +1,0 @@
-BaseGlobalPlanner:
-  allow_unknown: false
-  default_tolerance: 0.3
