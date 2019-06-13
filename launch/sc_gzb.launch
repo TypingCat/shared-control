@@ -7,8 +7,8 @@
   <arg name="robot_pose_x" value="0.0"/>
   <arg name="robot_pose_y" value="0.0"/>
   <arg name="robot_pose_Y" value="1.57"/>
-  <arg name="robot_vel_lin" value="0.9"/>
-  <arg name="robot_vel_ang" value="0.5"/>
+  <arg name="robot_vel_lin" value="0.6"/>
+  <arg name="robot_vel_ang" value="0.6"/>
 
   <arg name="environment" value="L81"/>
   <arg name="node_radius" value="3.0"/>

@@ -28,7 +28,7 @@ class TaskPlan:
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
         self.plan_cycle = rospy.Duration(rospy.get_param('~plan_cycle', 0.5))
         self.node_radius = rospy.get_param('~node_radius', 2.0)
-        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)
+        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.6)
         self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
         ## GVG 서비스 확인
         print(C_YELLO + '\rTask planner, GVG 서비스 확인중...' + C_END)
@@ -260,16 +260,17 @@ class TaskPlan:
         self.publisher_robot_state.publish(state)
 
     def update_move_feedback(self, data):
-        # print("\r피드백: %d(%s)"%(data.status.status, data.status.text))
         pass
 
     def update_move_status(self, data):
-        # rospy.loginfo(data)
         pass
 
     def update_move_result(self, data):
-        # print("\r결과: %d(%s)"%(data.status.status, data.status.text))
         self.move_result = data.status
+        ## 정지 확인
+        if self.move_result.status == 3:
+            vel = Twist()
+            self.publisher_cmd_vel.publish(vel)
 
     def update_robot_pose(self, data):
         self.robot_pose = data.pose.pose
