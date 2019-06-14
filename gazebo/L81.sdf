@@ -51,7 +51,7 @@
           <material>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/WhiteGlow</name>
             </script>
           </material>
         </visual>
@@ -80,10 +80,10 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <state world_name='default'>
-      <sim_time>200 360000000</sim_time>
-      <real_time>101 264486222</real_time>
-      <wall_time>1560233113 627788913</wall_time>
-      <iterations>50500</iterations>
+      <sim_time>308 706000000</sim_time>
+      <real_time>108 995507252</real_time>
+      <wall_time>1560410809 270094450</wall_time>
+      <iterations>108346</iterations>
       <model name='L81'>
         <pose frame=''>-17.1343 -18.6756 0.502971 2e-06 9.9e-05 0.000983</pose>
         <scale>1 1 1</scale>
@@ -914,7 +914,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>2.46879 -14.9701 20.268 -0 0.685796 1.81222</pose>
+        <pose frame=''>16.7719 19.3556 27.3875 0 0.917796 -2.95098</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -1616,6 +1616,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
@@ -1627,7 +1628,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Black</name>
             </script>
             <shader type='pixel'>
               <normal_map>__default__</normal_map>
@@ -1808,6 +1809,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <pose frame=''>0 0 0 0 -0 0</pose>
           <geometry>
@@ -1819,7 +1821,7 @@
             <lighting>1</lighting>
             <script>
               <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
             </script>
             <shader type='pixel'>
               <normal_map>__default__</normal_map>
@@ -7511,6 +7513,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -7519,7 +7522,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -7606,6 +7609,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -7614,7 +7618,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -7701,6 +7705,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -7709,7 +7714,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8366,6 +8371,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8374,7 +8380,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8461,6 +8467,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8469,7 +8476,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8556,6 +8563,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8564,7 +8572,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8651,6 +8659,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8659,7 +8668,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8746,6 +8755,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8754,7 +8764,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8841,6 +8851,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8849,7 +8860,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -8936,6 +8947,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -8944,7 +8956,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9031,6 +9043,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9039,7 +9052,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9126,6 +9139,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9134,7 +9148,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9221,6 +9235,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9229,7 +9244,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9316,6 +9331,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9324,7 +9340,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9601,6 +9617,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9609,7 +9626,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9696,6 +9713,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9704,7 +9722,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -9791,6 +9809,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -9799,7 +9818,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>
@@ -12356,6 +12375,7 @@
         </inertial>
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
+        <gravity>1</gravity>
         <visual name='visual'>
           <geometry>
             <box>
@@ -12364,7 +12384,7 @@
           </geometry>
           <material>
             <script>
-              <name>Gazebo/Grey</name>
+              <name>Gazebo/Wood</name>
               <uri>file://media/materials/scripts/gazebo.material</uri>
             </script>
             <shader type='pixel'>

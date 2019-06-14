@@ -267,10 +267,6 @@ class TaskPlan:
 
     def update_move_result(self, data):
         self.move_result = data.status
-        ## 정지 확인
-        if self.move_result.status == 3:
-            vel = Twist()
-            self.publisher_cmd_vel.publish(vel)
 
     def update_robot_pose(self, data):
         self.robot_pose = data.pose.pose
