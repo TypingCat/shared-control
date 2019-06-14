@@ -14,7 +14,7 @@ TebLocalPlannerROS:
  max_vel_x: 0.6
  max_vel_x_backwards: 0.2
  max_vel_theta: 0.9 #0.3
- acc_lim_x: 0.5
+ acc_lim_x: 0.1
  acc_lim_theta: 0.5
  min_turning_radius: 0.0
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
@@ -29,9 +29,9 @@ TebLocalPlannerROS:
    vertices: [[-0.205, -0.155], [-0.205, 0.155], [0.077, 0.155], [0.077, -0.155]] #[ [0.25, -0.05], [0.18, -0.05], [0.18, -0.18], [-0.19, -0.18], [-0.25, 0], [-0.19, 0.18], [0.18, 0.18], [0.18, 0.05], [0.25, 0.05] ] # for type "polygon"
 
  # GoalTolerance
- xy_goal_tolerance: 0.4 #0.2
- yaw_goal_tolerance: 1.57 #0.1
- free_goal_vel: True #False
+ xy_goal_tolerance: 0.3 #0.2
+ yaw_goal_tolerance: 1.0 #0.1
+ free_goal_vel: True
 
  # Obstacles
  min_obstacle_dist: 0.1 #0.4

@@ -19,7 +19,7 @@ class DirectControl:
     def __init__(self):
         """초기화"""
 
-        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.26)
+        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.6)
         self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
 
         rospy.Subscriber('joy', Joy, self.joystick)

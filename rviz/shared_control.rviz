@@ -3,7 +3,8 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Navigation1/Map1
       Splitter Ratio: 0.566666663
     Tree Height: 374
   - Class: rviz/Selection
@@ -30,16 +31,16 @@ Toolbars:
 Visualization Manager:
   Class: ""
   Displays:
-    - Alpha: 1
+    - Alpha: 0.100000001
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/Group
       Displays:
         - Class: rviz/MarkerArray
@@ -100,7 +101,7 @@ Visualization Manager:
       Name: Shared control
     - Class: rviz/Group
       Displays:
-        - Alpha: 0.699999988
+        - Alpha: 0.200000003
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
@@ -281,7 +282,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 0
@@ -298,7 +299,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -324,7 +325,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 2.9010036
+      Distance: 7.07934666
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -339,10 +340,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.534796596
+      Pitch: 1.11979616
       Target Frame: base_footprint
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.16541219
+      Yaw: 3.14041185
     Saved: ~
 Window Geometry:
   Camera:

@@ -36,7 +36,7 @@
 - `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
 - `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
-- `1.5.0` Local planner 변경
+- `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 
 
 ## 사용법
@@ -85,6 +85,7 @@ $ sudo xboxdrv
 - 하드웨어
     - Turtlebot3 Waffle(Gazebo)
     - XBOX360 remote controller
+    - Graphic card(nvidia-384)
 
 ### 설치 방법
 1. Turtlebot3 설치안내 중 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치한다.
@@ -106,7 +107,7 @@ $ catkin_make
 이동로봇의 속도를 직접 제어한다. 키보드와 조이스틱 입력을 지원한다.
 
 - Parameters
-    - robot_vel_lin (float, default: 0.26)
+    - robot_vel_lin (float, default: 0.6)
     - robot_vel_ang (float, default: 1.82)
     - spin_cycle (float, default: 0.1)
 
