@@ -52,7 +52,7 @@
 
   # 인터페이스
   <node pkg="shared_control" type="interface.py" name="interfacer" output="screen"/>
-  <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-        args="-d $(find shared_control)/rviz/shared_control.rviz"/>
+  <!-- <node pkg="rviz" type="rviz" name="rviz" respawn="true"
+        args="-d $(find shared_control)/rviz/shared_control.rviz"/> -->
 
 </launch>

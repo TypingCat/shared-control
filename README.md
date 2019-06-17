@@ -89,17 +89,15 @@ $ sudo xboxdrv
 
 ### 설치 방법
 1. Turtlebot3 설치안내 중 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치한다.
-2. [TEB local planner](http://wiki.ros.org/teb_local_planner/Tutorials/Setup%20and%20test%20Optimization)를 설치한다.
-3. 그리고 이하의 명령어를 따라 설치를 마무리한다.
-
-```
-$ cd ~/catkin_ws/src
-$ git clone https://github.com/finiel/shared_control.git
-$ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
-$ pip install networkx==2.1
-$ cd ~/catkin_ws
-$ catkin_make
-```
+2. shared_control 외 필요한 패키지들을 설치한다.
+    ```
+    $ cd ~/catkin_ws/src
+    $ git clone https://github.com/finiel/shared_control.git
+    $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner
+    $ pip install --user networkx==2.1 pygame
+    $ cd ~/catkin_ws
+    $ catkin_make
+    ```
 
 
 ## 노드
