@@ -3,7 +3,10 @@ Panels:
     Help Height: 78
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
+      Expanded:
+        - /Camera1/Visibility1
+        - /Camera1/Visibility1/Shared control1
+        - /Camera1/Visibility1/Navigation1
       Splitter Ratio: 0.566666663
     Tree Height: 374
   - Class: rviz/Selection
@@ -209,12 +212,12 @@ Visualization Manager:
         LaserScan: true
         Map: true
         Navigation:
-          Map: true
+          Map: false
           Value: true
           global_plan: true
           local_plan: true
           teb_marker: true
-        RobotModel: true
+        RobotModel: false
         Shared control:
           GVG: true
           Value: true

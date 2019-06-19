@@ -128,6 +128,7 @@ class TaskPlan:
         if des_node_dist > self.node_radius:
             return
         ## 선택지 확인
+        state = RobotState()
         des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
         choice = copy.copy(des_node_neighbors)
         try:
@@ -141,7 +142,6 @@ class TaskPlan:
             self.departure_node = self.destination_node
             self.robot_state = S_SLEEP
             ### 정지 알림
-            state = RobotState()
             state.motion = M_STOP
             self.publisher_robot_state.publish(state)
             return
@@ -153,23 +153,30 @@ class TaskPlan:
             self.move_to(choice[0])
             self.robot_state = S_INDIRECT_WAIT
             ### 움직임 알림
-            state = RobotState()
-            state.motion = M_FORWARD
+            state.motion = M_MOVE
             self.publisher_robot_state.publish(state)
             return
         else:
             ### 선택지가 둘 이상이라면 motorimagery를 요청한다.
             print('\rTask planner, Motorimagery 요청')
             self.robot_state = S_INDIRECT_BUSY
+            state.motion = M_CUE
+            self.publisher_robot_state.publish(state)
             cue = Header()
             cue.stamp = rospy.Time.now()
             mi = self.get_motorimagery(cue)
             if mi.dir == M_FORWARD:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '앞' + C_END + ') 획득')
+                state.motion = M_FORWARD
+                self.publisher_robot_state.publish(state)
             elif mi.dir == M_LEFT:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '좌' + C_END + ') 획득')
+                state.motion = M_LEFT
+                self.publisher_robot_state.publish(state)
             elif mi.dir == M_RIGHT:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '우' + C_END + ') 획득')
+                state.motion = M_RIGHT
+                self.publisher_robot_state.publish(state)
             ### 교차로에 도달할 때까지 대기한다.
             while not self.move_result.status == 3:
                 rospy.sleep(self.spin_cycle)
@@ -197,6 +204,8 @@ class TaskPlan:
             id = des_node_neighbors_dth.index(min(des_node_neighbors_dth))
             ### 이동한다.
             print('\rTask planner, 다음 노드로 이동')
+            state.motion = M_MOVE
+            self.publisher_robot_state.publish(state)
             self.move_to(des_node_neighbors[id])
             self.departure_node = self.destination_node
             self.destination_node = des_node_neighbors[id]
@@ -217,7 +226,6 @@ class TaskPlan:
             state.motion = M_LEFT
         else:
             state.motion = M_RIGHT
-        self.publisher_robot_state.publish(state)
         ## Eyeblink가 들어오면 정지
         t = rospy.get_time()
         while self.eyeblink_time < t:
@@ -254,10 +262,6 @@ class TaskPlan:
         # else:
         #     self.move_result.status = 3
         self.client.send_goal(goal)
-        ## 움직임 알림
-        state = RobotState()
-        state.motion = M_FORWARD
-        self.publisher_robot_state.publish(state)
 
     def update_move_feedback(self, data):
         pass

@@ -10,7 +10,7 @@ from std_msgs.msg import Int32, Header
 from visualization_msgs.msg import MarkerArray, Marker
 from sensor_msgs.msg import Image
 
-from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult
+from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult, RobotState
 from shared_control.srv import Motorimagery, Node
 from reserved_words import *
 
@@ -29,11 +29,9 @@ class Interface:
         self.color = {'data': [(255, 223, 36),   # default
                                (255, 223, 36),   # M_RIGHT
                                (255, 223, 36),   # M_LEFT
-                               (255, 223, 36)],  # M_FORWARD}
-                      'time': [rospy.get_time(),
-                               rospy.get_time(),
-                               rospy.get_time(),
-                               rospy.get_time()]}
+                               (255, 223, 36),   # M_FORWARD
+                               (255, 223, 36), (255, 223, 36), (255, 223, 36), (255, 223, 36)],
+                      'time': [rospy.get_time(), rospy.get_time(), rospy.get_time(), rospy.get_time(), rospy.get_time(), rospy.get_time(), rospy.get_time(), rospy.get_time()]}
 
         # 입출력 설정
         print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
@@ -41,6 +39,8 @@ class Interface:
         self.motorimagery_header = Header()
         self.motorimagery_result = MotorimageryResult()
         rospy.Subscriber('interf/motorimagery_result', MotorimageryResult, self.update_motorimagery_result)
+        rospy.Subscriber('interf/robot_state', RobotState, self.update_marker)
+
         self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
         rospy.Service('interf/motorimagery', Motorimagery, self.motorimagery)
         print(C_YELLO + '\rInterfacer, BCI 서비스 시작' + C_END)
@@ -58,19 +58,15 @@ class Interface:
             self.height = data.height
         cam = pygame.image.frombuffer(data.data, (data.width, data.height), 'RGB')
         self.screen.blit(cam, (0, 0))
-
         # 방향 표현
-        self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
-        self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
-        self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
-
-
-
-        # 상태 표현
-        # self.draw_circle()
-
-
-
+        if (self.color['time'][M_CUE] > self.color['time'][M_MOVE]) or (rospy.get_time() < self.color['time'][M_MOVE] + 3.):
+            self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
+            self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
+            self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
+        else:
+            self.color['data'][M_RIGHT] = self.color['data'][0]
+            self.color['data'][M_LEFT] = self.color['data'][0]
+            self.color['data'][M_FORWARD] = self.color['data'][0]
         # 화면 출력
         pygame.display.flip()
 
@@ -84,19 +80,14 @@ class Interface:
         elif type == M_FORWARD:
             arr = [[1, 0], [0.5, 0], [0.5, 1], [-0.5, 1], [-0.5, 0], [-1, 0], [0, -1]]
         arr = [[scale*i+x, scale*j+y] for [i, j] in arr]
-        # 색상 결정
-        if rospy.get_time() > self.color['time'][type]:
-            self.color['data'][type] = self.color['data'][0]
         # 출력
         pygame.draw.polygon(self.screen, self.color['data'][type], arr)
 
-
-
-    def draw_circle(self, type, scale, x, y, text):
-        """원을 그린다"""
-        pass
-
-
+    def update_marker(self, data):
+        """로봇의 상황으로 마커의 출력상태를 결정한다"""
+        self.color['time'][data.motion] = rospy.get_time()
+        if (data.motion == M_RIGHT) or (data.motion == M_LEFT) or (data.motion == M_FORWARD):
+            self.color['data'][data.motion] = (241, 95, 95)
 
     def motorimagery(self, request):
         """Motorimagery를 위한 서비스를 관리한다"""
@@ -115,9 +106,6 @@ class Interface:
         """획득한 motorimagery를 기록한다"""
         self.motorimagery_header.stamp = rospy.Time.now()
         self.motorimagery_result = copy.copy(data)
-        # 마커 색상 변경
-        self.color['data'][data.dir] = (241, 95, 95)
-        self.color['time'][data.dir] = rospy.get_time() + 3.
 
     def __del__(self):
         """종료한다"""
