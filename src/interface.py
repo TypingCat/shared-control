@@ -10,7 +10,7 @@ from std_msgs.msg import Int32, Header
 from visualization_msgs.msg import MarkerArray, Marker
 from sensor_msgs.msg import Image
 
-from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult, RobotState
+from shared_control.msg import MotorimageryCue, MotorimageryResult, EyeblinkResult, RobotState, PathState
 from shared_control.srv import Motorimagery, Node
 from reserved_words import *
 
@@ -43,6 +43,8 @@ class Interface:
         self.motorimagery_result = MotorimageryResult()
         rospy.Subscriber('interf/motorimagery_result', MotorimageryResult, self.update_motorimagery_result)
         rospy.Subscriber('interf/robot_state', RobotState, self.update_marker)
+        rospy.Subscriber('interf/path_state', PathState, self.update_path)
+        self.switch_marker = [False, False, False]
 
         self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
         rospy.Service('interf/motorimagery', Motorimagery, self.motorimagery)
@@ -66,11 +68,11 @@ class Interface:
             self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
             self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
             self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
+            self.draw_cross(50, 0.5*self.width, 0.5*self.height)
         elif rospy.get_time() < self.color['time'][M_MOVE] + 3.:
             self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
             self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
             self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
-            self.draw_cross(50, 0.5*self.width, 0.5*self.height)
         else:
             self.color['data'][M_RIGHT] = self.color['data'][0]
             self.color['data'][M_LEFT] = self.color['data'][0]
@@ -82,10 +84,13 @@ class Interface:
         """화살표를 그린다"""
         # 좌표 생성
         if type == M_RIGHT:
+            if self.switch_marker[0] == False: return
             arr = [[1, 0], [0, 1], [0, 0.5], [-1, 0.5], [-1, -0.5], [0, -0.5], [0, -1]]
         elif type == M_LEFT:
+            if self.switch_marker[1] == False: return
             arr = [[1, 0.5], [0, 0.5], [0, 1], [-1, 0], [0, -1], [0, -0.5], [1, -0.5]]
         elif type == M_FORWARD:
+            if self.switch_marker[2] == False: return
             arr = [[1, 0], [0.5, 0], [0.5, 1], [-0.5, 1], [-0.5, 0], [-1, 0], [0, -1]]
         arr = [[scale*i+x, scale*j+y] for [i, j] in arr]
         # 출력
@@ -104,6 +109,11 @@ class Interface:
         self.color['time'][data.motion] = rospy.get_time()
         if (data.motion == M_RIGHT) or (data.motion == M_LEFT) or (data.motion == M_FORWARD):
             self.color['data'][data.motion] = (241, 95, 95)
+
+    def update_path(self, data):
+        self.switch_marker[0] = True if data.right > 0 else False
+        self.switch_marker[1] = True if data.left > 0 else False
+        self.switch_marker[2] = True if data.forward > 0 else False
 
     def motorimagery(self, request):
         """Motorimagery를 위한 서비스를 관리한다"""

@@ -57,6 +57,7 @@ add_message_files(
   MotorimageryResult.msg
   EyeblinkResult.msg
   RobotState.msg
+  PathState.msg
 )
 
 ## Generate services in the 'srv' folder
