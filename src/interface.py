@@ -35,8 +35,12 @@ class Interface:
                                (255, 223, 36),
                                (134, 229, 127)],  # M_MOVE
                       'time': [rospy.get_time()]*8}
+        self.fullscreen = rospy.get_param('~fullscreen', True)
 
         # 입출력 설정
+        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
+        self.publisher_eyeblink_result = rospy.Publisher('interf/eyeblink_result', EyeblinkResult, queue_size=1)
+
         print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
         self.publisher_motorimagery_cue = rospy.Publisher('interf/motorimagery_cue', MotorimageryCue, queue_size=1)
         self.motorimagery_header = Header()
@@ -51,16 +55,22 @@ class Interface:
         print(C_YELLO + '\rInterfacer, BCI 서비스 시작' + C_END)
         print(C_GREEN + '\rInterfacer, 초기화 완료' + C_END)
 
+        self.key_watcher = rospy.Timer(self.spin_cycle, self.keyboard)
+
     def visualize(self, data):
         """화면을 출력한다"""
         # 화면 생성
         try:
             self.screen
         except:
-            # self.screen = pygame.display.set_mode((data.width, data.height), pygame.FULLSCREEN)
-            self.screen = pygame.display.set_mode((data.width, data.height))
+            if self.fullscreen:
+                self.screen = pygame.display.set_mode((data.width, data.height), pygame.FULLSCREEN)
+            else:
+                self.screen = pygame.display.set_mode((data.width, data.height))
             self.width = data.width
             self.height = data.height
+            pygame.mouse.set_visible(False)
+        # 영상 획득
         cam = pygame.image.frombuffer(data.data, (data.width, data.height), 'RGB')
         self.screen.blit(cam, (0, 0))
         # 방향 표현
@@ -77,6 +87,9 @@ class Interface:
             self.color['data'][M_RIGHT] = self.color['data'][0]
             self.color['data'][M_LEFT] = self.color['data'][0]
             self.color['data'][M_FORWARD] = self.color['data'][0]
+            self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
+            self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
+            self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
         # 화면 출력
         pygame.display.flip()
 
@@ -133,60 +146,43 @@ class Interface:
         self.motorimagery_header.stamp = rospy.Time.now()
         self.motorimagery_result = copy.copy(data)
 
-    def __del__(self):
-        """종료한다"""
-        pygame.quit()
-
-
-class Keyboard:
-    """키보드 입력을 관리한다"""
-
-    def __init__(self):
-        """초기화"""
-        # 파라미터 설정
-        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
-
-        # 입출력 설정
-        self.publisher_motorimagery_result = rospy.Publisher('interf/motorimagery_result', MotorimageryResult, queue_size=1)
-        self.publisher_eyeblink_result = rospy.Publisher('interf/eyeblink_result', EyeblinkResult, queue_size=1)
-
-        # 초기화
-        self.key_setting = termios.tcgetattr(sys.stdin)
-        self.key_watcher = rospy.Timer(self.spin_cycle, self.spin)
-
-    def get_key(self):
-        """키보드 입력을 획득한다"""
-        tty.setraw(sys.stdin.fileno())
-        select.select([sys.stdin], [], [], 0)
-        key = sys.stdin.read(1)
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.key_setting)
-        return key
-
-    def spin(self, event):
-        """키보드 입력을 메시지로 발행한다"""
-        key = self.get_key()
-        if key == '\x03':   # ctrl+c
-            self.key_watcher.shutdown()
-        elif key == 'a':
-            self.publisher_motorimagery_result.publish(M_LEFT)
-        elif key == 'w':
-            self.publisher_motorimagery_result.publish(M_FORWARD)
-        elif key == 'd':
-            self.publisher_motorimagery_result.publish(M_RIGHT)
-        elif key == 's':
-            self.publisher_motorimagery_result.publish(M_STOP)
-        elif key == 'x':
-            self.publisher_motorimagery_result.publish(M_BACKWARD)
-        elif key == '2':
-            self.publisher_eyeblink_result.publish(2)
-        elif key == '3':
-            self.publisher_eyeblink_result.publish(3)
-        else:
+    def keyboard(self, event):
+        try:
+            self.screen
+        except:
             return
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:       # 종료
+                self.key_watcher.shutdown()
+                pygame.quit()
+                rospy.sleep(rospy.Duration(1.0))
+                rospy.signal_shutdown("Quit")
+            elif event.type == pygame.KEYDOWN:  # 키 획득
+                pressed = pygame.key.get_pressed()
+                buttons = [pygame.key.name(k) for k, v in enumerate(pressed) if v]
+                if ((buttons[0] == 'c') and (len(buttons) > 2)) or (buttons[0] == 'escape'):   # ctrl+c
+                    self.key_watcher.shutdown()
+                    pygame.quit()
+                    rospy.sleep(rospy.Duration(1.0))
+                    rospy.signal_shutdown("종료")
+                elif buttons[0] == 'a':
+                    self.publisher_motorimagery_result.publish(M_LEFT)
+                elif buttons[0] == 'w':
+                    self.publisher_motorimagery_result.publish(M_FORWARD)
+                elif buttons[0] == 'd':
+                    self.publisher_motorimagery_result.publish(M_RIGHT)
+                elif buttons[0] == 's':
+                    self.publisher_motorimagery_result.publish(M_STOP)
+                elif buttons[0] == 'x':
+                    self.publisher_motorimagery_result.publish(M_BACKWARD)
+                elif buttons[0] == '2':
+                    self.publisher_eyeblink_result.publish(2)
+                elif buttons[0] == '3':
+                    self.publisher_eyeblink_result.publish(3)
 
 
 if __name__ == '__main__':
     rospy.init_node('interfacer')
     i = Interface()
-    k = Keyboard()
     rospy.spin()

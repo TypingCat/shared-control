@@ -7,15 +7,16 @@
   <arg name="robot_pose_x" value="0.0"/>
   <arg name="robot_pose_y" value="0.0"/>
   <arg name="robot_pose_Y" value="1.57"/>
+
   <arg name="robot_vel_lin" value="0.6"/>
   <arg name="robot_vel_ang" value="0.6"/>
 
   <arg name="environment" value="L81"/>
   <arg name="node_radius" value="3.0"/>
+  <arg name="fullscreen" value="True"/>
 
   # 환경 시뮬레이션
   <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg environment).yaml"/>
-
   <include file="$(find shared_control)/launch/gazebo.launch">
     <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
     <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
@@ -41,7 +42,6 @@
     <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
     <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
   </include>
-
   <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
     <param name="robot_vel_lin" value="$(arg robot_vel_lin)"/>
     <param name="robot_vel_ang" value="$(arg robot_vel_ang)"/>
@@ -51,7 +51,9 @@
   </node>
 
   # 인터페이스
-  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen"/>
+  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
+    <param name="fullscreen" value="$(arg fullscreen)"/>
+  </node>
   <!-- <node pkg="rviz" type="rviz" name="rviz" respawn="true"
         args="-d $(find shared_control)/rviz/shared_control.rviz"/> -->
 
