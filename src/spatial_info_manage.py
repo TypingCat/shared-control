@@ -8,7 +8,7 @@ import networkx
 from nav_msgs.msg import OccupancyGrid
 from visualization_msgs.msg import MarkerArray, Marker
 from geometry_msgs.msg import Point
-from std_msgs.msg import ColorRGBA
+from std_msgs.msg import ColorRGBA, Int32
 
 from shared_control.srv import Nearest, Neighbors, Node
 from reserved_words import *
@@ -19,7 +19,6 @@ class SpatialInfoManage:
 
     def __init__(self):
         """초기화"""
-
         self.map = OccupancyGrid()
         self.gvd = OccupancyGrid()
         self.graph = networkx.Graph()
@@ -336,7 +335,6 @@ class SpatialInfoManage:
 
     def get_nearest(self, request):
         """입력한 위치와 가장 가까운 GVG 노드의 id를 반환한다"""
-
         try:
             nearest = [-1, 2147483647]
             for n in self.graph.nodes:
@@ -345,24 +343,20 @@ class SpatialInfoManage:
                 if dist2 < nearest[1]:
                     nearest = [n, dist2]
             return {'id': nearest[0]}
-
         except:
             rospy.loginfo('서비스 get_nearest 실패')
             return {'id': -1}
 
     def get_neighbors(self, request):
         """입력한 id를 갖는 GVG 노드의 이웃노드 id 리스트를 반환한다"""
-
         try:
             return {'ids': list(self.graph.neighbors(request.id))}
-
         except:
             rospy.loginfo('서비스 get_neighbors 실패')
             return {'ids': [-1]}
 
     def get_node(self, request):
         """입력한 id를 갖는 노드의 속성을 반환한다"""
-
         p = Point()
         try:
             p.x = self.graph.nodes[request.id]['pos'][0]

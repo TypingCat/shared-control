@@ -15,7 +15,7 @@ from actionlib_msgs.msg import GoalStatusArray, GoalStatus
 
 from move_base_msgs.msg import MoveBaseActionFeedback
 
-from shared_control.msg import MID, EyeblinkResult, RobotState
+from shared_control.msg import EyeblinkResult, RobotState, PathState
 from shared_control.srv import Nearest, Neighbors, Node, Motorimagery
 from reserved_words import *
 
@@ -43,6 +43,7 @@ class TaskPlan:
         print(C_YELLO + '\rTask planner, 자율주행 서비스 확인중...' + C_END)
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
         self.publisher_robot_state = rospy.Publisher('interf/robot_state', RobotState, queue_size=1)
+        self.publisher_path_state = rospy.Publisher('interf/path_state', PathState, queue_size=1)
         self.prev_goal = Point()
         self.move_result = GoalStatus()
         self.move_result.status = 3
@@ -128,6 +129,7 @@ class TaskPlan:
         if des_node_dist > self.node_radius:
             return
         ## 선택지 확인
+        state = RobotState()
         des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
         choice = copy.copy(des_node_neighbors)
         try:
@@ -141,7 +143,6 @@ class TaskPlan:
             self.departure_node = self.destination_node
             self.robot_state = S_SLEEP
             ### 정지 알림
-            state = RobotState()
             state.motion = M_STOP
             self.publisher_robot_state.publish(state)
             return
@@ -153,23 +154,31 @@ class TaskPlan:
             self.move_to(choice[0])
             self.robot_state = S_INDIRECT_WAIT
             ### 움직임 알림
-            state = RobotState()
-            state.motion = M_FORWARD
+            state.motion = M_MOVE
             self.publisher_robot_state.publish(state)
+            self.notify_path()
             return
         else:
             ### 선택지가 둘 이상이라면 motorimagery를 요청한다.
             print('\rTask planner, Motorimagery 요청')
             self.robot_state = S_INDIRECT_BUSY
+            state.motion = M_CUE
+            self.publisher_robot_state.publish(state)
             cue = Header()
             cue.stamp = rospy.Time.now()
             mi = self.get_motorimagery(cue)
             if mi.dir == M_FORWARD:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '앞' + C_END + ') 획득')
+                state.motion = M_FORWARD
+                self.publisher_robot_state.publish(state)
             elif mi.dir == M_LEFT:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '좌' + C_END + ') 획득')
+                state.motion = M_LEFT
+                self.publisher_robot_state.publish(state)
             elif mi.dir == M_RIGHT:
                 print('\rTask planner, Motorimagery(' + C_YELLO + '우' + C_END + ') 획득')
+                state.motion = M_RIGHT
+                self.publisher_robot_state.publish(state)
             ### 교차로에 도달할 때까지 대기한다.
             while not self.move_result.status == 3:
                 rospy.sleep(self.spin_cycle)
@@ -197,10 +206,13 @@ class TaskPlan:
             id = des_node_neighbors_dth.index(min(des_node_neighbors_dth))
             ### 이동한다.
             print('\rTask planner, 다음 노드로 이동')
+            state.motion = M_MOVE
+            self.publisher_robot_state.publish(state)
             self.move_to(des_node_neighbors[id])
             self.departure_node = self.destination_node
             self.destination_node = des_node_neighbors[id]
             self.robot_state = S_INDIRECT_WAIT
+            self.notify_path()
 
     def round(self, th):
         return ((th + math.pi) % (2 * math.pi)) - math.pi
@@ -217,7 +229,6 @@ class TaskPlan:
             state.motion = M_LEFT
         else:
             state.motion = M_RIGHT
-        self.publisher_robot_state.publish(state)
         ## Eyeblink가 들어오면 정지
         t = rospy.get_time()
         while self.eyeblink_time < t:
@@ -249,15 +260,44 @@ class TaskPlan:
         if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
-        # if math.sqrt(dx**2 + dy**2) > self.node_radius:
-        #     self.client.send_goal(goal)
-        # else:
-        #     self.move_result.status = 3
         self.client.send_goal(goal)
-        ## 움직임 알림
-        state = RobotState()
-        state.motion = M_FORWARD
-        self.publisher_robot_state.publish(state)
+
+    def notify_path(self):
+        # 경로정보 수집
+        des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
+        choice = copy.copy(des_node_neighbors)
+        try:
+            choice.remove(self.departure_node)
+        except: pass
+
+        dep_pos = self.get_node(self.departure_node).point
+        des_pos = self.get_node(self.destination_node).point
+        th = math.atan2(des_pos.y - dep_pos.y,
+                        des_pos.x - dep_pos.x)
+
+        choice_pos = [self.get_node(node).point for node in choice]
+        choice_th = [self.round(math.atan2(pos.y - des_pos.y, pos.x - des_pos.x) - th) for pos in choice_pos]
+
+        # 정면경로 확인
+        state = PathState()
+        choice_th_forward = [0, 3.14]
+        for i, th in enumerate(choice_th):
+            if abs(th) < abs(choice_th_forward[1]):
+                choice_th_forward[0] = i
+                choice_th_forward[1] = th
+        if abs(choice_th_forward[1]) < 0.5:
+            state.forward = 1
+            choice_th.remove(choice_th_forward[1])
+
+        # 좌우경로 확인
+        for i, th in enumerate(choice_th):
+            if th < 0:
+                state.right += 1
+            else:
+                state.left += 1
+
+        # 경로형태 알림
+        self.publisher_path_state.publish(state)
 
     def update_move_feedback(self, data):
         pass

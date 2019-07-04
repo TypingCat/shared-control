@@ -37,6 +37,7 @@
 - `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
+- `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
 
 
 ## 사용법
@@ -89,17 +90,15 @@ $ sudo xboxdrv
 
 ### 설치 방법
 1. Turtlebot3 설치안내 중 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치한다.
-2. [TEB local planner](http://wiki.ros.org/teb_local_planner/Tutorials/Setup%20and%20test%20Optimization)를 설치한다.
-3. 그리고 이하의 명령어를 따라 설치를 마무리한다.
-
-```
-$ cd ~/catkin_ws/src
-$ git clone https://github.com/finiel/shared_control.git
-$ sudo apt-get install python-pip xboxdrv ros-kinetic-joy
-$ pip install networkx==2.1
-$ cd ~/catkin_ws
-$ catkin_make
-```
+2. shared_control 외 필요한 패키지들을 설치한다.
+    ```
+    $ cd ~/catkin_ws/src
+    $ git clone https://github.com/finiel/shared_control.git
+    $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner
+    $ pip install --user networkx==2.1 pygame
+    $ cd ~/catkin_ws
+    $ catkin_make
+    ```
 
 
 ## 노드
