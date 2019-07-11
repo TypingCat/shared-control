@@ -161,6 +161,10 @@ class Interface:
             elif event.type == pygame.KEYDOWN:  # 키 획득
                 pressed = pygame.key.get_pressed()
                 buttons = [pygame.key.name(k) for k, v in enumerate(pressed) if v]
+                try:
+                    buttons[0]
+                except:
+                    return
                 if ((buttons[0] == 'c') and (len(buttons) > 2)) or (buttons[0] == 'escape'):   # ctrl+c
                     self.key_watcher.shutdown()
                     pygame.quit()

@@ -1,60 +1,66 @@
 <launch>
-  # 시뮬레이션 환경에 놓인 로봇을 문답식으로 제어한다.
-  # 로봇: Turtlebot3 waffle(gamma)
-  # 제어방식: 공유제어, 키보드 awsd(motorimagery)와 23(eyeblink) 혹은 BCI
+    # 시뮬레이션 환경에 놓인 로봇을 문답식으로 제어한다.
+    # 로봇: Turtlebot3 waffle(gamma)
+    # 제어방식: 공유제어, 키보드 awsd(motorimagery)와 23(eyeblink) 혹은 BCI
 
-  # 파라미터 설정
-  <arg name="robot_pose_x" value="0.0"/>
-  <arg name="robot_pose_y" value="0.0"/>
-  <arg name="robot_pose_Y" value="1.57"/>
+    # 파라미터 설정
+    <arg name="x" default="0.0"/>
+    <arg name="y" default="0.0"/>
+    <arg name="Y" default="1.57"/>
+    <arg name="v" default="0.6"/>
+    <arg name="w" default="0.6"/>
 
-  <arg name="robot_vel_lin" value="0.6"/>
-  <arg name="robot_vel_ang" value="0.6"/>
+    <arg name="env" default="L81"/>
+    <arg name="rad" default="3.0"/>
 
-  <arg name="environment" value="L81"/>
-  <arg name="node_radius" value="3.0"/>
-  <arg name="fullscreen" value="True"/>
+    <arg name="rviz" default="False"/>
+    <arg name="gzb" default="True"/>
+    <arg name="full" default="False"/>
 
-  # 환경 시뮬레이션
-  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg environment).yaml"/>
-  <include file="$(find shared_control)/launch/gazebo.launch">
-    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
-    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
-    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
-    <arg name="environment" value="$(arg environment)"/>
-    <arg name="gui" value="false"/>
-  </include>
+    # 환경 시뮬레이션
+    <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg env).yaml"/>
+    <group if="$(arg gzb)">
+        <include file="$(find shared_control)/launch/gazebo.launch">
+            <arg name="robot_pose_x" value="$(arg x)"/>
+            <arg name="robot_pose_y" value="$(arg y)"/>
+            <arg name="robot_pose_Y" value="$(arg Y)"/>
+            <arg name="environment" value="$(arg env)"/>
+            <arg name="gui" value="false"/>
+        </include>
+    </group>
 
-  # 공간구조 구축
-  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen">
-    <param name="gvd_PM" value="5.0"/>
-    <param name="gvd_BM" value="4.4"/>
-    <param name="gvg_minimum_path_distance" value="0.5"/>
-    <rosparam param="custom_edge_list_x1"> [-12.4, -12.1, -12.3, 0.0, 0.0, 0.0, 0.1, -14.6, -12.1, -13.5, -12.3, 0.1, -0.8, 0.0] </rosparam>
-    <rosparam param="custom_edge_list_y1"> [3.5, 6, 23.7, 0.4, 6, 13, 23.7, 7.2, 6, 25.5, 23.7, 23.7, 13.5, 13] </rosparam>
-    <rosparam param="custom_edge_list_x2"> [-12.1, -12.3, -12.8, 0.0, 0.0, 0.1, 0.1, -12.1, 0.0, -12.3, 0.1, 2.5, 0.0, 2.5] </rosparam>
-    <rosparam param="custom_edge_list_y2"> [6, 23.7, 30.7, 6, 13, 23.7, 34.6, 6, 6, 23.7, 23.7, 26.1, 13, 13.1] </rosparam>
-  </node>
+    # 공간구조 구축
+    <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen">
+        <param name="gvd_PM" value="5.0"/>
+        <param name="gvd_BM" value="4.4"/>
+        <param name="gvg_minimum_path_distance" value="0.5"/>
+        <rosparam param="custom_edge_list_x1"> [-12.4, -12.1, -12.3, 0.0, 0.0, 0.0, 0.1, -14.6, -12.1, -13.5, -12.3, 0.1, -0.8, 0.0] </rosparam>
+        <rosparam param="custom_edge_list_y1"> [3.5, 6, 23.7, 0.4, 6, 13, 23.7, 7.2, 6, 25.5, 23.7, 23.7, 13.5, 13] </rosparam>
+        <rosparam param="custom_edge_list_x2"> [-12.1, -12.3, -12.8, 0.0, 0.0, 0.1, 0.1, -12.1, 0.0, -12.3, 0.1, 2.5, 0.0, 2.5] </rosparam>
+        <rosparam param="custom_edge_list_y2"> [6, 23.7, 30.7, 6, 13, 23.7, 34.6, 6, 6, 23.7, 23.7, 26.1, 13, 13.1] </rosparam>
+    </node>
 
-  # 이동로봇 제어
-  <include file="$(find shared_control)/launch/navigation.launch">
-    <arg name="robot_pose_x" value="$(arg robot_pose_x)"/>
-    <arg name="robot_pose_y" value="$(arg robot_pose_y)"/>
-    <arg name="robot_pose_Y" value="$(arg robot_pose_Y)"/>
-  </include>
-  <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
-    <param name="robot_vel_lin" value="$(arg robot_vel_lin)"/>
-    <param name="robot_vel_ang" value="$(arg robot_vel_ang)"/>
-    <param name="node_radius" value="$(arg node_radius)"/>
-    <param name="spin_cycle" value="0.3"/>
-    <param name="plan_cycle" value="1.0"/>
-  </node>
+    # 이동로봇 제어
+    <include file="$(find shared_control)/launch/navigation.launch">
+        <arg name="robot_pose_x" value="$(arg x)"/>
+        <arg name="robot_pose_y" value="$(arg y)"/>
+        <arg name="robot_pose_Y" value="$(arg Y)"/>
+    </include>
+    <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
+        <param name="robot_vel_lin" value="$(arg v)"/>
+        <param name="robot_vel_ang" value="$(arg w)"/>
+        <param name="node_radius" value="$(arg rad)"/>
+        <param name="spin_cycle" value="0.3"/>
+        <param name="plan_cycle" value="1.0"/>
+    </node>
 
-  # 인터페이스
-  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
-    <param name="fullscreen" value="$(arg fullscreen)"/>
-  </node>
-  <!-- <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-        args="-d $(find shared_control)/rviz/shared_control.rviz"/> -->
+    # 인터페이스
+    <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
+        <param name="fullscreen" value="$(arg full)"/>
+    </node>
+    <group if="$(arg rviz)">
+        <node pkg="rviz" type="rviz" name="rviz" respawn="true"
+            args="-d $(find shared_control)/rviz/shared_control.rviz"/>
+    </group>
 
 </launch>
