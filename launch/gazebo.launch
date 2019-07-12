@@ -41,7 +41,7 @@
 	args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)"/>
 
   # 이동로봇 모델 불러오기
-  <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gamma.urdf.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gazebo.urdf.xacro"/>
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
         args="-urdf -model turtlebot3_waffle_gamma
               -x $(arg robot_pose_x)

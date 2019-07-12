@@ -25,7 +25,7 @@ class Interface:
         # 화면 초기화
         pygame.init()
         pygame.display.set_caption("Shared control interface")
-        rospy.Subscriber('camera/rgb/image_raw', Image, self.visualize)
+        rospy.Subscriber(rospy.get_param('~camera', 'camera/rgb/image_raw'), Image, self.visualize)
         self.color = {'data': [(255, 223, 36),   # default
                                (255, 223, 36),   # M_RIGHT
                                (255, 223, 36),   # M_LEFT
