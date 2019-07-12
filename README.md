@@ -62,11 +62,12 @@ $ roslaunch shared_control dc_gzb.launch
 - `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
 - `interf/robot_state`, 이동로봇의 상태를 보고한다. <br> {motion: 시작하는 움직임}
 
-### SLAM을 위한 hotspot 네트워크 설정
+### Hotspot 네트워크 설정
 1. Hotspot을 제공할 컴퓨터에서 Network Connections/Add, Wi-Fi 타입 연결을 생성한다.
-2. Wi-Fi 탭에서 Connection name(=WiFi-hotspot), SSID(=Turtlebot), Mode(=Hotspot), Device(=wlp1s0)를 설정한다.
+2. Wi-Fi 탭에서 Connection name(=Turtlebot3), SSID(=Turtlebot3), Mode(=Hotspot), Device(=wlp1s0)를 설정한다.
 3. IPv4 탭에서 Method(=Shared to other computers)를 설정한다. 그리고 저장한다.
-4. Hotspot에 연결할 컴퓨터에서 Connect to Hidden Wi-Fi Network, 위에서 설정한 네트워크를 찾아 연결한다.
+4. Create New Wi-Fi Network에서 새로 생성한 네트워크 설정(=Turtlebot3)을 선택한다.
+5. Hotspot에 연결할 컴퓨터에서 Connect to Hidden Wi-Fi Network, 위에서 설정한 네트워크(=Turtlebot3)를 찾아 연결한다.
 
 ### 조이스틱 연결
 XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
@@ -94,7 +95,7 @@ $ sudo xboxdrv
     ```
     $ cd ~/catkin_ws/src
     $ git clone https://github.com/finiel/shared_control.git
-    $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner
+    $ sudo apt install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner ros-kinetic-realsense-camera
     $ pip install --user networkx==2.1 pygame
     $ cd ~/catkin_ws
     $ catkin_make

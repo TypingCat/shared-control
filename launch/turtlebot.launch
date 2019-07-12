@@ -21,4 +21,9 @@
     <param name="scan_mode"        type="string" value="Sensitivity"/>
   </node>
 
+  # Realsense 연결
+  <include file="$(find shared_control)/launch/realsense.launch">
+      <remap from="camera/color/image_raw" to="camera/rgb/image_raw"/>
+  </include>
+
 </launch>
