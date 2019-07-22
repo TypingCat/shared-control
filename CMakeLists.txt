@@ -52,18 +52,16 @@ find_package(gazebo REQUIRED)
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  MID.msg
-  MotorimageryCue.msg
-  MotorimageryResult.msg
-  EyeblinkResult.msg
-  RobotState.msg
-  PathState.msg
+  CmdAssist.msg
+  CmdIntuit.msg
+  NavCue.msg
+  RobotMotion.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  Motorimagery.srv
+  Nav2Cmd.srv
   Nearest.srv
   Neighbors.srv
   Node.srv

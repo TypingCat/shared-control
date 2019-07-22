@@ -34,10 +34,11 @@
 - `1.0.0` 노드 사이의 프로토콜 확립, `1.0.1` Task planner 구축, `1.0.2` Gazebo 연결, `1.0.3` Interface visualizer 구축, `1.0.4` 좌표계 구축
 - `1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
 - `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
-- `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
+- `1.3.0` 이동로봇-BCI 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 - `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
+- `1.7.0` 이동로봇-BCI 인터페이스 개편
 
 
 ## 사용법
@@ -46,21 +47,21 @@
 
 | | 직접제어 | 공유제어 |
 |-|-|-|
-| 실제 | ~~dc.launch~~ | ~~sc.launch~~ |
+| 실제 | ~~dc.launch~~ | sc.launch |
 | 시뮬레이션 | dc_gzb.launch | sc_gzb.launch |
 
-예를 들어 직접제어를 시뮬레이션으로 실행하려면,
+### 토픽
+interf/cmd/intuit
+interf/cmd/assist
+interf/nav_cue
+interf/robot/motion
 
-```
-$ roslaunch shared_control dc_gzb.launch
-```
-
-공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
 
 - `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
 - `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), 전(3), 후(4), 정지(5)}
 - `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
 - `interf/robot_state`, 이동로봇의 상태를 보고한다. <br> {motion: 시작하는 움직임}
+
 
 ### Hotspot 네트워크 설정
 1. Hotspot을 제공할 컴퓨터에서 Network Connections/Add, Wi-Fi 타입 연결을 생성한다.
