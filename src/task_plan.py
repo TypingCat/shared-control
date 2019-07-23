@@ -22,13 +22,13 @@ from reserved_words import *
 
 class TaskPlan:
     def __init__(self):
-        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.1))
-        self.plan_cycle = rospy.Duration(rospy.get_param('~plan_cycle', 0.5))
-        self.node_radius = rospy.get_param('~node_radius', 2.0)
-        self.forward_threshold = rospy.get_param('~forward_threshold', 0.5)
-        self.robot_vel_lin = rospy.get_param('~robot_vel_lin', 0.6)
-        self.robot_vel_ang = rospy.get_param('~robot_vel_ang', 1.82)
-
+        self.ang_fwd_threshold = rospy.get_param('~ang_fwd_threshold', 0.5)
+        self.ang_vel_intersection = rospy.get_param('~ang_vel_intersection', 1.82)
+        self.dist_alarm_1 = rospy.get_param('~dist_alarm_1', 5.0)
+        self.dist_alarm_2 = rospy.get_param('~dist_alarm_2', 3.0)
+        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.3))
+        self.plan_cycle = rospy.Duration(rospy.get_param('~plan_cycle', 1.0))
+        
         print(C_YELLO + '\rTask planner, GVG 서비스 확인중...' + C_END)
         rospy.wait_for_service('gvg/nearest')
         rospy.wait_for_service('gvg/neighbors')
@@ -116,16 +116,24 @@ class TaskPlan:
         # 로봇이 목적지에 접근했는지 확인한다.
         if (self.robot_state == S_INDIRECT_BUSY) or (self.robot_state == S_SLEEP):
             return
-        dep_node_pos = self.get_node(self.departure_node).point
-        dep_node_dist = math.sqrt((self.robot_pose.position.x - dep_node_pos.x)**2
-                                 +(self.robot_pose.position.y - dep_node_pos.y)**2)
         des_node_pos = self.get_node(self.destination_node).point
         des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
-                                 +(self.robot_pose.position.y - des_node_pos.y)**2)
-        if dep_node_dist < des_node_dist:
-            return
-        if des_node_dist > self.node_radius:
-            return
+                                + (self.robot_pose.position.y - des_node_pos.y)**2)
+
+        # 첫번째 알람지점을 통과하면 알린다.
+        while des_node_dist > self.dist_alarm_1:
+            des_node_pos = self.get_node(self.destination_node).point
+            des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
+                                    + (self.robot_pose.position.y - des_node_pos.y)**2)
+            rospy.sleep(self.spin_cycle)
+        self.publisher_nav_cue.publish(self.check_intersection())
+
+        # 두번째 알람지점을 통과하면 임무계획을 시작한다.
+        while des_node_dist > self.dist_alarm_2:
+            des_node_pos = self.get_node(self.destination_node).point
+            des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
+                                    + (self.robot_pose.position.y - des_node_pos.y)**2)
+            rospy.sleep(self.spin_cycle)
 
         # 선택지를 검색한다.
         des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
@@ -152,7 +160,6 @@ class TaskPlan:
             self.move_to(choice[0])
             self.robot_state = S_INDIRECT_WAIT
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_MOVE)
-            self.publisher_nav_cue.publish(self.check_intersection())
             return
         ## 선택지가 둘 이상이라면,
         else:
@@ -208,7 +215,6 @@ class TaskPlan:
             self.departure_node = self.destination_node
             self.destination_node = des_node_neighbors[id]
             self.robot_state = S_INDIRECT_WAIT
-            self.publisher_nav_cue.publish(self.check_intersection())
 
     def round(self, th):
         return ((th + math.pi) % (2 * math.pi)) - math.pi
@@ -217,7 +223,7 @@ class TaskPlan:
         """로봇이 해당방향으로 회전한다."""
         ## 회전한다.
         vel = Twist()
-        vel.angular.z = sign * self.robot_vel_ang
+        vel.angular.z = sign * self.ang_vel_intersection
         self.publisher_cmd_vel.publish(vel)
         if sign > 0:
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_LEFT)
@@ -288,7 +294,7 @@ class TaskPlan:
             if abs(th) < abs(choice_th_forward[1]):
                 choice_th_forward[0] = i
                 choice_th_forward[1] = th
-        if abs(choice_th_forward[1]) < self.forward_threshold:
+        if abs(choice_th_forward[1]) < self.ang_fwd_threshold:
             cue.forward = 1
             choice_th.remove(choice_th_forward[1])
         for i, th in enumerate(choice_th):

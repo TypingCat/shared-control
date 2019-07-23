@@ -4,7 +4,7 @@
 import rospy
 import pygame
 import copy
-import termios, sys, select, tty
+import os
 
 from std_msgs.msg import Int32, Header
 from visualization_msgs.msg import MarkerArray, Marker
@@ -20,13 +20,24 @@ class Interface:
 
     def __init__(self):
         # 파라미터 설정
+        self.camera = rospy.get_param('~camera', 'camera/rgb/image_raw')
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
+        self.scale_arrow = rospy.get_param('~scale_arrow', 50)
+        self.scale_cross = rospy.get_param('~scale_cross', 30)
 
         # 화면 초기화
-        print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "0, 0"
         pygame.init()
+        self.monitor = pygame.display.Info()
+        self.width = rospy.get_param('~width', int(0.48*self.monitor.current_w))
+        self.height = rospy.get_param('~height', int(0.48*self.monitor.current_h))
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.mouse.set_visible(False)
         pygame.display.set_caption("Shared control interface")
-        rospy.Subscriber(rospy.get_param('~camera', 'camera/rgb/image_raw'), Image, self.visualize)
+
+        # 토픽 구독
+        print(C_YELLO + '\rInterfacer, BCI 서비스 준비중...' + C_END)
+        rospy.Subscriber(self.camera, Image, self.visualize)
         self.color = {'data': [(255, 223, 36),   # default
                                (255, 223, 36),   # M_RIGHT
                                (255, 223, 36),   # M_LEFT
@@ -36,13 +47,13 @@ class Interface:
                                (255, 223, 36),
                                (134, 229, 127)],  # M_MOVE
                       'time': [rospy.get_time()]*8}
-        self.fullscreen = rospy.get_param('~fullscreen', True)
 
-        # 입출력 설정
+        # 출력 설정
         self.publisher_cmd_intuit = rospy.Publisher('interf/cmd/intuit', CmdIntuit, queue_size=1)
         self.publisher_cmd_assist = rospy.Publisher('interf/cmd/assist', CmdAssist, queue_size=1)
         self.publisher_nav_cue = rospy.Publisher('interf/nav_cue', NavCue, queue_size=1)
         
+        # 토픽 구독
         self.cmd = CmdIntuit()
         rospy.Subscriber('interf/cmd/intuit', CmdIntuit, self.update_cmd_intuit)
         rospy.Subscriber('interf/robot/motion', RobotMotion, self.update_marker_color)
@@ -57,42 +68,31 @@ class Interface:
 
     def visualize(self, data):
         """화면을 출력한다."""
-        # 화면을 설정한다.
-        try:
-            self.screen
-        except:
-            if self.fullscreen:
-                self.screen = pygame.display.set_mode((data.width, data.height), pygame.FULLSCREEN)
-            else:
-                self.screen = pygame.display.set_mode((data.width, data.height))
-            self.width = data.width
-            self.height = data.height
-            pygame.mouse.set_visible(False)
-
         # 영상을 획득한다.
         cam = pygame.image.frombuffer(data.data, (data.width, data.height), 'RGB')
-        self.screen.blit(cam, (0, 0))
+        img = pygame.transform.smoothscale(cam, (self.width, self.height))
+        self.screen.blit(img, (0, 0))
 
         # 영상 위에 화살표 마커를 덧붙여 출력한다.
         if self.color['time'][M_CUE] > self.color['time'][M_MOVE]:
-            self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
-            self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
-            self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
-            self.draw_cross(50, 0.5*self.width, 0.5*self.height)
+            self.draw_arrow(M_RIGHT, 0.94*self.width, 0.5*self.height)
+            self.draw_arrow(M_LEFT, 0.06*self.width, 0.5*self.height)
+            self.draw_arrow(M_FORWARD, 0.5*self.width, 0.1*self.height)
+            self.draw_cross(0.5*self.width, 0.5*self.height)
         elif rospy.get_time() < self.color['time'][M_MOVE] + 3.:
-            self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
-            self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
-            self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
+            self.draw_arrow(M_RIGHT, 0.94*self.width, 0.5*self.height)
+            self.draw_arrow(M_LEFT, 0.06*self.width, 0.5*self.height)
+            self.draw_arrow(M_FORWARD, 0.5*self.width, 0.1*self.height)
         else:
             self.color['data'][M_RIGHT] = self.color['data'][0]
             self.color['data'][M_LEFT] = self.color['data'][0]
             self.color['data'][M_FORWARD] = self.color['data'][0]
-            self.draw_arrow(M_RIGHT, 70, 0.94*self.width, 0.5*self.height)
-            self.draw_arrow(M_LEFT, 70, 0.06*self.width, 0.5*self.height)
-            self.draw_arrow(M_FORWARD, 70, 0.5*self.width, 0.1*self.height)
+            self.draw_arrow(M_RIGHT, 0.94*self.width, 0.5*self.height)
+            self.draw_arrow(M_LEFT, 0.06*self.width, 0.5*self.height)
+            self.draw_arrow(M_FORWARD, 0.5*self.width, 0.1*self.height)
         pygame.display.flip()
 
-    def draw_arrow(self, type, scale, x, y):
+    def draw_arrow(self, type, x, y):
         """화살표를 그린다."""
         if type == M_RIGHT:
             if self.switch_marker[0] == False: return
@@ -103,13 +103,13 @@ class Interface:
         elif type == M_FORWARD:
             if self.switch_marker[2] == False: return
             arr = [[1, 0], [0.5, 0], [0.5, 1], [-0.5, 1], [-0.5, 0], [-1, 0], [0, -1]]
-        arr = [[scale*i+x, scale*j+y] for [i, j] in arr]
+        arr = [[self.scale_arrow*i+x, self.scale_arrow*j+y] for [i, j] in arr]
         pygame.draw.polygon(self.screen, self.color['data'][type], arr)
 
-    def draw_cross(self, scale, x, y):
+    def draw_cross(self, x, y):
         """십자가를 그린다"""
         cross = [[1, 0.1], [0.1, 0.1], [0.1, 1], [-0.1, 1], [-0.1, 0.1], [-1, 0.1], [-1, -0.1], [-0.1, -0.1], [-0.1, -1], [0.1, -1], [0.1, -0.1], [1, -0.1]]
-        cross = [[scale*i+x, scale*j+y] for [i, j] in cross]
+        cross = [[self.scale_cross*i+x, self.scale_cross*j+y] for [i, j] in cross]
         pygame.draw.polygon(self.screen, self.color['data'][M_MOVE], cross)
 
     def nav2cmd(self, request):
@@ -132,19 +132,12 @@ class Interface:
 
     def keyboard(self, event):
         """키보드 입력을 받아온다."""
-        try:
-            self.screen
-        except:
-            return
-
-        # 키가 눌렸는지 확인한다.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:       # 종료: ctrl+c
                 self.key_watcher.shutdown()
                 pygame.quit()
                 rospy.sleep(rospy.Duration(1.0))
                 rospy.signal_shutdown("Quit")
-
             elif event.type == pygame.KEYDOWN:  # 키 획득
                 pressed = pygame.key.get_pressed()
                 buttons = [pygame.key.name(k) for k, v in enumerate(pressed) if v]
@@ -152,7 +145,6 @@ class Interface:
                     buttons[0]
                 except:
                     return
-
                 if ((buttons[0] == 'c') and (len(buttons) > 2)) or (buttons[0] == 'escape'):   # 종료: ctrl+c
                     self.key_watcher.shutdown()
                     pygame.quit()
