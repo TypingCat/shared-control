@@ -21,4 +21,7 @@
     <param name="scan_mode"        type="string" value="Sensitivity"/>
   </node>
 
+  # Realsense 연결
+  <include file="$(find shared_control)/launch/realsense.launch"/>
+
 </launch>

@@ -1,4 +1,2 @@
 Header header
----
-Header header
 int32 dir

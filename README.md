@@ -19,56 +19,67 @@
 
 ### 협업구조
 - 김래현박사님팀
-    - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr), 오승준(ohseungjun@kist.re.kr)
+    - 실무자: 김다혜(dahyekim@kist.re.kr), 윤주석(juseok5462@kist.re.kr), 권장호(g15007@kist.re.kr), 오승준(ohseungjun@kist.re.kr), 박상인(sipark@kist.re.kr)
     - 역할: BCI로 사용자의 의도를 획득한다.
 - 최종석박사님팀
-    - 실무자: 노진홍(fini@kist.re.kr), 최태민(choitm0707@kist.re.kr)
+    - 실무자: 노진홍(fini@kist.re.kr)
     - 역할: BCI-이동로봇을 위한 공유제어를 설계한다.
-- 윤상석교수님팀
-    - 실무자: 엄홍규(ehg2y@naver.com)
-    - 역할: 이동로봇을 제어한다.
-
-![아키텍처](image/architecture.png)
 
 ### 변경점
 - `1.0.0` 노드 사이의 프로토콜 확립, `1.0.1` Task planner 구축, `1.0.2` Gazebo 연결, `1.0.3` Interface visualizer 구축, `1.0.4` 좌표계 구축
 - `1.1.0` 실제 BCI와 연결, `1.1.1` 평가 모듈 추가, `1.1.2` Joystick 추가, `1.1.3` 그래프 수동작성기능 추가
 - `1.2.0` 행동방침 변경, `1.2.1` 실행파일 인자 공유, `1.2.2` Motion manager 인터럽트 기능 추가
-- `1.3.0` BCI-이동로봇 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
+- `1.3.0` 이동로봇-BCI 인터페이스 개선, `1.3.1` 지도 확장, `1.3.2` 노드 마운트 초기화, `1.3.3` 로봇의 상태 발행
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 - `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
+- `1.7.0` 이동로봇-BCI 인터페이스 개편
 
 
 ## 사용법
-### 실행
-본 패키지는 두 가지 제어방식과 두 가지 구현방식을 지원한다. 각 방식에 해당하는 실행파일은 다음과 같다.
+### 실행 순서
+1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
+2. 로봇을 켠다. Gazebo로 실행하는 경우에는 생략한다.
+    ``` bash
+    $ roslaunch shared_control turtlebot.launch
+    ```
+3. 제어 프로그램을 실행한다.
+    ``` bash
+    $ roslaunch shared_control start.launch gzb:=false      # 로봇으로 실행하는 경우
+    $ roslaunch shared_control start.launch                 # Gazebo로 실행하는 경우
+    $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드로 제어하는 경우
+    ```
 
-| | 직접제어 | 공유제어 |
-|-|-|-|
-| 실제 | ~~dc.launch~~ | ~~sc.launch~~ |
-| 시뮬레이션 | dc_gzb.launch | sc_gzb.launch |
+필요하다면 실행파일 `start.launch`에서 파라미터를 수정할 수 있다.
 
-예를 들어 직접제어를 시뮬레이션으로 실행하려면,
+### Subscribed topic for BCI
+- `interf/cmd/intuit`: 로봇에게 이동방향을 지시한다.
+    - `header`
+    - `dir` = {1: 오른쪽, 2: 왼쪽, 3: 앞}
+- `interf/cmd/assist`: 로봇에게 행동시점을 지시한다.
+    - `header`
+    - `num` = {2: 교차로에서 회전정지시점, 혹은 말단노드 탈출시점}
 
-```
-$ roslaunch shared_control dc_gzb.launch
-```
+### Published topic for BCI
+- `interf/nav_cue`: 도달예정인 교차로의 정보를 제공한다.
+    - `header`
+    - `dist` = 교차로와의 거리
+    - `right` = 오른쪽 경로의 수
+    - `left` = 왼쪽 경로의 수
+    - `forward` = {0: 전방경로 없음, 1: 전방경로 있음}
+    - `backward` = {0: 후방경로 없음, 1: 후방경로 있음}
+- `interf/robot/motion`: 로봇이 선택한 움직임을 알린다.
+    - `header`
+    - `motion` = {1: 오른쪽, 2: 왼쪽, 3: 앞, 4: 뒤, 5: 정지, 6: 알림, 7: 이동}
 
-공유제어 시스템과 BCI 시스템 사이의 프로토콜은 다음과 같다.
-
-- `interf/motorimagery_cue`, 공유제어 --> BCI, Motor imagery가 필요한 시점을 알린다. <br> {header: 메시지 발행시점}
-- `interf/motorimagery_result`, BCI --> 공유제어, Motor imagery 결과를 보낸다. <br> {dir: 우(1), 좌(2), 전(3), 후(4), 정지(5)}
-- `interf/eyeblink_result`, BCI --> 공유제어, Eye blink 결과를 보낸다. <br> {num: 깜빡임 횟수}
-- `interf/robot_state`, 이동로봇의 상태를 보고한다. <br> {motion: 시작하는 움직임}
-
-### SLAM을 위한 hotspot 네트워크 설정
+### Hotspot 네트워크 설정
 1. Hotspot을 제공할 컴퓨터에서 Network Connections/Add, Wi-Fi 타입 연결을 생성한다.
-2. Wi-Fi 탭에서 Connection name(=WiFi-hotspot), SSID(=Turtlebot), Mode(=Hotspot), Device(=wlp1s0)를 설정한다.
+2. Wi-Fi 탭에서 Connection name(=Turtlebot3), SSID(=Turtlebot3), Mode(=Hotspot), Device(=wlp1s0)를 설정한다.
 3. IPv4 탭에서 Method(=Shared to other computers)를 설정한다. 그리고 저장한다.
-4. Hotspot에 연결할 컴퓨터에서 Connect to Hidden Wi-Fi Network, 위에서 설정한 네트워크를 찾아 연결한다.
+4. Create New Wi-Fi Network에서 새로 생성한 네트워크 설정(=Turtlebot3)을 선택한다.
+5. Hotspot에 연결할 컴퓨터에서 Connect to Hidden Wi-Fi Network, 위에서 설정한 네트워크(=Turtlebot3)를 찾아 연결한다.
 
-### 조이스틱 연결
+### Joystick 연결
 XBOX360 조이스틱을 연결하려면 어댑터를 꽂고 패드와 페어링을 한다. 두 기기의 페어링 버튼 `(((`을 동시에 누르면 된다. 그리고 다음을 실행한다. 터미널에 조이스틱 데이터가 출력되면 성공이다.
 
 ```
@@ -94,72 +105,8 @@ $ sudo xboxdrv
     ```
     $ cd ~/catkin_ws/src
     $ git clone https://github.com/finiel/shared_control.git
-    $ sudo apt-get install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner
+    $ sudo apt install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner ros-kinetic-realsense-camera
     $ pip install --user networkx==2.1 pygame
     $ cd ~/catkin_ws
     $ catkin_make
     ```
-
-
-## 노드
-### Direct controller
-이동로봇의 속도를 직접 제어한다. 키보드와 조이스틱 입력을 지원한다.
-
-- Parameters
-    - robot_vel_lin (float, default: 0.6)
-    - robot_vel_ang (float, default: 1.82)
-    - spin_cycle (float, default: 0.1)
-
-### Evaluator
-이동로봇의 움직임을 테스트한다. 무작위 혹은 주어진 목표까지 이동하기까지의 시간을 기록한다.
-
-- Parameters
-    - destination_margin (float, default: 0.5), 목적지 반경
-    - destination_spawn_x_min (float, default: -5.0), 목적지 무작위 발생영역 (x_min, x_max, y_min, y_max)
-    - destination_spawn_x_max (float, default: 5.0)
-    - destination_spawn_y_min (float, default: -5.0)
-    - destination_spawn_y_max (float, default: 5.0)
-    - destination_list_x (float, default: []), 수동 목적지 리스트 (x, y)
-    - destination_list_y (float, default: [])
-    - spin_cycle (float, default: 0.1)
-
-### Interfacer
-간접제어를 위한 프로토콜을 정리한다. 키보드와 BCI 입력을 지원한다.
-
-- Parameters
-    - spin_cycle (float, default: 0.1)
-
-### Spatial information manager
-공간정보를 처리한다. 주어진 지도를 GVG로 변환하고 검색서비스를 제공한다.
-
-- Paramters
-    - gvd_PM (float, default: 10.0), Origin 사이의 최소거리
-    - gvd_BM (float, default: 3.74), GVD에 등록되기 위한 occupied와의 최소거리
-    - gvg_minimum_path_distance (float, default: 0.3), GVG 말단이 성립하기 위한 최소거리
-    - custom_edge_list_x1 (float, default: []), 엣지 (x1, y1, x2, y2)로 구성되는 그래프; 입력하면 해당 그래프가 GVG를 대체
-    - custom_edge_list_y1 (float, default: [])
-    - custom_edge_list_x2 (float, default: [])
-    - custom_edge_list_y2 (float, default: [])
-
-### Task planner
-이동로봇의 행동방침을 반영한다. 현재상황을 파악하여 로봇의 이동목표를 결정하거나 질문을 생성한다.
-
-- Paramters
-    - spin_cycle (float, default: 0.1)
-    - plan_cycle (float, default: 0.5)
-    - node_radius (float, default: 2.0), 노드의 반경; cue 발행시점 조절가능
-    - robot_vel_lin (float, default: 0.26)
-    - robot_vel_ang (float, default: 1.82)
-- Expected behaviors
-    - Task planner는 3개의 상태(휴면, 준비, 작동)을 기반으로 움직이는 finite-state machine이다. 휴면상태에서 시작한다.
-    - 최초노드는 가장 가까운 노드로 설정된다.
-    - 이동 중 교차로에 접근하면 cue를 발행한다.
-    - 교차로에 도달하면 motor imagery가 선택한 방향으로 회전한다. 회전하는 도중 eye blink가 들어오면 해당 방향으로 이동하고, 아니면 해당방향의 마지막 노드를 향해 이동한다.
-    - 말단노드에 도달한다면 휴면상태로 전환한다.
-
-### Visualizer
-시각화를 담당한다. 사용자가 상황을 파악할 수 있도록 주행환경과 인터페이스를 마커로 발행한다.
-
-- Parameters
-    - MI_marker_len (float, default: 1.0), Motor imagery 선택지를 나타내는 화살표의 길이
-    - publish_cycle (float, default: 0.3)
