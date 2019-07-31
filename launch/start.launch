@@ -1,6 +1,6 @@
 <launch>
 
-    # 파라미터 설정(단위: m, rad)
+    # 파라미터 설정(단위: m, rad, s)
     <arg name="init_robot_pose_x" default="0.0"/>       # 초기자세 (x, y, Y)
     <arg name="init_robot_pose_y" default="0.0"/>
     <arg name="init_robot_pose_Y" default="0.0"/>
@@ -12,7 +12,7 @@
     <arg name="dist_alarm_2" default="3.0"/>            # 알림거리 2: 명령 요청지점
 
     <arg name="env" default="L81"/>                     # 주행환경
-    <arg name="gzb" default="true"/>                    # Gazebo 실행여부
+    <arg name="gzb" default="false"/>                   # Gazebo 실행여부
 
     # 환경 시뮬레이션
     <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg env).yaml"/>
@@ -51,16 +51,7 @@
     </node>
 
     # 인터페이스
-    <group if="$(arg gzb)">
-        <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">        
-            <param name="camera" value="camera/rgb/image_raw"/>
-        </node>
-    </group>
-    <group unless="$(arg gzb)">
-        <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">        
-            <param name="camera" value="camera/color/image_raw"/>
-        </node>
-    </group>
+    <node pkg="shared_control" type="interface.py" name="interfacer" output="screen"/>
     <node pkg="rviz" type="rviz" name="rviz" respawn="true"
         args="-d $(find shared_control)/rviz/shared_control.rviz"/>
 

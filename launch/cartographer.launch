@@ -1,0 +1,8 @@
+<launch>
+    <node name="cartographer_node" pkg="cartographer_ros"
+        type="cartographer_node" args="
+            -configuration_directory $(find shared_control)/lua
+            -configuration_basename turtlebot.lua"
+        output="screen">
+    </node>
+</launch>
