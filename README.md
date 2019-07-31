@@ -39,15 +39,16 @@
 ## 사용법
 ### 실행 순서
 1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
-2. 로봇을 켠다. Gazebo로 실행하는 경우에는 생략한다.
+2. 로봇을 켠다.
     ``` bash
-    $ roslaunch shared_control turtlebot.launch
+    $ roslaunch shared_control turtlebot.launch             # 실제 로봇으로 실행하는 경우
+    $ roslaunch shared_control gazebo.launch                # 시뮬레이터로 실행하는 경우(옵션으로 생략 가능)
     ```
 3. 제어 프로그램을 실행한다.
     ``` bash
-    $ roslaunch shared_control start.launch gzb:=false      # 로봇으로 실행하는 경우
-    $ roslaunch shared_control start.launch                 # Gazebo로 실행하는 경우
-    $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드로 제어하는 경우
+    $ roslaunch shared_control start.launch                 # 로봇/시뮬레이터가 실행되고 있을 경우
+    $ roslaunch shared_control start.launch gzb:=true       # 시뮬레이터를 같이 실행할 경우
+    $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드로 직접 제어하는 경우
     ```
 
 필요하다면 실행파일 `start.launch`에서 파라미터를 수정할 수 있다.
@@ -99,7 +100,7 @@ $ sudo xboxdrv
     - XBOX360 remote controller
     - Graphic card(nvidia-384)
 
-### 설치 방법
+### 설치 순서
 1. Turtlebot3 설치안내 중 [PC setup](http://emanual.robotis.com/docs/en/platform/turtlebot3/pc_setup/) 파트를 따라 설치한다.
 2. shared_control 외 필요한 패키지들을 설치한다.
     ```

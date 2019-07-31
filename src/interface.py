@@ -20,7 +20,7 @@ class Interface:
 
     def __init__(self):
         # 파라미터 설정
-        self.camera = rospy.get_param('~camera', 'camera/rgb/image_raw')
+        self.camera = rospy.get_param('~camera', 'camera/color/image_raw')
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
         self.scale_arrow = rospy.get_param('~scale_arrow', 50)
         self.scale_cross = rospy.get_param('~scale_cross', 30)
