@@ -33,7 +33,7 @@
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 - `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
-- `1.7.0` 이동로봇-BCI 인터페이스 개편
+- `1.7.0` 이동로봇-BCI 인터페이스 개편, `1.7.1` 실행주체 분리
 
 
 ## 사용법
@@ -41,13 +41,13 @@
 1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
 2. 로봇을 켠다.
     ``` bash
-    $ roslaunch shared_control turtlebot.launch             # 실제 로봇으로 실행하는 경우
-    $ roslaunch shared_control gazebo.launch                # 시뮬레이터로 실행하는 경우(옵션으로 생략 가능)
+    $ roslaunch shared_control turtlebot.launch             # 실제로봇 실행
+    $ roslaunch shared_control gazebo.launch                # 시뮬레이터 실행
     ```
 3. 제어 프로그램을 실행한다.
     ``` bash
     $ roslaunch shared_control start.launch                 # 로봇/시뮬레이터가 실행되고 있을 경우
-    $ roslaunch shared_control start.launch gzb:=true       # 시뮬레이터를 같이 실행할 경우
+    $ roslaunch shared_control start.launch gzb:=true       # 시뮬레이터를 같이 실행하는 경우(시뮬레이터 별도실행 불필요)
     $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드로 직접 제어하는 경우
     ```
 
