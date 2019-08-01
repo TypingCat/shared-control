@@ -1,4 +1,4 @@
-image: map_global.pgm
+image: L84.pgm
 resolution: 0.050000
 origin: [-3.707217, -14.279832, 0.000000]
 negate: 0
