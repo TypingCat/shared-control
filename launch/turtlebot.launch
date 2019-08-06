@@ -14,6 +14,7 @@
     <node pkg="shared_control" type="filter.py" name="filter">
         <param name="imu_in" value="imu_raw"/>
         <param name="imu_out" value="imu"/>
+        <param name="imu_delayed" value="true"/>
     </node>
 
     # RPLidar 연결
