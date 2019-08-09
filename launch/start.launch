@@ -38,6 +38,11 @@
     </node>
 
     # 이동로봇 제어
+    <include file="$(find shared_control)/launch/navigation.launch">
+        <arg name="robot_pose_x" value="$(arg init_robot_pose_x)"/>
+        <arg name="robot_pose_y" value="$(arg init_robot_pose_y)"/>
+        <arg name="robot_pose_Y" value="$(arg init_robot_pose_Y)"/>
+    </include>
     <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
         <param name="ang_vel_intersection" value="$(arg ang_vel_intersection)"/>
         <param name="ang_fwd_threshold" value="$(arg ang_fwd_threshold)"/>
