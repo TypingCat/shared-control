@@ -3,9 +3,9 @@
     # 파라미터 설정
     <arg name="init_robot_pose_x" default="0.0"/>       # 초기자세 (x, y, Y)
     <arg name="init_robot_pose_y" default="0.0"/>
-    <arg name="init_robot_pose_Y" default="0.0"/>
+    <arg name="init_robot_pose_Y" default="1.57"/>
 
-    <arg name="map" default="L81"/>                     # 주행환경
+    <arg name="map" default="L81_gazebo"/>              # 주행환경
 
     # 세부 파라미터 설정
     <arg name="paused" default="false"/>
