@@ -18,7 +18,7 @@
       <arg name="gui" value="false"/>
     </include>
   </group>
-
+  
   # 공간구조 구축
   <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen">
     <param name="gvd_PM" value="5.0"/>
