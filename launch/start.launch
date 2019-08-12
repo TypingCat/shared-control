@@ -3,7 +3,7 @@
     # 파라미터 설정(단위: m, rad, s)
     <arg name="init_robot_pose_x" default="0.0"/>       # 초기자세 (x, y, Y)
     <arg name="init_robot_pose_y" default="0.0"/>
-    <arg name="init_robot_pose_Y" default="1.57"/>
+    <arg name="init_robot_pose_Y" default="0.0"/>
 
     <arg name="ang_vel_intersection" default="0.6"/>    # 교차로에서의 회전속도
     <arg name="ang_fwd_threshold" default="0.6"/>       # 직진경로인정 최소각도
@@ -11,7 +11,7 @@
     <arg name="dist_alarm_1" default="5.0"/>            # 알림거리 1
     <arg name="dist_alarm_2" default="3.0"/>            # 알림거리 2: 명령 요청지점
 
-    <arg name="map" default="L81_gazebo"/>              # 주행환경
+    <arg name="map" default="L81_20190812"/>            # 주행환경
     <arg name="gzb" default="false"/>                   # Gazebo 실행여부
 
     # 환경 시뮬레이션
@@ -31,10 +31,10 @@
         <param name="gvd_PM" value="5.0"/>
         <param name="gvd_BM" value="4.4"/>
         <param name="gvg_minimum_path_distance" value="0.5"/>
-        <rosparam param="custom_edge_list_x1"> [-12.4, -12.1, -12.3, 0.0, 0.0, 0.0, 0.1, -14.6, -12.1, -13.5, -12.3, 0.1, -0.8, 0.0] </rosparam>
-        <rosparam param="custom_edge_list_y1"> [3.5, 6, 23.7, 0.4, 6, 13, 23.7, 7.2, 6, 25.5, 23.7, 23.7, 13.5, 13] </rosparam>
-        <rosparam param="custom_edge_list_x2"> [-12.1, -12.3, -12.8, 0.0, 0.0, 0.1, 0.1, -12.1, 0.0, -12.3, 0.1, 2.5, 0.0, 2.5] </rosparam>
-        <rosparam param="custom_edge_list_y2"> [6, 23.7, 30.7, 6, 13, 23.7, 34.6, 6, 6, 23.7, 23.7, 26.1, 13, 13.1] </rosparam>
+        <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 14.9, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 14.9] </rosparam>
+        <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.6, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.6] </rosparam>
+        <rosparam param="custom_edge_list_x2"> [5.3, 14.9, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 15.7] </rosparam>
+        <rosparam param="custom_edge_list_y2"> [0.2, 0.6, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.5] </rosparam>
     </node>
 
     # 이동로봇 제어
@@ -43,12 +43,12 @@
         <arg name="robot_pose_y" value="$(arg init_robot_pose_y)"/>
         <arg name="robot_pose_Y" value="$(arg init_robot_pose_Y)"/>
     </include>
-    <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
+    <!-- <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
         <param name="ang_vel_intersection" value="$(arg ang_vel_intersection)"/>
         <param name="ang_fwd_threshold" value="$(arg ang_fwd_threshold)"/>
         <param name="dist_alarm_1" value="$(arg dist_alarm_1)"/>
         <param name="dist_alarm_2" value="$(arg dist_alarm_2)"/>
-    </node>
+    </node> -->
 
     # 인터페이스
     <node pkg="shared_control" type="interface.py" name="interfacer" output="screen"/>
