@@ -106,7 +106,7 @@ $ sudo xboxdrv
     ```
     $ cd ~/catkin_ws/src
     $ git clone https://github.com/finiel/shared_control.git
-    $ sudo apt install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner ros-kinetic-realsense-camera ros-kinetic-usb-cam
+    $ sudo apt install python-pip xboxdrv ros-kinetic-joy ros-kinetic-teb-local-planner ros-kinetic-realsense-camera
     $ pip install --user networkx==2.1 pygame
     $ cd ~/catkin_ws
     $ catkin_make

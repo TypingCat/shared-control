@@ -78,27 +78,28 @@ class TaskPlan:
                 nearest = self.get_nearest(self.robot_pose.position).id
             except:
                 rospy.sleep(self.plan_cycle)
-        self.move_to(nearest)
+        
+        nearest_pos = self.get_node(nearest).point
+        dist = math.sqrt((self.robot_pose.position.x - nearest_pos.x)**2 + (self.robot_pose.position.y - nearest_pos.y)**2)
+        if dist > 1.0:  # 충분히 가깝다면 이동을 생략한다.
+            self.move_to(nearest)
         while self.move_result.status == 0:
             rospy.sleep(self.plan_cycle)
 
         # 로봇이 놓인 노드의 형태를 확인한다.
         neighbors = list(self.get_neighbors(nearest).ids)
-        if len(neighbors) < 2:
-            self.departure_node = nearest
-        else:
-            nearest_pos = self.get_node(nearest).point
-            nearest_th = math.atan2(self.robot_pose.position.y - nearest_pos.y,
-                                    self.robot_pose.position.x - nearest_pos.x)
-            closest_th = 2*math.pi
-            for node in neighbors:
-                pos = self.get_node(node).point
-                th = math.atan2(pos.y - nearest_pos.y,
-                                pos.x - nearest_pos.x)
-                th_ = abs(self.round(th - nearest_th))
-                if th_ < closest_th:
-                    closest_th = th_
-                    self.departure_node = node
+        nearest_th = math.atan2(self.robot_pose.position.y - nearest_pos.y,
+                                self.robot_pose.position.x - nearest_pos.x)
+        closest_th = 2*math.pi
+        for node in neighbors:
+            pos = self.get_node(node).point
+            th = math.atan2(pos.y - nearest_pos.y,
+                            pos.x - nearest_pos.x)
+            th_ = abs(self.round(th - nearest_th))
+            if th_ < closest_th:
+                closest_th = th_
+                self.departure_node = node
+
         self.destination_node = nearest
 
     def percussion(self, data):

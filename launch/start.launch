@@ -1,6 +1,8 @@
 <launch>
 
   # 파라미터 설정(단위: m, rad, s)
+  <arg name="lin_vel_joy" default="0.26"/>            # 조이스틱 최고 선속도
+  <arg name="ang_vel_joy" default="1.82"/>            # 조이스틱 최고 각속도
   <arg name="ang_vel_intersection" default="0.6"/>    # 교차로에서의 회전속도
   <arg name="ang_fwd_threshold" default="0.6"/>       # 직진경로인정 최소각도
 
@@ -24,10 +26,10 @@
     <param name="gvd_PM" value="5.0"/>
     <param name="gvd_BM" value="4.4"/>
     <param name="gvg_minimum_path_distance" value="0.5"/>
-    <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 14.9, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 14.9] </rosparam>
-    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.6, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.6] </rosparam>
-    <rosparam param="custom_edge_list_x2"> [5.3, 14.9, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 15.7] </rosparam>
-    <rosparam param="custom_edge_list_y2"> [0.2, 0.6, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.5] </rosparam>
+    <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 11.7, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 11.7, 12.9] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.4, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.4, 2.3] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.3, 11.7, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 12.2, 11.7] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.2, 0.4, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.8, 0.4] </rosparam>
   </node>
 
   # 이동로봇 제어
@@ -40,7 +42,11 @@
   </node>
 
   # 인터페이스
-  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen"/>
+  <node pkg="joy" type="joy_node" name="joy_node"/>
+  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
+    <param name="lin_vel_joy" value="$(arg lin_vel_joy)"/>
+    <param name="ang_vel_joy" value="$(arg ang_vel_joy)"/>
+  </node>
   <node pkg="rviz" type="rviz" name="rviz" respawn="true"
     args="-d $(find shared_control)/rviz/start.rviz"/>
 
