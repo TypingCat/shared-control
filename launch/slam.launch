@@ -43,7 +43,7 @@
   </node>
 
   # 시각화
-  <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-        args="-d $(find shared_control)/rviz/slam.rviz"/>
+  <!-- <node pkg="rviz" type="rviz" name="rviz" respawn="true"
+        args="-d $(find shared_control)/rviz/slam.rviz"/> -->
           
 </launch>

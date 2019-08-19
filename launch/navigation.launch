@@ -2,6 +2,7 @@
 
   # 파라미터 설정
   <arg name="map" default="L81_20190812"/>            # 주행환경
+  <arg name="robot" default="minibot"/>               # 로봇
 
   # 환경
   <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg map).yaml"/>
@@ -16,7 +17,6 @@
   </node>
 
   # 로봇
-  <arg name="robot" default="minibot"/>
   <include file="$(find shared_control)/launch/$(arg robot).launch"/>
   
   # 위치 추정
@@ -29,8 +29,8 @@
     <param name="update_min_a"              value="0.20"/>
     <param name="resample_interval"         value="1"/>
     <param name="transform_tolerance"       value="0.5"/>
-    <param name="recovery_alpha_slow"       value="0.00"/>
-    <param name="recovery_alpha_fast"       value="0.00"/>
+    <param name="recovery_alpha_slow"       value="0.0"/>
+    <param name="recovery_alpha_fast"       value="0.0"/>
     <param name="initial_pose_x"            value="0.0"/>
     <param name="initial_pose_y"            value="0.0"/>
     <param name="initial_pose_a"            value="0.0"/>
@@ -58,13 +58,13 @@
 
   # 경로 계획
   <node pkg="move_base" type="move_base" name="move_base">
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="local_costmap"/>
-    <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/global_costmap_params.yaml" command="load"/>
 
-    <rosparam file="$(find shared_control)/param/base_local_planner_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/costmap_converter_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/base_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_converter_params.yaml" command="load"/>
 
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
     <param name="controller_frequency" value="10.0"/>
