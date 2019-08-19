@@ -172,10 +172,13 @@ class Interface:
 
     def joystick(self, data):
         """조이스틱 입력을 받아온다"""
+        threshold = 0.1
+
         # button = Int32MultiArray()
         twist = Twist()
-        twist.linear.x = self.lin_vel_joy * data.axes[1]
-        twist.angular.z = self.ang_vel_joy * data.axes[0]
+        twist.linear.x = self.lin_vel_joy * data.axes[1] if data.axes[1] > threshold else 0.0
+        twist.angular.z = self.ang_vel_joy * data.axes[0] if data.axes[0] > threshold else 0.0
+
         self.publisher_cmd_vel.publish(twist)
 
     def update_marker_color(self, data):

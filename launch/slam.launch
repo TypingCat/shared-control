@@ -1,6 +1,10 @@
 <launch>
   # 지도저장 명령어: rosrun map_server map_saver -f 파일이름
 
+  # 로봇
+  <arg name="robot" default="minibot"/>
+  <include file="$(find shared_control)/launch/$(arg robot).launch"/>
+
   # 맵핑
   <node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping">
     <param name="base_frame" value="base_footprint"/>

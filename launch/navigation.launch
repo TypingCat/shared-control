@@ -1,5 +1,24 @@
 <launch>
 
+  # 파라미터 설정
+  <arg name="map" default="L81_20190812"/>            # 주행환경
+
+  # 환경
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg map).yaml"/>
+  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen">
+    <param name="gvd_PM" value="5.0"/>
+    <param name="gvd_BM" value="4.4"/>
+    <param name="gvg_minimum_path_distance" value="0.5"/>
+    <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 11.7, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 11.7, 12.9] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.4, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.4, 2.3] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.3, 11.7, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 12.2, 11.7] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.2, 0.4, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.8, 0.4] </rosparam>
+  </node>
+
+  # 로봇
+  <arg name="robot" default="minibot"/>
+  <include file="$(find shared_control)/launch/$(arg robot).launch"/>
+  
   # 위치 추정
   <node pkg="amcl" type="amcl" name="amcl">
     <remap from="amcl_pose"                 to="robot/pose"/>
