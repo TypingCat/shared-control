@@ -1,8 +1,10 @@
 <launch>
   # 지도저장 명령어: rosrun map_server map_saver -f 파일이름
 
+  # 옵션
+  <arg name="robot" default="minibot" doc="[minibot, turtlebot, gazebo]"/>
+
   # 로봇
-  <arg name="robot" default="minibot"/>
   <include file="$(find shared_control)/launch/$(arg robot).launch"/>
 
   # 맵핑
@@ -42,8 +44,4 @@
     <param name="lasamplestep" value="0.005"/>
   </node>
 
-  # 시각화
-  <!-- <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-        args="-d $(find shared_control)/rviz/slam.rviz"/> -->
-          
 </launch>

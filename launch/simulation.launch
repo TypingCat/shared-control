@@ -1,0 +1,13 @@
+<launch>
+
+  # 옵션
+  <arg name="map" default="L81_gazebo"/>
+
+  # 환경
+  <include file="$(find shared_control)/launch/gazebo.launch"/>
+  <include file="$(find shared_control)/launch/navigation.launch">
+    <arg name="robot" value="gazebo"/>
+    <arg name="map" value="$(arg map)"/>
+  </include>
+
+</launch>

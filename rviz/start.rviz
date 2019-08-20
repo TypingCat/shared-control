@@ -111,22 +111,186 @@ Visualization Manager:
           Value: false
       Enabled: true
       Name: Navigation
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/TF
+          Enabled: true
+          Frame Timeout: 15
+          Frames:
+            All Enabled: false
+            base_footprint:
+              Value: true
+            base_link:
+              Value: false
+            base_scan:
+              Value: false
+            camera_depth_frame:
+              Value: false
+            camera_depth_optical_frame:
+              Value: false
+            camera_ir2_frame:
+              Value: false
+            camera_ir2_optical_frame:
+              Value: false
+            camera_ir_frame:
+              Value: false
+            camera_ir_optical_frame:
+              Value: false
+            camera_link:
+              Value: false
+            camera_rgb_frame:
+              Value: false
+            camera_rgb_optical_frame:
+              Value: false
+            imu_link:
+              Value: false
+            map:
+              Value: true
+            odom:
+              Value: true
+            wheel_back_left_link:
+              Value: false
+            wheel_back_right_link:
+              Value: false
+            wheel_front_left_link:
+              Value: false
+            wheel_front_right_link:
+              Value: false
+          Marker Scale: 1
+          Name: TF
+          Show Arrows: true
+          Show Axes: true
+          Show Names: true
+          Tree:
+            map:
+              odom:
+                base_footprint:
+                  base_link:
+                    base_scan:
+                      {}
+                    camera_link:
+                      camera_depth_frame:
+                        camera_depth_optical_frame:
+                          {}
+                      camera_ir2_frame:
+                        camera_ir2_optical_frame:
+                          {}
+                      camera_ir_frame:
+                        camera_ir_optical_frame:
+                          {}
+                      camera_rgb_frame:
+                        camera_rgb_optical_frame:
+                          {}
+                    imu_link:
+                      {}
+                    wheel_back_left_link:
+                      {}
+                    wheel_back_right_link:
+                      {}
+                    wheel_front_left_link:
+                      {}
+                    wheel_front_right_link:
+                      {}
+          Update Interval: 0
+          Value: true
+        - Class: rviz/TF
+          Enabled: true
+          Frame Timeout: 15
+          Frames:
+            All Enabled: false
+            base_footprint:
+              Value: false
+            base_link:
+              Value: false
+            base_scan:
+              Value: false
+            camera_depth_frame:
+              Value: false
+            camera_depth_optical_frame:
+              Value: false
+            camera_ir2_frame:
+              Value: false
+            camera_ir2_optical_frame:
+              Value: false
+            camera_ir_frame:
+              Value: false
+            camera_ir_optical_frame:
+              Value: false
+            camera_link:
+              Value: false
+            camera_rgb_frame:
+              Value: false
+            camera_rgb_optical_frame:
+              Value: false
+            imu_link:
+              Value: false
+            map:
+              Value: false
+            odom:
+              Value: false
+            wheel_back_left_link:
+              Value: true
+            wheel_back_right_link:
+              Value: true
+            wheel_front_left_link:
+              Value: true
+            wheel_front_right_link:
+              Value: true
+          Marker Scale: 1
+          Name: TF_wheel
+          Show Arrows: true
+          Show Axes: false
+          Show Names: false
+          Tree:
+            map:
+              odom:
+                base_footprint:
+                  base_link:
+                    base_scan:
+                      {}
+                    camera_link:
+                      camera_depth_frame:
+                        camera_depth_optical_frame:
+                          {}
+                      camera_ir2_frame:
+                        camera_ir2_optical_frame:
+                          {}
+                      camera_ir_frame:
+                        camera_ir_optical_frame:
+                          {}
+                      camera_rgb_frame:
+                        camera_rgb_optical_frame:
+                          {}
+                    imu_link:
+                      {}
+                    wheel_back_left_link:
+                      {}
+                    wheel_back_right_link:
+                      {}
+                    wheel_front_left_link:
+                      {}
+                    wheel_front_right_link:
+                      {}
+          Update Interval: 0
+          Value: true
+        - Alpha: 1
+          Class: rviz/RobotModel
+          Collision Enabled: false
+          Enabled: true
+          Links:
+            All Links Enabled: true
+            Expand Joint Details: false
+            Expand Link Details: false
+            Expand Tree: false
+            Link Tree Style: Links in Alphabetic Order
+          Name: RobotModel
+          Robot Description: robot_description
+          TF Prefix: ""
+          Update Interval: 0
+          Value: true
+          Visual Enabled: true
       Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-      Name: RobotModel
-      Robot Description: robot_description
-      TF Prefix: ""
-      Update Interval: 0
-      Value: true
-      Visual Enabled: true
+      Name: Robot
     - Class: rviz/Camera
       Enabled: false
       Image Rendering: background and overlay
@@ -138,18 +302,22 @@ Visualization Manager:
       Unreliable: false
       Value: false
       Visibility:
-        "": true
         LaserScan: true
         Map: false
         Navigation:
-          "": true
           Value: true
+          global_plan: true
+          local_plan: true
+          teb_marker: true
         Obstacle: false
-        RobotModel: false
-        Shared control:
-          "": true
+        Robot:
+          RobotModel: true
+          TF: true
+          TF_wheel: true
           Value: true
-        TF: true
+        Shared control:
+          GVG: true
+          Value: true
         Value: true
       Zoom Factor: 1
     - Alpha: 1
@@ -191,166 +359,6 @@ Visualization Manager:
       Topic: /move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
-    - Class: rviz/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: false
-        base_footprint:
-          Value: true
-        base_link:
-          Value: false
-        base_scan:
-          Value: false
-        camera_depth_frame:
-          Value: false
-        camera_depth_optical_frame:
-          Value: false
-        camera_ir2_frame:
-          Value: false
-        camera_ir2_optical_frame:
-          Value: false
-        camera_ir_frame:
-          Value: false
-        camera_ir_optical_frame:
-          Value: false
-        camera_link:
-          Value: false
-        camera_rgb_frame:
-          Value: false
-        camera_rgb_optical_frame:
-          Value: false
-        imu_link:
-          Value: false
-        map:
-          Value: true
-        odom:
-          Value: true
-        wheel_back_left_link:
-          Value: false
-        wheel_back_right_link:
-          Value: false
-        wheel_front_left_link:
-          Value: false
-        wheel_front_right_link:
-          Value: false
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                base_scan:
-                  {}
-                camera_link:
-                  camera_depth_frame:
-                    camera_depth_optical_frame:
-                      {}
-                  camera_ir2_frame:
-                    camera_ir2_optical_frame:
-                      {}
-                  camera_ir_frame:
-                    camera_ir_optical_frame:
-                      {}
-                  camera_rgb_frame:
-                    camera_rgb_optical_frame:
-                      {}
-                imu_link:
-                  {}
-                wheel_back_left_link:
-                  {}
-                wheel_back_right_link:
-                  {}
-                wheel_front_left_link:
-                  {}
-                wheel_front_right_link:
-                  {}
-      Update Interval: 0
-      Value: true
-    - Class: rviz/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: false
-        base_footprint:
-          Value: false
-        base_link:
-          Value: false
-        base_scan:
-          Value: false
-        camera_depth_frame:
-          Value: false
-        camera_depth_optical_frame:
-          Value: false
-        camera_ir2_frame:
-          Value: false
-        camera_ir2_optical_frame:
-          Value: false
-        camera_ir_frame:
-          Value: false
-        camera_ir_optical_frame:
-          Value: false
-        camera_link:
-          Value: false
-        camera_rgb_frame:
-          Value: false
-        camera_rgb_optical_frame:
-          Value: false
-        imu_link:
-          Value: false
-        map:
-          Value: false
-        odom:
-          Value: false
-        wheel_back_left_link:
-          Value: true
-        wheel_back_right_link:
-          Value: true
-        wheel_front_left_link:
-          Value: true
-        wheel_front_right_link:
-          Value: true
-      Marker Scale: 1
-      Name: TF_wheel
-      Show Arrows: true
-      Show Axes: false
-      Show Names: false
-      Tree:
-        map:
-          odom:
-            base_footprint:
-              base_link:
-                base_scan:
-                  {}
-                camera_link:
-                  camera_depth_frame:
-                    camera_depth_optical_frame:
-                      {}
-                  camera_ir2_frame:
-                    camera_ir2_optical_frame:
-                      {}
-                  camera_ir_frame:
-                    camera_ir_optical_frame:
-                      {}
-                  camera_rgb_frame:
-                    camera_rgb_optical_frame:
-                      {}
-                imu_link:
-                  {}
-                wheel_back_left_link:
-                  {}
-                wheel_back_right_link:
-                  {}
-                wheel_front_left_link:
-                  {}
-                wheel_front_right_link:
-                  {}
-      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:

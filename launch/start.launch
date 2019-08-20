@@ -1,43 +1,33 @@
 <launch>
 
-  # 파라미터 설정(단위: m, rad, s)
-  <!-- <arg name="lin_vel_joy" default="0.26"/>            # 조이스틱 최고 선속도
-  <arg name="ang_vel_joy" default="1.82"/>            # 조이스틱 최고 각속도
-  <arg name="lin_vel_joy" default="0.69"/>            # 조이스틱 최고 선속도
-  <arg name="ang_vel_joy" default="3.67"/>            # 조이스틱 최고 각속도 -->
+  # 옵션(단위: m, rad, s)
+  <arg name="robot" default="minibot"/>               # 로봇
+  <arg name="share" default="true"/>                  # 공유제어 실행여부
 
   <arg name="ang_vel_intersection" default="0.6"/>    # 교차로에서의 회전속도
   <arg name="ang_fwd_threshold" default="0.6"/>       # 직진경로인정 최소각도
   <arg name="dist_alarm_1" default="5.0"/>            # 알림거리 1
   <arg name="dist_alarm_2" default="3.0"/>            # 알림거리 2: 명령 요청지점
 
-  <arg name="shared_control" default="true"/>         # 공유제어 실행여부
+  <arg name="lin_vel_joy" default="0.69"/>            # 조이스틱 최고 선속도
+  <arg name="ang_vel_joy" default="3.67"/>            # 조이스틱 최고 각속도
+  <!-- <arg name="lin_vel_joy" default="0.26"/>            # 조이스틱 최고 선속도
+  <arg name="ang_vel_joy" default="1.82"/>            # 조이스틱 최고 각속도 -->
   
   # 이동로봇 제어
-  <group if="$(arg shared_control)">
-    <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen">
-      <param name="ang_vel_intersection" value="$(arg ang_vel_intersection)"/>
-      <param name="ang_fwd_threshold" value="$(arg ang_fwd_threshold)"/>
-      <param name="dist_alarm_1" value="$(arg dist_alarm_1)"/>
-      <param name="dist_alarm_2" value="$(arg dist_alarm_2)"/>
-    </node>
-  </group>
+  <node pkg="shared_control" type="task_plan.py" name="task_planner" output="screen" if="$(arg share)">
+    <param name="ang_vel_intersection" value="$(arg ang_vel_intersection)"/>
+    <param name="ang_fwd_threshold" value="$(arg ang_fwd_threshold)"/>
+    <param name="dist_alarm_1" value="$(arg dist_alarm_1)"/>
+    <param name="dist_alarm_2" value="$(arg dist_alarm_2)"/>
+  </node>
 
   # 인터페이스
   <node pkg="joy" type="joy_node" name="joy_node"/>
-  <group if="$(arg robot) == 'minibot'">
-    <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
-      <param name="lin_vel_joy" value="0.69"/>
-      <param name="ang_vel_joy" value="3.67"/>
-    </node>
-  </group>
-  <group if="$(arg robot) == 'turtlebot'">
-    <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
-      <param name="lin_vel_joy" value="0.26"/>
-      <param name="ang_vel_joy" value="1.82"/>
-    </node>
-  </group>
-  <node pkg="rviz" type="rviz" name="rviz" respawn="true"
-    args="-d $(find shared_control)/rviz/start.rviz"/>
+  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
+    <param name="lin_vel_joy" value="$(arg lin_vel_joy)"/>
+    <param name="ang_vel_joy" value="$(arg ang_vel_joy)"/>
+  </node>
+  <node pkg="rviz" type="rviz" name="rviz" respawn="true" args="-d $(find shared_control)/rviz/start.rviz"/>
 
 </launch>
