@@ -1,7 +1,6 @@
 <launch>
 
   # 옵션(단위: m, rad, s)
-  <arg name="robot" default="minibot"/>               # 로봇
   <arg name="share" default="true"/>                  # 공유제어 실행여부
 
   <arg name="ang_vel_intersection" default="0.6"/>    # 교차로에서의 회전속도

@@ -3,7 +3,7 @@
   # 옵션
   <arg name="init_robot_pose_x" default="0.0"/>
   <arg name="init_robot_pose_y" default="0.0"/>
-  <arg name="init_robot_pose_Y" default="1.57"/>
+  <arg name="init_robot_pose_Y" default="0.0"/>
   <arg name="map" default="L81_gazebo"/>
   <arg name="gui" default="false"/>
 
