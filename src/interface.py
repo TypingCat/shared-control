@@ -21,8 +21,8 @@ class Interface:
 
     def __init__(self):
         # 파라미터 설정
-        self.lin_vel_joy = rospy.get_param('~lin_vel_joy', 0.26)
-        self.ang_vel_joy = rospy.get_param('~ang_vel_joy', 1.82)
+        self.lin_vel_joy = rospy.get_param('~lin_vel_joy', 0.69)
+        self.ang_vel_joy = rospy.get_param('~ang_vel_joy', 3.67)
         self.camera = rospy.get_param('~camera', 'camera/color/image_raw')
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
         self.scale_arrow = rospy.get_param('~scale_arrow', 50)
@@ -172,10 +172,13 @@ class Interface:
 
     def joystick(self, data):
         """조이스틱 입력을 받아온다"""
+        threshold = 0.1
+
         # button = Int32MultiArray()
         twist = Twist()
-        twist.linear.x = self.lin_vel_joy * data.axes[1]
-        twist.angular.z = self.ang_vel_joy * data.axes[0]
+        twist.linear.x = self.lin_vel_joy * data.axes[1] if abs(data.axes[1]) > threshold else 0.0
+        twist.angular.z = self.ang_vel_joy * data.axes[0] if abs(data.axes[0]) > threshold else 0.0
+
         self.publisher_cmd_vel.publish(twist)
 
     def update_marker_color(self, data):

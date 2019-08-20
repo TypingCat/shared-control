@@ -1,30 +1,24 @@
 <launch>
 
   # 이동로봇 상태 관리
-  <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.207 0 0 0 1 base_footprint base_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="base_scan_broadcaster" args="0.055 0 0 0 0 0.0 1 base_link base_scan 30" />
-  <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="-0.116 0 -0.182 0 0 0 1 base_link imu_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="wheel_front_right_broadcaster" args="0 -0.1765 -0.207 0 0 0 1 base_link wheel_front_right_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="wheel_front_left__broadcaster" args="0 0.1765 -0.207 0 0 0 1 base_link wheel_front_left_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="wheel_back_right_broadcaster" args="-0.2645 0.0825 -0.207 0 0 0 1 base_link wheel_back_right_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="wheel_back_left_broadcaster" args="-0.2645 -0.0825 -0.207 0 0 0 1 base_link wheel_back_left_link 30" />
-  <node pkg="tf" type="static_transform_publisher" name="camera_broadcaster" args="0.15 0.0 -0.207 0 0 0 1 base_link camera_link 30" />
+  <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.207 0 0 0 1 base_footprint base_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_scan_broadcaster" args="0.055 0 0 0 0 0.0 1 base_link base_scan 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="-0.116 0 -0.182 0 0 0 1 base_link imu_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="wheel_front_right_broadcaster" args="0 -0.1765 -0.207 0 0 0 1 base_link wheel_front_right_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="wheel_front_left__broadcaster" args="0 0.1765 -0.207 0 0 0 1 base_link wheel_front_left_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="wheel_back_right_broadcaster" args="-0.2645 0.0825 -0.207 0 0 0 1 base_link wheel_back_right_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="wheel_back_left_broadcaster" args="-0.2645 -0.0825 -0.207 0 0 0 1 base_link wheel_back_left_link 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="camera_broadcaster" args="0.15 0.0 -0.207 0 0 0 1 base_link camera_link 30"/>
 
   # Minibot 연결
   <node name="rosserial_core" pkg="rosserial_python" type="serial_node.py" output="screen">
-    <param name="port" type="string" value="/dev/ttyACM0" />
-    <param name="baud" type="int" value="115200" />
-    <remap from="odom" to="odom_raw"/>
-  </node>
-  <node pkg="shared_control" type="filter.py" name="filter">
-    <param name="odom_in" value="odom_raw"/>
-    <param name="odom_out" value="odom"/>
-    <param name="odom_no_cov" value="true"/>
+    <param name="port" type="string" value="/dev/ttyACM0"/>
+    <param name="baud" type="int" value="115200"/>
   </node>
 
   # RPLidar 연결
-  <node name="rplidarNode"          pkg="rplidar_ros_for_mini"  type="rplidarNode" output="screen">
-    <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>  
+  <node name="rplidarNode" pkg="rplidar_ros_for_mini" type="rplidarNode" output="screen">
+    <param name="serial_port"         type="string" value="/dev/ttyUSB0"/> 
     <param name="serial_baudrate"     type="int"    value="256000"/>
     <param name="frame_id"            type="string" value="base_scan"/>
     <param name="inverted"            type="bool"   value="false"/>
@@ -34,5 +28,5 @@
 
   # Realsense 연결
   <include file="$(find shared_control)/launch/realsense.launch"/>
-    
+
  </launch>

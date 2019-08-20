@@ -1,5 +1,34 @@
 <launch>
 
+  # 옵션
+  <arg name="robot" default="minibot" doc="[minibot, turtlebot]"/>
+  <arg name="map" default="L81_20190812"/>
+  <arg name="gzb" default="false"/>
+
+  # 로봇
+  <include file="$(find shared_control)/launch/$(arg robot).launch"/>
+
+  # 환경
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg map).yaml"/>
+  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen" unless="$(arg gzb)">
+    <param name="gvd_PM" value="5.0"/>
+    <param name="gvd_BM" value="4.4"/>
+    <param name="gvg_minimum_path_distance" value="0.5"/>
+    <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 11.7, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 11.7, 12.9] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.4, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.4, 2.3] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.3, 11.7, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 12.2, 11.7] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.2, 0.4, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.8, 0.4] </rosparam>
+  </node>
+  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen" if="$(arg gzb)">
+    <param name="gvd_PM" value="5.0"/>
+    <param name="gvd_BM" value="4.4"/>
+    <param name="gvg_minimum_path_distance" value="0.5"/>
+    <rosparam param="custom_edge_list_x1"> [0.0, 5.7, 12.1, 23.5, 3.1, 5.7, 23.4, 6.9, 5.7, 13.3, 12.1, 24.8, 23.4, 23.5] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.0, 0.0, 0.1, 12.1, 12.2, 12.5, 14.4, 12.2, 1.8, 0.0, 13.9, 12.5, 0.1] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.7, 12.1, 23.5, 33.9, 5.7, 23.4, 30.8, 5.7, 5.7, 12.1, 12.5, 23.4, 23.5, 26.0] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.0, 0.0, 0.1, 0.2, 12.2, 12.5, 13.0, 12.2, 0.0, 0.0, -2.0, 12.5, 0.1, -2.1] </rosparam>
+  </node>
+  
   # 위치 추정
   <node pkg="amcl" type="amcl" name="amcl">
     <remap from="amcl_pose"                 to="robot/pose"/>
@@ -10,8 +39,8 @@
     <param name="update_min_a"              value="0.20"/>
     <param name="resample_interval"         value="1"/>
     <param name="transform_tolerance"       value="0.5"/>
-    <param name="recovery_alpha_slow"       value="0.00"/>
-    <param name="recovery_alpha_fast"       value="0.00"/>
+    <param name="recovery_alpha_slow"       value="0.0"/>
+    <param name="recovery_alpha_fast"       value="0.0"/>
     <param name="initial_pose_x"            value="0.0"/>
     <param name="initial_pose_y"            value="0.0"/>
     <param name="initial_pose_a"            value="0.0"/>
@@ -39,14 +68,12 @@
 
   # 경로 계획
   <node pkg="move_base" type="move_base" name="move_base">
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="local_costmap"/>
-    <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/global_costmap_params.yaml" command="load"/>
-
-    <rosparam file="$(find shared_control)/param/base_local_planner_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/costmap_converter_params.yaml" command="load"/>
-
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/base_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_converter_params.yaml" command="load"/>
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
     <param name="controller_frequency" value="10.0"/>
   </node>

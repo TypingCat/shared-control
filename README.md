@@ -33,25 +33,49 @@
 - `1.4.0` 교차로 대응방식 변경, `1.4.1` Eyeblink 인터페이스 조정, `1.4.2` 경로계획법 튜닝
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 - `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
-- `1.7.0` 이동로봇-BCI 인터페이스 개편, `1.7.1` 실행주체 분리
+- `1.7.0` 이동로봇-BCI 인터페이스 개편, `1.7.1` 실행주체 분리, `1.7.2` 노드 이동
 
 
 ## 사용법
-### 실행 순서
+### SLAM
 1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
-2. 로봇을 켠다.
+2. 로봇을 SLAM 모드로 깨운다.
     ``` bash
-    $ roslaunch shared_control turtlebot.launch             # 실제로봇 실행
-    $ roslaunch shared_control gazebo.launch                # 시뮬레이터 실행
+    $ roslaunch shared_control slam.launch robot:=minibot   # 미니로봇
     ```
-3. 제어 프로그램을 실행한다.
     ``` bash
-    $ roslaunch shared_control start.launch                 # 로봇/시뮬레이터가 실행되고 있을 경우
-    $ roslaunch shared_control start.launch gzb:=true       # 시뮬레이터를 같이 실행하는 경우(시뮬레이터 별도실행 불필요)
-    $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드로 직접 제어하는 경우
+    $ roslaunch shared_control slam.launch robot:=turtlebot # 터틀봇
+    ```
+    ``` bash
+    $ roslaunch shared_control slam.launch robot:=gazebo    # 가제보
+    ```
+3. 원격제어 프로그램을 실행한다.
+    ``` bash
+    $ roslaunch shared_control start.launch share:=false    # 인터페이스
+    $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py # 키보드
+    ```
+4. 직접 돌아다니며 지도를 작성한 후, 저장한다.
+    ``` bash
+    $ rosrun map_server map_saver -f 파일이름
     ```
 
-필요하다면 실행파일 `start.launch`에서 파라미터를 수정할 수 있다.
+### Navigation
+1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
+2. 실행파일 `navigation.launch`에 지도를 등록한다.
+3. 로봇을 Navigation 모드로 깨운다.
+    ``` bash
+    $ roslaunch shared_control navigation.launch robot:=minibot   # 미니로봇
+    ```
+    ``` bash
+    $ roslaunch shared_control navigation.launch robot:=turtlebot # 터틀봇
+    ```
+    ``` bash
+    $ roslaunch shared_control simulation.launch                  # 가제보
+    ```
+4. 원격제어 프로그램을 실행한다. 필요하다면 실행파일 `start.launch`에서 파라미터를 수정한다.
+    ``` bash
+    $ roslaunch shared_control start.launch share:=true     # 인터페이스
+    ```
 
 ### Subscribed topic for BCI
 - `interf/cmd/intuit`: 로봇에게 이동방향을 지시한다.
