@@ -25,8 +25,8 @@
     <param name="gvg_minimum_path_distance" value="0.5"/>
     <rosparam param="custom_edge_list_x1"> [0.0, 5.7, 12.1, 23.5, 3.1, 5.7, 23.4, 6.9, 5.7, 13.3, 12.1, 24.8, 23.4, 23.5] </rosparam>
     <rosparam param="custom_edge_list_y1"> [0.0, 0.0, 0.0, 0.1, 12.1, 12.2, 12.5, 14.4, 12.2, 1.8, 0.0, 13.9, 12.5, 0.1] </rosparam>
-    <rosparam param="custom_edge_list_x2"> [5.7, 12.1, 23.5, 33.9, 5.7, 23.4, 24.8, 5.7, 5.7, 12.1, 12.5, 23.4, 23.5, 26.0] </rosparam>
-    <rosparam param="custom_edge_list_y2"> [0.0, 0.0, 0.1, 0.2, 12.2, 12.5, 13.9, 12.2, 0.0, 0.0, -2.0, 12.5, 0.1, -2.1] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.7, 12.1, 23.5, 33.9, 5.7, 23.4, 30.8, 5.7, 5.7, 12.1, 12.5, 23.4, 23.5, 26.0] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.0, 0.0, 0.1, 0.2, 12.2, 12.5, 13.0, 12.2, 0.0, 0.0, -2.0, 12.5, 0.1, -2.1] </rosparam>
   </node>
   
   # 위치 추정

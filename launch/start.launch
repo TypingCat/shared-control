@@ -7,7 +7,6 @@
   <arg name="ang_fwd_threshold" default="0.6"/>       # 직진경로인정 최소각도
   <arg name="dist_alarm_1" default="5.0"/>            # 알림거리 1
   <arg name="dist_alarm_2" default="3.0"/>            # 알림거리 2: 명령 요청지점
-
   <arg name="lin_vel_joy" default="0.69"/>            # 조이스틱 최고 선속도
   <arg name="ang_vel_joy" default="3.67"/>            # 조이스틱 최고 각속도
   <!-- <arg name="lin_vel_joy" default="0.26"/>            # 조이스틱 최고 선속도
