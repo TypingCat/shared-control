@@ -81,8 +81,8 @@ class TaskPlan:
         
         nearest_pos = self.get_node(nearest).point
         dist = math.sqrt((self.robot_pose.position.x - nearest_pos.x)**2 + (self.robot_pose.position.y - nearest_pos.y)**2)
-        if dist > 1.0:  # 충분히 가깝다면 이동을 생략한다.
-            self.move_to(nearest)
+        # if dist > 1.0:  # 충분히 가깝다면 이동을 생략한다.
+        #     self.move_to(nearest)
         while self.move_result.status == 0:
             rospy.sleep(self.plan_cycle)
 
