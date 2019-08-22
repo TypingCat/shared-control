@@ -106,6 +106,13 @@ class TaskPlan:
         """획득한 데이터를 장전, 격발한다."""
         if data.num == 3:
             print('\rTask planner, 명령(' + C_YELLO + '3' + C_END + ') 획득')
+            self.client.cancel_goal()
+            self.client.wait_for_server()
+            vel = Twist()
+            self.publisher_cmd_vel.publish(vel)
+            self.move_result.status = 3
+            self.publisher_robot_motion.publish(header=self.get_header(), motion=M_STOP)
+            self.robot_state = S_SLEEP
         elif data.num == 2:
             print('\rTask planner, 명령(' + C_YELLO + '2' + C_END + ') 획득')
             self.percussion_time = rospy.get_time()
