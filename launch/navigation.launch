@@ -1,30 +1,58 @@
 <launch>
 
-  # 파라미터 설정
-  <arg name="robot_pose_x" default="0.0"/>
-  <arg name="robot_pose_y" default="0.0"/>
-  <arg name="robot_pose_Y" default="0.0"/>
+  # 옵션
+  <arg name="robot" default="minibot" doc="[minibot, turtlebot]"/>
+  <arg name="map" default="L81_20190826"/>
+  <arg name="gzb" default="false"/>
+  <arg name="cam" default="true"/>
 
+  # 로봇
+  <include file="$(find shared_control)/launch/$(arg robot).launch"/>
+
+  # 환경
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find shared_control)/map/$(arg map).yaml"/>
+  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen" unless="$(arg gzb)">
+    <param name="gvd_PM" value="5.0"/>
+    <param name="gvd_BM" value="4.4"/>
+    <param name="gvg_minimum_path_distance" value="0.5"/>
+    <rosparam param="custom_edge_list_x1"> [0.0, 9.7, 20.0, 27.8, 5.4, 10.0, 27.8, 9.7, 10.0, 20.5, 20.0, 27.8, 27.8] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.5, 0.6, -12.3, -12.4, -11.7, 0.2, -12.4, 2.8, 0.5, 0.6, -11.7] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [9.7, 20.0, 27.8, 33.0, 10.0, 27.8, 30.2, 10.0, 8.9, 20.0, 19.8, 27.8, 27.9] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.2, 0.5, 0.6, 0.9, -12.4, -11.7, -11.5, -12.4, -13.7, 0.5, -2.2, -11.7, -14.4] </rosparam>
+  </node>
+  <node pkg="shared_control" type="spatial_info_manage.py" name="spatial_info_manager" output="screen" if="$(arg gzb)">
+    <param name="gvd_PM" value="5.0"/>
+    <param name="gvd_BM" value="4.4"/>
+    <param name="gvg_minimum_path_distance" value="0.5"/>
+    <rosparam param="custom_edge_list_x1"> [0.0, 5.7, 12.1, 23.5, 3.1, 5.7, 23.4, 6.9, 5.7, 13.3, 12.1, 24.8, 23.4, 23.5] </rosparam>
+    <rosparam param="custom_edge_list_y1"> [0.0, 0.0, 0.0, 0.1, 12.1, 12.2, 12.5, 14.4, 12.2, 1.8, 0.0, 13.9, 12.5, 0.1] </rosparam>
+    <rosparam param="custom_edge_list_x2"> [5.7, 12.1, 23.5, 33.9, 5.7, 23.4, 30.8, 5.7, 5.7, 12.1, 12.5, 23.4, 23.5, 26.0] </rosparam>
+    <rosparam param="custom_edge_list_y2"> [0.0, 0.0, 0.1, 0.2, 12.2, 12.5, 13.0, 12.2, 0.0, 0.0, -2.0, 12.5, 0.1, -2.1] </rosparam>
+  </node>
+  
   # 위치 추정
   <node pkg="amcl" type="amcl" name="amcl">
     <remap from="amcl_pose"                 to="robot/pose"/>
-    <param name="min_particles"             value="500"/>
-    <param name="max_particles"             value="3000"/>
-    <param name="kld_err"                   value="0.02"/>
-    <param name="update_min_d"              value="0.20"/>
-    <param name="update_min_a"              value="0.20"/>
+    <param name="min_particles"             value="300"/>
+    <param name="max_particles"             value="2000"/>
+    <param name="kld_err"                   value="0.1"/>
+    <param name="update_min_d"              value="0.1"/>
+    <param name="update_min_a"              value="0.2"/>
     <param name="resample_interval"         value="1"/>
-    <param name="transform_tolerance"       value="0.5"/>
-    <param name="recovery_alpha_slow"       value="0.00"/>
-    <param name="recovery_alpha_fast"       value="0.00"/>
-    <param name="initial_pose_x"            value="$(arg robot_pose_x)"/>
-    <param name="initial_pose_y"            value="$(arg robot_pose_y)"/>
-    <param name="initial_pose_a"            value="$(arg robot_pose_Y)"/>
+    <param name="transform_tolerance"       value="0.1"/>
+    <param name="recovery_alpha_slow"       value="0.001"/>
+    <param name="recovery_alpha_fast"       value="0.1"/>
+    <param name="initial_pose_x"            value="0.0"/>
+    <param name="initial_pose_y"            value="0.0"/>
+    <param name="initial_pose_a"            value="0.0"/>
+    <param name="initial_cov_xx"            value="0.25"/>
+    <param name="initial_cov_yy"            value="0.25"/>
+    <param name="initial_cov_aa"            value="0.6"/>
     <param name="gui_publish_rate"          value="50.0"/>
-    <param name="laser_max_range"           value="3.5"/>
-    <param name="laser_max_beams"           value="180"/>
-    <param name="laser_z_hit"               value="0.5"/>
-    <param name="laser_z_short"             value="0.05"/>
+    <param name="laser_max_range"           value="20.0"/>
+    <param name="laser_max_beams"           value="1440"/>
+    <param name="laser_z_hit"               value="0.9"/>
+    <param name="laser_z_short"             value="0.1"/>
     <param name="laser_z_max"               value="0.05"/>
     <param name="laser_z_rand"              value="0.5"/>
     <param name="laser_sigma_hit"           value="0.2"/>
@@ -32,10 +60,10 @@
     <param name="laser_likelihood_max_dist" value="2.0"/>
     <param name="laser_model_type"          value="likelihood_field"/>
     <param name="odom_model_type"           value="diff"/>
-    <param name="odom_alpha1"               value="0.1"/>
-    <param name="odom_alpha2"               value="0.1"/>
-    <param name="odom_alpha3"               value="0.1"/>
-    <param name="odom_alpha4"               value="0.1"/>
+    <param name="odom_alpha1"               value="2.0"/>
+    <param name="odom_alpha2"               value="2.0"/>
+    <param name="odom_alpha3"               value="2.0"/>
+    <param name="odom_alpha4"               value="2.0"/>
     <param name="use_map_topic"             value="true"/>
     <param name="global_frame_id"           value="map"/>
     <param name="odom_frame_id"             value="odom"/>
@@ -44,14 +72,12 @@
 
   # 경로 계획
   <node pkg="move_base" type="move_base" name="move_base">
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="global_costmap"/>
-    <rosparam file="$(find shared_control)/param/costmap_common_params.yaml" command="load" ns="local_costmap"/>
-    <rosparam file="$(find shared_control)/param/local_costmap_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/global_costmap_params.yaml" command="load"/>
-
-    <rosparam file="$(find shared_control)/param/base_local_planner_params.yaml" command="load"/>
-    <rosparam file="$(find shared_control)/param/costmap_converter_params.yaml" command="load"/>
-
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_common_params.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/local_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/global_costmap_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/base_local_planner_params.yaml" command="load"/>
+    <rosparam file="$(find shared_control)/$(arg robot)/costmap_converter_params.yaml" command="load"/>
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS"/>
     <param name="controller_frequency" value="10.0"/>
   </node>

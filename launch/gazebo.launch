@@ -1,63 +1,57 @@
 <launch>
 
-    # 파라미터 설정
-    <arg name="init_robot_pose_x" default="0.0"/>       # 초기자세 (x, y, Y)
-    <arg name="init_robot_pose_y" default="0.0"/>
-    <arg name="init_robot_pose_Y" default="0.0"/>
+  # 옵션
+  <arg name="init_robot_pose_x" default="0.0"/>
+  <arg name="init_robot_pose_y" default="0.0"/>
+  <arg name="init_robot_pose_Y" default="0.0"/>
+  <arg name="map" default="L81_gazebo"/>
+  <arg name="gui" default="false"/>
 
-    <arg name="environment" default="L81"/>             # 주행환경
+  # 시뮬레이션 파라미터 설정
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="extra_gazebo_args" default=""/>
+  <arg name="recording" default="false"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+  <arg name="physics" default="ode"/>
+  <arg name="verbose" default="false"/>
+  <arg name="world_name" default="$(find shared_control)/gazebo/$(arg map).sdf"/>
+  <arg name="respawn_gazebo" default="false"/>
+  <arg name="use_clock_frequency" default="false"/>
+  <arg name="pub_clock_frequency" default="100"/>
 
-    # 세부 파라미터 설정
-    <arg name="paused" default="false"/>
-    <arg name="use_sim_time" default="true"/>
-    <arg name="extra_gazebo_args" default=""/>
-    <arg name="gui" default="false"/>
-    <arg name="recording" default="false"/>
+  # 시스템 설정
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  <arg unless="$(arg paused)" name="command_arg1" value=""/>
+  <arg     if="$(arg paused)" name="command_arg1" value="-u"/>
+  <arg unless="$(arg recording)" name="command_arg2" value=""/>
+  <arg     if="$(arg recording)" name="command_arg2" value="-r"/>
+  <arg unless="$(arg verbose)" name="command_arg3" value=""/>
+  <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
+  <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
+  <arg     if="$(arg debug)" name="script_type" value="debug"/>
 
-    <arg name="headless" default="false"/>
-    <arg name="debug" default="false"/>
-    <arg name="physics" default="ode"/>
-    <arg name="verbose" default="false"/>
-    <arg name="world_name" default="$(find shared_control)/gazebo/$(arg environment).sdf"/>
+  # 서버 실행
+  <group if="$(arg use_clock_frequency)">
+    <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)"/>
+  </group>
+  <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
+  args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)">
+    <remap from="camera/rgb/image_raw" to="camera/color/image_raw"/>
+    <remap from="camera/rgb/camera_info" to="camera/color/camera_info"/>
+  </node>
 
-    <arg name="respawn_gazebo" default="false"/>
-    <arg name="use_clock_frequency" default="false"/>
-    <arg name="pub_clock_frequency" default="100"/>
+  # 이동로봇 모델 불러오기
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gazebo.urdf.xacro"/>
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
+    args="-urdf -model turtlebot3_waffle_gamma
+    -x $(arg init_robot_pose_x)
+    -y $(arg init_robot_pose_y)
+    -Y $(arg init_robot_pose_Y) -param robot_description"/>
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
 
-    # 시스템 설정
-    <param name="use_sim_time" value="$(arg use_sim_time)"/>
-    <arg unless="$(arg paused)" name="command_arg1" value=""/>
-    <arg     if="$(arg paused)" name="command_arg1" value="-u"/>
-    <arg unless="$(arg recording)" name="command_arg2" value=""/>
-    <arg     if="$(arg recording)" name="command_arg2" value="-r"/>
-    <arg unless="$(arg verbose)" name="command_arg3" value=""/>
-    <arg     if="$(arg verbose)" name="command_arg3" value="--verbose"/>
-    <arg unless="$(arg debug)" name="script_type" value="gzserver"/>
-    <arg     if="$(arg debug)" name="script_type" value="debug"/>
-
-    # 서버 실행
-    <group if="$(arg use_clock_frequency)">
-        <param name="gazebo/pub_clock_frequency" value="$(arg pub_clock_frequency)"/>
-    </group>
-    <node name="gazebo" pkg="gazebo_ros" type="$(arg script_type)" respawn="$(arg respawn_gazebo)" output="screen"
-    args="$(arg command_arg1) $(arg command_arg2) $(arg command_arg3) -e $(arg physics) $(arg extra_gazebo_args) $(arg world_name)">
-        <remap from="camera/rgb/image_raw" to="camera/color/image_raw"/>
-        <remap from="camera/rgb/camera_info" to="camera/color/camera_info"/>
-    </node>
-
-    # 이동로봇 모델 불러오기
-    <param name="robot_description" command="$(find xacro)/xacro.py $(find shared_control)/urdf/turtlebot3_waffle_gazebo.urdf.xacro"/>
-    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"
-        args="-urdf -model turtlebot3_waffle_gamma
-            -x $(arg init_robot_pose_x)
-            -y $(arg init_robot_pose_y)
-            -Y $(arg init_robot_pose_Y)
-            -param robot_description"/>
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher"/>
-
-    # 클라이언트 실행
-    <group if="$(arg gui)">
-        <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" output="screen" args="$(arg command_arg3)"/>
-    </group>
+  # 클라이언트 실행
+  <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" output="screen" args="$(arg command_arg3)" if="$(arg gui)"/>
 
 </launch>

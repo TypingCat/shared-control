@@ -6,9 +6,10 @@ import pygame
 import copy
 import os
 
-from std_msgs.msg import Int32, Header
+from std_msgs.msg import Int32, Header, Int32MultiArray
 from visualization_msgs.msg import MarkerArray, Marker
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, Joy
+from geometry_msgs.msg import Twist
 
 from shared_control.msg import NavCue, CmdIntuit, CmdAssist, RobotMotion
 from shared_control.srv import Nav2Cmd, Node
@@ -20,6 +21,8 @@ class Interface:
 
     def __init__(self):
         # 파라미터 설정
+        self.lin_vel_joy = rospy.get_param('~lin_vel_joy', 0.69)
+        self.ang_vel_joy = rospy.get_param('~ang_vel_joy', 3.67)
         self.camera = rospy.get_param('~camera', 'camera/color/image_raw')
         self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
         self.scale_arrow = rospy.get_param('~scale_arrow', 50)
@@ -52,6 +55,7 @@ class Interface:
         self.publisher_cmd_intuit = rospy.Publisher('interf/cmd/intuit', CmdIntuit, queue_size=1)
         self.publisher_cmd_assist = rospy.Publisher('interf/cmd/assist', CmdAssist, queue_size=1)
         self.publisher_nav_cue = rospy.Publisher('interf/nav_cue', NavCue, queue_size=1)
+        self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
         
         # 토픽 구독
         self.cmd = CmdIntuit()
@@ -59,6 +63,7 @@ class Interface:
         rospy.Subscriber('interf/robot/motion', RobotMotion, self.update_marker_color)
         rospy.Subscriber('interf/nav_cue', NavCue, self.update_marker_visibility)
         self.switch_marker = [False, False, False]
+        rospy.Subscriber('joy', Joy, self.joystick)
 
         # 서비스 시작
         rospy.Service('interf/nav2cmd', Nav2Cmd, self.nav2cmd)
@@ -164,6 +169,17 @@ class Interface:
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=2)
                 elif buttons[0] == '3':
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=3)
+
+    def joystick(self, data):
+        """조이스틱 입력을 받아온다"""
+        threshold = 0.1
+
+        # button = Int32MultiArray()
+        twist = Twist()
+        twist.linear.x = self.lin_vel_joy * data.axes[1] if abs(data.axes[1]) > threshold else 0.0
+        twist.angular.z = self.ang_vel_joy * data.axes[0] if abs(data.axes[0]) > threshold else 0.0
+
+        self.publisher_cmd_vel.publish(twist)
 
     def update_marker_color(self, data):
         self.color['time'][data.motion] = rospy.get_time()

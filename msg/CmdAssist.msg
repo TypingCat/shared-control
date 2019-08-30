@@ -1,2 +1,2 @@
 Header header
-int32 num
+int32 num       // 2: remove '+'
