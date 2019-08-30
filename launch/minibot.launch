@@ -2,6 +2,7 @@
 
   # 옵션
   <arg name="camera_hz" default="10"/>
+  <arg name="cam" default="true"/>
 
   # 이동로봇 상태 관리
   <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.207 0 0 0 1 base_footprint base_link 30"/>
@@ -30,7 +31,13 @@
   </node>
 
   # Realsense 연결
-  <include file="$(find shared_control)/launch/realsense.launch"/>
-  <node pkg="topic_tools" type="throttle" name="throttler" args="messages /camera/color/image_raw $(arg camera_hz) /camera/color/image"/>
+  <!-- <include file="$(find shared_control)/launch/realsense.launch"/>
+  <node pkg="topic_tools" type="throttle" name="throttler" args="messages /camera/color/image_raw $(arg camera_hz) /camera/color/image"/> -->
+  
+  <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" if="$(arg cam)">
+    <param name="pixel_format" value="yuyv"/>
+    <param name="camera_frame_id" value="camera_link"/>
+  </node>
+  <node pkg="topic_tools" type="throttle" name="throttler" args="messages /usb_cam/image_raw $(arg camera_hz) /camera/color/image"  if="$(arg cam)"/>
 
  </launch>
