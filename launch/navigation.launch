@@ -2,9 +2,9 @@
 
   # 옵션
   <arg name="robot" default="minibot" doc="[minibot, turtlebot]"/>
-  <!-- <arg name="map" default="L81_20190812"/> -->
   <arg name="map" default="L81_20190826"/>
   <arg name="gzb" default="false"/>
+  <arg name="cam" default="true"/>
 
   # 로봇
   <include file="$(find shared_control)/launch/$(arg robot).launch"/>
@@ -15,10 +15,6 @@
     <param name="gvd_PM" value="5.0"/>
     <param name="gvd_BM" value="4.4"/>
     <param name="gvg_minimum_path_distance" value="0.5"/>
-    <!-- <rosparam param="custom_edge_list_x1"> [0.0, 5.3, 11.7, 23.1, 2.3, 4.8, 22.6, 5.8, 4.8, 25.1, 22.6, 23.1, 11.7, 12.9] </rosparam>
-    <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.4, 0.8, 12.0, 12.4, 13.2, 15.4, 12.4, 14.8, 13.2, 0.8, 0.4, 2.3] </rosparam>
-    <rosparam param="custom_edge_list_x2"> [5.3, 11.7, 23.1, 32.7, 4.8, 22.6, 30.0, 4.8, 5.3, 22.6, 23.1, 25.8, 12.2, 11.7] </rosparam>
-    <rosparam param="custom_edge_list_y2"> [0.2, 0.4, 0.8, 1.0, 12.4, 13.2, 13.7, 12.4, 0.2, 13.2, 0.8, -1.9, -1.8, 0.4] </rosparam> -->
     <rosparam param="custom_edge_list_x1"> [0.0, 9.7, 20.0, 27.8, 5.4, 10.0, 27.8, 9.7, 10.0, 20.5, 20.0, 27.8, 27.8] </rosparam>
     <rosparam param="custom_edge_list_y1"> [0.0, 0.2, 0.5, 0.6, -12.3, -12.4, -11.7, 0.2, -12.4, 2.8, 0.5, 0.6, -11.7] </rosparam>
     <rosparam param="custom_edge_list_x2"> [9.7, 20.0, 27.8, 33.0, 10.0, 27.8, 30.2, 10.0, 8.9, 20.0, 19.8, 27.8, 27.9] </rosparam>
