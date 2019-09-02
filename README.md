@@ -74,8 +74,21 @@
     ```
 4. 원격제어 프로그램을 실행한다. 필요하다면 실행파일 `start.launch`에서 파라미터를 수정한다.
     ``` bash
-    $ roslaunch shared_control start.launch share:=true     # 인터페이스
+    $ roslaunch shared_control start.launch share:=true           # 인터페이스
     ```
+
+### 자주 발생하는 문제와 해결방법
+- 로봇이 위치추정을 실패, 특히 회전시의 변화를 따라가지 못하는 경우
+    - IMU 재시작
+        ``` bash
+        $ rostopic pub reset std_msgs/Empty
+        ```
+- 현재위치가 지도상의 위치와 다를 경우
+    - Rviz에서 `2D Pose Estimation`으로 지도상에 자세 입력
+    - 이후 로봇을 회전시켜 위치 미세조정
+        ``` bash
+        $ rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+        ```
 
 ### Subscribed topic for BCI
 - `interf/cmd/intuit`: 로봇에게 이동방향을 지시한다.

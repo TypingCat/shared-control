@@ -6,7 +6,8 @@ import pygame
 import copy
 import os
 
-from std_msgs.msg import Int32, Header, Int32MultiArray
+from sys import stdout
+from std_msgs.msg import Int32, Header, Int32MultiArray, Float32, Time
 from visualization_msgs.msg import MarkerArray, Marker
 from sensor_msgs.msg import Image, Joy
 from geometry_msgs.msg import Twist
@@ -24,7 +25,7 @@ class Interface:
         self.lin_vel_joy = rospy.get_param('~lin_vel_joy', 0.69)
         self.ang_vel_joy = rospy.get_param('~ang_vel_joy', 3.67)
         self.camera = rospy.get_param('~camera', 'camera/color/image_raw')
-        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
+        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.05))
         self.scale_arrow = rospy.get_param('~scale_arrow', 50)
         self.scale_cross = rospy.get_param('~scale_cross', 30)
 
@@ -56,7 +57,7 @@ class Interface:
         self.publisher_cmd_assist = rospy.Publisher('interf/cmd/assist', CmdAssist, queue_size=1)
         self.publisher_nav_cue = rospy.Publisher('interf/nav_cue', NavCue, queue_size=1)
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-        
+
         # 토픽 구독
         self.cmd = CmdIntuit()
         rospy.Subscriber('interf/cmd/intuit', CmdIntuit, self.update_cmd_intuit)
@@ -66,6 +67,11 @@ class Interface:
         rospy.Subscriber('joy', Joy, self.joystick)
 
         # 서비스 시작
+        self.publisher_time_start = rospy.Publisher('time/start', Time, queue_size=1)
+        self.publisher_time_end = rospy.Publisher('time/end', Time, queue_size=1)
+        self.time_start = rospy.Time.now()
+        self.the_timer = rospy.Timer(rospy.Duration(0.1), self.timer)
+
         rospy.Service('interf/nav2cmd', Nav2Cmd, self.nav2cmd)
         self.key_watcher = rospy.Timer(self.spin_cycle, self.keyboard)
         print(C_YELLO + '\rInterfacer, BCI 서비스 시작' + C_END)
@@ -140,6 +146,7 @@ class Interface:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:       # 종료: ctrl+c
                 self.key_watcher.shutdown()
+                self.the_timer.shutdown()
                 pygame.quit()
                 rospy.sleep(rospy.Duration(1.0))
                 rospy.signal_shutdown("Quit")
@@ -150,8 +157,10 @@ class Interface:
                     buttons[0]
                 except:
                     return
+
                 if ((buttons[0] == 'c') and (len(buttons) > 2)) or (buttons[0] == 'escape'):   # 종료: ctrl+c
                     self.key_watcher.shutdown()
+                    self.the_timer.shutdown()
                     pygame.quit()
                     rospy.sleep(rospy.Duration(1.0))
                     rospy.signal_shutdown("종료")
@@ -165,21 +174,76 @@ class Interface:
                     self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_STOP)
                 elif buttons[0] == 'x':
                     self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_BACKWARD)
-                elif buttons[0] == '2':
+
+                if buttons[0] == '2':
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=2)
                 elif buttons[0] == '3':
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=3)
+
+                if buttons[0] == 'q':
+                    self.time_start = rospy.Time.now()
+                    self.publisher_time_start.publish(self.time_start)
+                    print(C_YELLO + '\r%6.1f: Interface, 시간 초기화'%(rospy.Time.now() - self.time_start).to_sec() + C_END)
+                elif buttons[0] == 'e':
+                    t = rospy.Time.now()
+                    self.publisher_time_end.publish(t) 
+                    print(C_GREEN + '\r%6.1f: Interface, 경과시간 확인'%(t - self.time_start).to_sec() + C_END)
+
+                if buttons[0] == 'h':   # Left
+                    self.move_with(0, 1)
+                elif buttons[0] == 'u': # Forward
+                    self.move_with(1, 0)
+                elif buttons[0] == 'k': # Right
+                    self.move_with(0, -1)
+                elif buttons[0] == 'm': # Backward
+                    self.move_with(-1, 0)
+                elif buttons[0] == 'j': # Stop
+                    self.move_with(0, 0)
+                elif buttons[0] == 'y': # Forward-left
+                    self.move_with(1, 1)
+                elif buttons[0] == 'i': # Forward-right
+                    self.move_with(1, -1)
+
+    def timer(self, event):
+        elapsed = rospy.Time.now() - self.time_start
+        stdout.write("\r%6.1f: 현재 시각[sec]"%elapsed.to_sec())
+        stdout.flush()
+
+    def move_with(self, lin, ang):
+        twist = Twist()
+        twist.linear.x = self.lin_vel_joy * lin
+        twist.angular.z = self.ang_vel_joy * ang
+        self.publisher_cmd_vel.publish(twist)
 
     def joystick(self, data):
         """조이스틱 입력을 받아온다"""
         threshold = 0.1
 
-        # button = Int32MultiArray()
         twist = Twist()
         twist.linear.x = self.lin_vel_joy * data.axes[1] if abs(data.axes[1]) > threshold else 0.0
         twist.angular.z = self.ang_vel_joy * data.axes[0] if abs(data.axes[0]) > threshold else 0.0
-
         self.publisher_cmd_vel.publish(twist)
+
+        if data.buttons[11] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_LEFT)
+        if data.buttons[13] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_FORWARD)
+        if data.buttons[12] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_RIGHT)
+        if data.buttons[14] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_BACKWARD)
+        
+        if data.buttons[0] == 1 or data.buttons[1] == 1 or data.buttons[2] == 1 or data.buttons[3] == 1:
+            self.publisher_cmd_assist.publish(header=self.get_header(), num=2)
+
+        if data.axes[2] == -1:
+            self.time_start = rospy.Time.now()
+            self.publisher_time_start.publish(self.time_start)
+            print(C_YELLO + '\r%6.1f: Interface, 시간 초기화'%(rospy.Time.now() - self.time_start).to_sec() + C_END)
+        if data.axes[5] == -1:
+            t = rospy.Time.now()
+            self.publisher_time_end.publish(t) 
+            print(C_GREEN + '\r%6.1f: Interface, 경과시간 확인'%(t - self.time_start).to_sec() + C_END)
 
     def update_marker_color(self, data):
         self.color['time'][data.motion] = rospy.get_time()

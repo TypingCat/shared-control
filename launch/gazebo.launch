@@ -6,6 +6,7 @@
   <arg name="init_robot_pose_Y" default="0.0"/>
   <arg name="map" default="L81_gazebo"/>
   <arg name="gui" default="false"/>
+  <arg name="camera_hz" default="10"/>
 
   # 시뮬레이션 파라미터 설정
   <arg name="paused" default="false"/>
@@ -53,5 +54,6 @@
 
   # 클라이언트 실행
   <node name="gazebo_gui" pkg="gazebo_ros" type="gzclient" output="screen" args="$(arg command_arg3)" if="$(arg gui)"/>
+  <node pkg="topic_tools" type="throttle" name="throttler" args="messages /camera/color/image_raw $(arg camera_hz) /camera/color/image"/>
 
 </launch>
