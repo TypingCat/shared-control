@@ -73,8 +73,6 @@ class TaskPlan:
         print(C_GREEN + '\rTask planner, 초기화 완료\n' + C_END)
 
     def mount_gvg(self):
-        """이동로봇을 GVG 노드에 마운트"""
-        # 로봇과 가장 가까운 노드로 이동한다.
         nearest = -1
         while nearest == -1:
             try:
@@ -82,14 +80,10 @@ class TaskPlan:
             except:
                 rospy.sleep(self.plan_cycle)
         
-        nearest_pos = self.get_node(nearest).point
-        dist = math.sqrt((self.robot_pose.position.x - nearest_pos.x)**2 + (self.robot_pose.position.y - nearest_pos.y)**2)
-        # if dist > 1.0:  # 충분히 가깝다면 이동을 생략한다.
-        #     self.move_to(nearest)
+        nearest_pos = self.get_node(nearest).point        
         while self.move_result.status == 0:
             rospy.sleep(self.plan_cycle)
 
-        # 로봇이 놓인 노드의 형태를 확인한다.
         neighbors = list(self.get_neighbors(nearest).ids)
         nearest_th = math.atan2(self.robot_pose.position.y - nearest_pos.y,
                                 self.robot_pose.position.x - nearest_pos.x)
@@ -106,9 +100,8 @@ class TaskPlan:
         self.destination_node = nearest
 
     def percussion(self, data):
-        """획득한 데이터를 장전, 격발한다."""
         if data.num == 3:
-            print('\r%6.1f: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '3' + C_END + ') 획득')
+            print('\r%6.1f[s]: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '3' + C_END + ') 획득')
             self.client.cancel_goal()
             self.client.wait_for_server()
             vel = Twist()
@@ -117,21 +110,18 @@ class TaskPlan:
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_STOP)
             self.robot_state = S_SLEEP
         elif data.num == 2:
-            print('\r%6.1f: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '2' + C_END + ') 획득')
+            print('\r%6.1f[s]: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '2' + C_END + ') 획득')
             self.percussion_time = rospy.get_time()
             if self.robot_state == S_SLEEP:
                 self.robot_state = S_INDIRECT_WAIT
 
     def explosion(self, event):
-        """로봇에 과부하를 걸어 폭발시킨다."""
-        # 로봇이 목적지에 접근했는지 확인한다.
         if (self.robot_state == S_INDIRECT_BUSY) or (self.robot_state == S_SLEEP):
             return
         des_node_pos = self.get_node(self.destination_node).point
         des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
                                 + (self.robot_pose.position.y - des_node_pos.y)**2)
 
-        # 첫번째 알람지점을 통과하면 알린다.
         while des_node_dist > self.dist_alarm_1:
             des_node_pos = self.get_node(self.destination_node).point
             des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
@@ -139,43 +129,38 @@ class TaskPlan:
             rospy.sleep(self.spin_cycle)
         self.publisher_nav_cue.publish(self.check_intersection())
 
-        # 두번째 알람지점을 통과하면 임무계획을 시작한다.
         while des_node_dist > self.dist_alarm_2:
             des_node_pos = self.get_node(self.destination_node).point
             des_node_dist = math.sqrt((self.robot_pose.position.x - des_node_pos.x)**2
                                     + (self.robot_pose.position.y - des_node_pos.y)**2)
             rospy.sleep(self.spin_cycle)
 
-        # 선택지를 검색한다.
         des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
         choice = copy.copy(des_node_neighbors)
         try:
             choice.remove(self.departure_node)
         except: pass
 
-        # 선택지의 수에 따라 행동방침을 결정한다.
-        ## 말단노드라면 정지하고 휴면상태로 전환한다.
         if len(choice) == 0:    
             while not self.move_result.status == 3:
                 rospy.sleep(self.spin_cycle)
-            print('\r%6.1f: Task planner, 상태전환: '%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '휴면' + C_END)
+            print('\r%6.1f[s]: Task planner, 상태전환: '%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '휴면' + C_END)
             self.departure_node = self.destination_node
             self.robot_state = S_SLEEP
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_STOP)
             return
-        ## 선택이 불필요하다면 바로 이동한다.
+
         elif len(choice) == 1:
-            print('\r%6.1f: Task planner, 다음 노드로 이동'%(rospy.Time.now() - self.time_start).to_sec())
+            print('\r%6.1f[s]: Task planner, 다음 노드로 이동'%(rospy.Time.now() - self.time_start).to_sec())
             self.departure_node = self.destination_node
             self.destination_node = choice[0]
             self.move_to(choice[0])
             self.robot_state = S_INDIRECT_WAIT
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_MOVE)
             return
-        ## 선택지가 둘 이상이라면,
+
         else:
-            ### 명령을 요청한다.
-            print('\r%6.1f: Task planner, 명령 요청'%(rospy.Time.now() - self.time_start).to_sec())
+            print('\r%6.1f[s]: Task planner, 명령 요청'%(rospy.Time.now() - self.time_start).to_sec())
             self.robot_state = S_INDIRECT_BUSY
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_CUE)
             cue = self.check_intersection()
@@ -186,18 +171,17 @@ class TaskPlan:
                                forward=cue.forward,
                                backward=cue.backward)
             if cmd.dir == M_FORWARD:
-                print('\r%6.1f: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '앞' + C_END + ') 획득')
+                print('\r%6.1f[s]: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '앞' + C_END + ') 획득')
                 self.publisher_robot_motion.publish(header=self.get_header(), motion=M_FORWARD)
             elif cmd.dir == M_LEFT:
-                print('\r%6.1f: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '좌' + C_END + ') 획득')
+                print('\r%6.1f[s]: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '좌' + C_END + ') 획득')
                 self.publisher_robot_motion.publish(header=self.get_header(), motion=M_LEFT)
             elif cmd.dir == M_RIGHT:
-                print('\r%6.1f: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '우' + C_END + ') 획득')
+                print('\r%6.1f[s]: Task planner, 명령('%(rospy.Time.now() - self.time_start).to_sec() + C_YELLO + '우' + C_END + ') 획득')
                 self.publisher_robot_motion.publish(header=self.get_header(), motion=M_RIGHT)
-            ### 교차로에 도달할 때까지 대기한다.
             while not self.move_result.status == 3:
                 rospy.sleep(self.spin_cycle)
-            ### 획득한 답변에 따라 움직임을 결정한다.
+
             if cmd.dir == M_FORWARD:
                 pass
             elif cmd.dir == M_LEFT:
@@ -207,7 +191,7 @@ class TaskPlan:
             else:
                 self.robot_state = S_INDIRECT_WAIT
                 return
-            ### 정면의 경로를 확인한다.
+
             des_node_neighbors_th = []
             for c in des_node_neighbors:
                 pos = self.get_node(c).point
@@ -219,8 +203,8 @@ class TaskPlan:
                  self.robot_pose.orientation.z, self.robot_pose.orientation.w])[2]
             des_node_neighbors_dth = [abs(self.round(th - th_robot)) for th in des_node_neighbors_th]
             id = des_node_neighbors_dth.index(min(des_node_neighbors_dth))
-            ### 정면의 경로를 따라 이동한다.
-            print('\r%6.1f: Task planner, 다음 노드로 이동'%(rospy.Time.now() - self.time_start).to_sec())
+
+            print('\r%6.1f[s]: Task planner, 다음 노드로 이동'%(rospy.Time.now() - self.time_start).to_sec())
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_MOVE)
             self.move_to(des_node_neighbors[id])
             self.departure_node = self.destination_node
@@ -231,8 +215,6 @@ class TaskPlan:
         return ((th + math.pi) % (2 * math.pi)) - math.pi
 
     def turn(self, sign):
-        """로봇이 해당방향으로 회전한다."""
-        ## 회전한다.
         vel = Twist()
         vel.angular.z = sign * self.ang_vel_intersection
         self.publisher_cmd_vel.publish(vel)
@@ -241,7 +223,6 @@ class TaskPlan:
         else:
             self.publisher_robot_motion.publish(header=self.get_header(), motion=M_RIGHT)
 
-        ## 보조명령이 들어오면 정지한다.
         t = rospy.get_time()
         while self.percussion_time < t:
             self.publisher_cmd_vel.publish(vel)
@@ -251,8 +232,6 @@ class TaskPlan:
         rospy.sleep(self.spin_cycle)
 
     def move_to(self, id, force=False):
-        """로봇이 해당노드로 이동한다."""
-        ## 목표를 설정한다.
         if (not self.move_result.status == 3) and (force == False):
             return
         self.move_result.status = 0
@@ -268,15 +247,12 @@ class TaskPlan:
         goal.target_pose.pose.orientation.z = q[2]
         goal.target_pose.pose.orientation.w = q[3]
 
-        ## 목표를 향해 이동한다.
         if force == True:
             self.client.cancel_goal()
             self.client.wait_for_server()
         self.client.send_goal(goal)
 
     def check_intersection(self):
-        """경로의 형태를 확인한다."""
-        # 출발노드와 도착노드 주변의 경로를 확인한다.
         des_node_neighbors = list(self.get_neighbors(self.destination_node).ids)
         choice = copy.copy(des_node_neighbors)
         try:
@@ -289,13 +265,11 @@ class TaskPlan:
         choice_pos = [self.get_node(node).point for node in choice]
         choice_th = [self.round(math.atan2(pos.y - des_pos.y, pos.x - des_pos.x) - th) for pos in choice_pos]
 
-        # 교차로와의 거리를 계산한다.
         cue = NavCue()
         cue.header = self.get_header()
         cue.dist = math.sqrt((self.robot_pose.position.x - des_pos.x)**2
                            + (self.robot_pose.position.y - des_pos.y)**2)
 
-        # 경로를 앞뒤좌우로 분리한다.
         cue.right = 0
         cue.left = 0
         cue.forward = 0
@@ -330,7 +304,6 @@ class TaskPlan:
         return header
         
 
-# 노드 생성
 if __name__ == '__main__':
     rospy.init_node('task_planner')
     tp = TaskPlan()
