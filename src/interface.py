@@ -5,11 +5,13 @@ import rospy
 import pygame
 import copy
 import os
+import math
 
-from std_msgs.msg import Int32, Header, Int32MultiArray
+from sys import stdout
+from std_msgs.msg import Int32, Header, Int32MultiArray, Float32, Time
 from visualization_msgs.msg import MarkerArray, Marker
-from sensor_msgs.msg import Image, Joy
-from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Image, Joy, JointState
+from geometry_msgs.msg import Twist, PoseWithCovarianceStamped, Point
 
 from shared_control.msg import NavCue, CmdIntuit, CmdAssist, RobotMotion
 from shared_control.srv import Nav2Cmd, Node
@@ -24,7 +26,7 @@ class Interface:
         self.lin_vel_joy = rospy.get_param('~lin_vel_joy', 0.69)
         self.ang_vel_joy = rospy.get_param('~ang_vel_joy', 3.67)
         self.camera = rospy.get_param('~camera', 'camera/color/image_raw')
-        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.01))
+        self.spin_cycle = rospy.Duration(rospy.get_param('~spin_cycle', 0.05))
         self.scale_arrow = rospy.get_param('~scale_arrow', 50)
         self.scale_cross = rospy.get_param('~scale_cross', 30)
 
@@ -56,16 +58,26 @@ class Interface:
         self.publisher_cmd_assist = rospy.Publisher('interf/cmd/assist', CmdAssist, queue_size=1)
         self.publisher_nav_cue = rospy.Publisher('interf/nav_cue', NavCue, queue_size=1)
         self.publisher_cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-        
+        self.publisher_cmd_joint = rospy.Publisher('cmd_joint', JointState, queue_size=1)
+
         # 토픽 구독
         self.cmd = CmdIntuit()
+        self.switch_marker = [False, False, False]
         rospy.Subscriber('interf/cmd/intuit', CmdIntuit, self.update_cmd_intuit)
         rospy.Subscriber('interf/robot/motion', RobotMotion, self.update_marker_color)
         rospy.Subscriber('interf/nav_cue', NavCue, self.update_marker_visibility)
-        self.switch_marker = [False, False, False]
         rospy.Subscriber('joy', Joy, self.joystick)
+        self.path = []
+        rospy.Subscriber('robot/pose', PoseWithCovarianceStamped, self.update_robot_pose)
 
         # 서비스 시작
+        self.publisher_time_start = rospy.Publisher('time/start', Time, queue_size=1)
+        self.publisher_time_end = rospy.Publisher('time/end', Time, queue_size=1)
+        self.time_start = rospy.Time.now()
+        self.the_timer = rospy.Timer(rospy.Duration(0.1), self.timer)
+        self.path_publisher = rospy.Publisher('interf/path', MarkerArray, queue_size=1)
+        self.path_visualizer = rospy.Timer(rospy.Duration(0.3), self.visualize_path)
+
         rospy.Service('interf/nav2cmd', Nav2Cmd, self.nav2cmd)
         self.key_watcher = rospy.Timer(self.spin_cycle, self.keyboard)
         print(C_YELLO + '\rInterfacer, BCI 서비스 시작' + C_END)
@@ -140,6 +152,7 @@ class Interface:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:       # 종료: ctrl+c
                 self.key_watcher.shutdown()
+                self.the_timer.shutdown()
                 pygame.quit()
                 rospy.sleep(rospy.Duration(1.0))
                 rospy.signal_shutdown("Quit")
@@ -150,8 +163,10 @@ class Interface:
                     buttons[0]
                 except:
                     return
+
                 if ((buttons[0] == 'c') and (len(buttons) > 2)) or (buttons[0] == 'escape'):   # 종료: ctrl+c
                     self.key_watcher.shutdown()
+                    self.the_timer.shutdown()
                     pygame.quit()
                     rospy.sleep(rospy.Duration(1.0))
                     rospy.signal_shutdown("종료")
@@ -165,21 +180,100 @@ class Interface:
                     self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_STOP)
                 elif buttons[0] == 'x':
                     self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_BACKWARD)
-                elif buttons[0] == '2':
+
+                if buttons[0] == '2':
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=2)
                 elif buttons[0] == '3':
                     self.publisher_cmd_assist.publish(header=self.get_header(), num=3)
 
-    def joystick(self, data):
-        """조이스틱 입력을 받아온다"""
-        threshold = 0.1
+                if buttons[0] == 'q':
+                    self.time_start = rospy.Time.now()
+                    self.publisher_time_start.publish(self.time_start)
+                    self.path = []
+                    print(C_YELLO + '\r%6.1f[s]: Interface, 시간 초기화'%(rospy.Time.now() - self.time_start).to_sec() + C_END)
+                elif buttons[0] == 'e':
+                    t = rospy.Time.now()
+                    self.publisher_time_end.publish(t)
+                    dist = 0.0
+                    for i in range(len(self.path)-1): 
+                        dist += math.sqrt((self.path[i+1][0] - self.path[i][0])**2 + (self.path[i+1][1] - self.path[i][1])**2)
+                    print(C_GREEN + '\r%6.1f[s]: Interface, 이동거리 %3.1f[m]'%((t - self.time_start).to_sec(), dist) + C_END)
 
-        # button = Int32MultiArray()
+                if buttons[0] == 'j':   # Left
+                    self.move_with(0, 1)
+                elif buttons[0] == 'i': # Forward
+                    self.move_with(1, 0)
+                elif buttons[0] == 'l': # Right
+                    self.move_with(0, -1)
+                elif buttons[0] == ',': # Backward
+                    self.move_with(-1, 0)
+                elif buttons[0] == 'k': # Stop
+                    self.move_with(0, 0)
+                elif buttons[0] == 'u': # Forward-left
+                    self.move_with(1, 1)
+                elif buttons[0] == 'o': # Forward-right
+                    self.move_with(1, -1)
+
+                if buttons[0] == 'y':
+                    self.head_to(0.5, 0.1)
+                elif buttons[0] == 'h':
+                    self.head_to(0.0, 0.1)
+                elif buttons[0] == 'n':
+                    self.head_to(-0.5, 0.1)
+
+    def timer(self, event):
+        elapsed = rospy.Time.now() - self.time_start
+        stdout.write("\r%6.1f[s]: 현재 시각"%elapsed.to_sec())
+        stdout.flush()
+
+    def move_with(self, lin, ang):
+        twist = Twist()
+        twist.linear.x = self.lin_vel_joy * lin
+        twist.angular.z = self.ang_vel_joy * ang
+        self.publisher_cmd_vel.publish(twist)
+
+    def head_to(self, pos, vel):
+        joint = JointState()
+        joint.position = [pos]
+        joint.velocity = [vel]
+        self.publisher_cmd_joint.publish(joint)
+
+    def joystick(self, data):
+        threshold = 0.2
+
         twist = Twist()
         twist.linear.x = self.lin_vel_joy * data.axes[1] if abs(data.axes[1]) > threshold else 0.0
         twist.angular.z = self.ang_vel_joy * data.axes[0] if abs(data.axes[0]) > threshold else 0.0
-
         self.publisher_cmd_vel.publish(twist)
+
+        self.head_to(0.5*data.axes[4], 0.1)
+
+        if data.buttons[11] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_LEFT)
+        if data.buttons[13] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_FORWARD)
+        if data.buttons[12] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_RIGHT)
+        if data.buttons[14] == 1:
+            self.publisher_cmd_intuit.publish(header=self.get_header(), dir=M_BACKWARD)
+        
+        if data.buttons[1] == 1:    # B
+            self.publisher_cmd_assist.publish(header=self.get_header(), num=2)
+        elif data.buttons[2] == 1:  # X
+            self.publisher_cmd_assist.publish(header=self.get_header(), num=3)
+
+        if data.axes[2] == -1:
+            self.time_start = rospy.Time.now()
+            self.publisher_time_start.publish(self.time_start)
+            self.path = []
+            print(C_YELLO + '\r%6.1f[s]: Interface, 시간 초기화'%(rospy.Time.now() - self.time_start).to_sec() + C_END)
+        if data.axes[5] == -1:
+            t = rospy.Time.now()
+            self.publisher_time_end.publish(t)
+            dist = 0.0
+            for i in range(len(self.path)-1): 
+                dist += math.sqrt((self.path[i+1][0] - self.path[i][0])**2 + (self.path[i+1][1] - self.path[i][1])**2)
+            print(C_GREEN + '\r%6.1f[s]: Interface, 이동거리 %3.1f[m]'%((t - self.time_start).to_sec(), dist) + C_END)
 
     def update_marker_color(self, data):
         self.color['time'][data.motion] = rospy.get_time()
@@ -200,6 +294,31 @@ class Interface:
         header.stamp = rospy.Time.now()
         return header
 
+    def update_robot_pose(self, data):
+        self.robot_pose = data.pose.pose
+        self.path.append((self.robot_pose.position.x, self.robot_pose.position.y))
+
+    def visualize_path(self, event):
+        path_line = Marker()
+        path_line.header.stamp = rospy.Time.now()
+        path_line.header.frame_id = 'map'
+        path_line.id = 0
+        path_line.type = Marker.LINE_STRIP
+        path_line.action = Marker.ADD
+        path_line.scale.x = 0.3
+        path_line.color.r = 0.0
+        path_line.color.g = 1.0
+        path_line.color.b = 0.0
+        path_line.color.a = 0.3
+        path_line.points = []
+        for pos in self.path:
+            p = Point()
+            p.x = pos[0]
+            p.y = pos[1]
+            p.z = 0.01
+            path_line.points.append(p)
+
+        self.path_publisher.publish([path_line])
 
 if __name__ == '__main__':
     rospy.init_node('interfacer')
