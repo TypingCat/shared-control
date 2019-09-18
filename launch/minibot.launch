@@ -6,7 +6,10 @@
 
   # 이동로봇 상태 관리
   <node pkg="tf" type="static_transform_publisher" name="base_link_broadcaster" args="0 0 0.207 0 0 0 1 base_footprint base_link 30"/>
-  <node pkg="tf" type="static_transform_publisher" name="base_scan_broadcaster" args="0.055 0 0 0 0 0.0 1 base_link base_scan 30"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="base_scan_joint_broadcaster" args="0.055 0 0 0 0 1 1 base_link base_scan_joint 30"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_scan_broadcaster" args="0 0 0 0 0 1 1 base_scan_joint base_scan 30"/>
+
   <node pkg="tf" type="static_transform_publisher" name="imu_broadcaster" args="-0.116 0 -0.182 0 0 0 1 base_link imu_link 30"/>
   <node pkg="tf" type="static_transform_publisher" name="wheel_front_right_broadcaster" args="0 -0.1765 -0.207 0 0 0 1 base_link wheel_front_right_link 30"/>
   <node pkg="tf" type="static_transform_publisher" name="wheel_front_left__broadcaster" args="0 0.1765 -0.207 0 0 0 1 base_link wheel_front_left_link 30"/>
