@@ -1,7 +1,7 @@
 <launch>
 
   # 옵션
-  <arg name="camera_hz" default="10"/>
+  <arg name="camera_hz" default="5"/>
   <arg name="cam" default="true"/>
 
   # 이동로봇 상태 관리
