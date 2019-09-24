@@ -34,6 +34,7 @@
 - `1.5.0` Local planner 변경, `1.5.1` 정지자세 교정, `1.5.2` 주행시야 갱신
 - `1.6.0` 1인칭 인터페이스 추가, `1.6.1` 다음 경로의 형태 발생, `1.6.2` 키보드 인터페이스 결합, `1.6.3` 전체화면모드 적용
 - `1.7.0` 이동로봇-BCI 인터페이스 개편, `1.7.1` 실행주체 분리, `1.7.2` 노드 이동, `1.7.3` 주행정보 기록
+- `1.8.0` 단순화 버전 추가
 
 
 ## 사용법
@@ -75,6 +76,17 @@
 4. 원격제어 프로그램을 실행한다. 필요하다면 실행파일 `start.launch`에서 파라미터를 수정한다.
     ``` bash
     $ roslaunch shared_control start.launch share:=true           # 인터페이스
+    ```
+
+### Simple
+1. 로봇과 서버의 [ROS 네트워크를 설정](http://wiki.ros.org/ROS/NetworkSetup)한다.
+2. 로봇을 깨운다.
+    ``` bash
+    $ roslaunch shared_control minibot.launch
+    ```
+3. 단순화된 원격제어 프로그램을 실행한다.
+    ``` bash
+    $ roslaunch shared_control simple.launch
     ```
 
 ### 자주 발생하는 문제와 해결방법
