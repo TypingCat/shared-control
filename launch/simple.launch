@@ -15,15 +15,13 @@
     <param name="move_vel" value="$(arg move_vel)"/>
     <param name="move_time" value="$(arg move_time)"/>
     <param name="turn_vel" value="$(arg turn_vel)"/>
-  </node>
-
-  # 인터페이스
-  <node pkg="joy" type="joy_node" name="joy_node"/>
-  <node pkg="shared_control" type="interface.py" name="interfacer" output="screen">
     <param name="lin_vel_joy" value="$(arg lin_vel_joy)"/>
     <param name="ang_vel_joy" value="$(arg ang_vel_joy)"/>
     <param name="camera" value="camera/color/image"/>
   </node>
+
+  # 인터페이스
+  <node pkg="joy" type="joy_node" name="joy_node"/>
   <node pkg="rviz" type="rviz" name="rviz" respawn="true" args="-d $(find shared_control)/rviz/simple.rviz"/>
 
 </launch>
