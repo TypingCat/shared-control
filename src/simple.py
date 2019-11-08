@@ -139,6 +139,8 @@ class Simple:
         self.publisher_simple = rospy.Publisher('simple/motion', RobotMotion, queue_size=1)
 
         # 실행
+        self.interf.arrow_switch = False
+        self.interf.cross_switch = False
         print(C_GREEN + '\rSimple, 초기화 완료' + C_END)
         while True:
             self.task()
@@ -147,36 +149,53 @@ class Simple:
     def task(self):
         '''질문과 이동을 반복한다.'''
 
-        # Rest
-        print('\rRest 시작')
-        self.interf.arrow_switch = False
-        self.interf.cross_switch = False
+        print('\r휴면')
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=1)
         now = rospy.get_time()
         while self.time_cmd < now:
             rospy.sleep(rospy.Duration(0.2))
+
+        print('\r화살표')
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=2)
-        print('\rRest 종료')
+        self.interf.arrow_switch = True
+        now = rospy.get_time()
+        while rospy.get_time() < now+1.0:
+            rospy.sleep(rospy.Duration(0.2))
 
-        # BCI
-        print('\rBCI 시작')
+        print('\r픽스에이션')
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=3)
-        self.bci()
+        self.interf.cross_switch = True
+        now = rospy.get_time()
+        while rospy.get_time() < now+3.0:
+            rospy.sleep(rospy.Duration(0.2))
+
+        print('\rStop cue')
+        self.publisher_simple.publish(
+            header=self.get_header(),
+            motion=4)
+
+        print('\r로봇 이동')
+        self.publisher_simple.publish(
+            header=self.get_header(),
+            motion=5)
+        self.move()
+
+        print('\r화살표와 픽스에이션 제거')
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=6)
-        print('\rBCI 종료')
+        self.interf.arrow_switch = False
+        self.interf.cross_switch = False
 
 
-    def bci(self):
+    def move(self):
         print('\r%6.1f[s]: Simple, 명령 요청'%(rospy.Time.now() - self.time_start).to_sec())
-        self.interf.arrow_switch = True
         cmd = self.get_cmd(
             header=self.get_header(),
             dist=self.move_dist,
@@ -223,8 +242,6 @@ class Simple:
 
     def turn(self, vel):
         '''주어진 방향으로 회전한다.'''
-        self.interf.arrow_switch = False
-        self.interf.cross_switch = True
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=4)
@@ -246,8 +263,6 @@ class Simple:
         v.angular.z = 0
         self.publisher_cmd_vel.publish(v)
         rospy.sleep(rospy.Duration(0.2))
-
-        self.interf.cross_switch = False
         self.publisher_simple.publish(
             header=self.get_header(),
             motion=5)
