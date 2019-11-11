@@ -178,7 +178,6 @@ class Simple:
         rospy.sleep(rospy.Duration(0.2))
 
         print('\r로봇 이동')
-        self.publisher_simple.publish(header=self.get_header(), motion=5)
         self.move()
         rospy.sleep(rospy.Duration(0.2))
         
@@ -223,6 +222,7 @@ class Simple:
         self.publisher_robot_motion.publish(
             header=self.get_header(),
             motion=M_FORWARD)
+        self.publisher_simple.publish(header=self.get_header(), motion=5)
 
         v = Twist()
         v.linear.x = vel
