@@ -5,6 +5,8 @@
   <arg name="move_vel" default="0.3"/>
   <arg name="move_time" default="2.0"/>
   <arg name="turn_vel" default="1.82"/>
+  <arg name="wait_1" default="1.0"/>
+  <arg name="wait_2" default="3.0"/>
   
   <arg name="lin_vel_joy" default="0.69"/>            # 조이스틱 최고 선속도 0.69
   <arg name="ang_vel_joy" default="1.50"/>            # 조이스틱 최고 각속도 3.67

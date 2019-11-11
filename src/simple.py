@@ -121,6 +121,8 @@ class Simple:
         self.move_vel = rospy.get_param('~move_vel', 0.3)
         self.move_time = rospy.get_param('~move_time', 2.0)
         self.turn_vel = rospy.get_param('~turn_vel', 1.82)
+        self.wait_1 = rospy.get_param('~wait_1', 1.0)
+        self.wait_2 = rospy.get_param('~wait_2', 3.0)
 
         # 변수 초기화
         self.time_start = rospy.Time.now()
@@ -150,46 +152,34 @@ class Simple:
         '''질문과 이동을 반복한다.'''
 
         print('\r휴면')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=1)
+        self.publisher_simple.publish(header=self.get_header(), motion=1)
         now = rospy.get_time()
         while self.time_cmd < now:
             rospy.sleep(rospy.Duration(0.2))
 
         print('\r화살표')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=2)
+        self.publisher_simple.publish( header=self.get_header(), motion=2)
         self.interf.arrow_switch = True
         now = rospy.get_time()
-        while rospy.get_time() < now+1.0:
+        while rospy.get_time() < now+self.wait_1:
             rospy.sleep(rospy.Duration(0.2))
 
         print('\r픽스에이션')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=3)
+        self.publisher_simple.publish(header=self.get_header(), motion=3)
         self.interf.cross_switch = True
         now = rospy.get_time()
-        while rospy.get_time() < now+3.0:
+        while rospy.get_time() < now+self.wait_2:
             rospy.sleep(rospy.Duration(0.2))
 
         print('\rStop cue')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=4)
+        self.publisher_simple.publish(header=self.get_header(), motion=4)
 
         print('\r로봇 이동')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=5)
+        self.publisher_simple.publish(header=self.get_header(), motion=5)
         self.move()
 
         print('\r화살표와 픽스에이션 제거')
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=6)
+        self.publisher_simple.publish(header=self.get_header(), motion=6)
         self.interf.arrow_switch = False
         self.interf.cross_switch = False
 
