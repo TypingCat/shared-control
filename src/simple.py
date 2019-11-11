@@ -144,6 +144,8 @@ class Simple:
         self.interf.arrow_switch = False
         self.interf.cross_switch = False
         print(C_GREEN + '\rSimple, 초기화 완료' + C_END)
+        rospy.sleep(rospy.Duration(0.2))
+
         while True:
             self.task()
             rospy.sleep(rospy.Duration(0.2))
@@ -173,16 +175,18 @@ class Simple:
 
         print('\rStop cue')
         self.publisher_simple.publish(header=self.get_header(), motion=4)
+        rospy.sleep(rospy.Duration(0.2))
 
         print('\r로봇 이동')
         self.publisher_simple.publish(header=self.get_header(), motion=5)
         self.move()
-
+        rospy.sleep(rospy.Duration(0.2))
+        
         print('\r화살표와 픽스에이션 제거')
         self.publisher_simple.publish(header=self.get_header(), motion=6)
         self.interf.arrow_switch = False
         self.interf.cross_switch = False
-
+        rospy.sleep(rospy.Duration(0.2))
 
     def move(self):
         print('\r%6.1f[s]: Simple, 명령 요청'%(rospy.Time.now() - self.time_start).to_sec())
@@ -232,9 +236,6 @@ class Simple:
 
     def turn(self, vel):
         '''주어진 방향으로 회전한다.'''
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=4)
         if vel > 0:
             self.publisher_robot_motion.publish(
                 header=self.get_header(),
@@ -253,9 +254,6 @@ class Simple:
         v.angular.z = 0
         self.publisher_cmd_vel.publish(v)
         rospy.sleep(rospy.Duration(0.2))
-        self.publisher_simple.publish(
-            header=self.get_header(),
-            motion=5)
     
     def get_header(self):
         '''헤더를 생성한다.'''
